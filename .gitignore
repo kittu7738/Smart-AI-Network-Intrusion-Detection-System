@@ -1,0 +1,14 @@
+Smart-AI-Network-Intrusion-Detection-System/
+│
+├── README.md
+├── LICENSE
+├── requirements.txt
+├── app.py
+├── dataset/
+├── models/
+├── preprocessing/
+├── templates/
+├── static/
+├── reports/
+├── uploads/
+└── utils/

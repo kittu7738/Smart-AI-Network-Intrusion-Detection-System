@@ -14,5 +14,17 @@
         "pipeline_version": "1.0",
         "random_seed": 42,
         "strategy": "Dropped NaNs/Infs, deduplicated, 70/15/15 stratify for IDS2018. Official splits kept for CICIoT2023."
+    },
+    "model_training": {
+        "IDS2018": {
+            "DecisionTree": "completed",
+            "RandomForest": "completed",
+            "XGBoost": "completed"
+        },
+        "CICIoT2023": {
+            "DecisionTree": "completed",
+            "RandomForest": "completed",
+            "XGBoost": "completed"
+        }
     }
 }

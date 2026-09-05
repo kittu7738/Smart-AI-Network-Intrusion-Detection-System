@@ -39,6 +39,7 @@ uploads/
 captures/
 models/
 data/processed/
+data/raw/
 database/*.sqlite
 database/*.db
 

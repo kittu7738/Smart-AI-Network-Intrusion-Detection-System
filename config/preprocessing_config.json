@@ -1,0 +1,42 @@
+{
+    "version": "1.0",
+    "paths": {
+        "raw_ids2018": "Datasets/ids2018_combined_7attacks_benign.parquet",
+        "raw_ciciot2023_dir": "Datasets/CICIOT23",
+        "processed_ids2018": "data/processed/IDS2018",
+        "processed_ciciot2023": "data/processed/CICIoT2023",
+        "samples_dir": "data/samples",
+        "reports_dir": "reports"
+    },
+    "parameters": {
+        "random_seed": 42,
+        "split_ratios": {
+            "train": 0.70,
+            "val": 0.15,
+            "test": 0.15
+        }
+    },
+    "classes": {
+        "ids2018": [
+            "Benign",
+            "DDoS",
+            "DoS",
+            "Botnet",
+            "Infiltration",
+            "Brute Force",
+            "Web Attack"
+        ],
+        "ciciot2023": [
+            "Benign",
+            "DDoS",
+            "DoS",
+            "Botnet",
+            "Infiltration",
+            "Brute Force",
+            "Web Attack",
+            "Spoofing",
+            "Recon / Port Scan",
+            "MITM"
+        ]
+    }
+}

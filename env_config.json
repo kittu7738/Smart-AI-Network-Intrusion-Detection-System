@@ -3,7 +3,10 @@
         "dataset_verification_completed": true,
         "feature_alignment_completed": true,
         "label_strategy_analysis_completed": true,
-        "data_preparation_completed": true
+        "data_preparation_completed": true,
+        "data_preparation_started": true,
+        "ids2018_preparation_status": "Success",
+        "ciciot2023_preparation_status": "Success"
     },
     "preparation_metadata": {
         "timestamp": 1788588562.533073,

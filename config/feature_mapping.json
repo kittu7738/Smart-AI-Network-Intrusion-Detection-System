@@ -1,0 +1,53 @@
+{
+    "ids2018_to_common": {
+        "Protocol": "protocol_type",
+        "Flow Duration": "flow_duration",
+        "ACK Flag Count": "ack_flag_count",
+        "SYN Flag Count": "syn_flag_count",
+        "FIN Flag Count": "fin_flag_count",
+        "RST Flag Count": "rst_flag_count",
+        "URG Flag Count": "urg_flag_count",
+        "Flow Packets/s": "flow_packet_rate",
+        "Fwd Packets/s": "fwd_packet_rate",
+        "Bwd Packets/s": "bwd_packet_rate",
+        "Packet Length Min": "packet_length_min",
+        "Packet Length Max": "packet_length_max",
+        "Packet Length Mean": "packet_length_mean",
+        "Packet Length Std": "packet_length_std",
+        "Packet Length Variance": "packet_length_variance"
+    },
+    "ciciot2023_to_common": {
+        "Protocol Type": "protocol_type",
+        "flow_duration": "flow_duration",
+        "ack_count": "ack_flag_count",
+        "syn_count": "syn_flag_count",
+        "fin_count": "fin_flag_count",
+        "rst_count": "rst_flag_count",
+        "urg_count": "urg_flag_count",
+        "Rate": "flow_packet_rate",
+        "Srate": "fwd_packet_rate",
+        "Drate": "bwd_packet_rate",
+        "Min": "packet_length_min",
+        "Max": "packet_length_max",
+        "AVG": "packet_length_mean",
+        "Std": "packet_length_std",
+        "Variance": "packet_length_variance"
+    },
+    "final_common_schema": [
+        "protocol_type",
+        "flow_duration",
+        "ack_flag_count",
+        "syn_flag_count",
+        "fin_flag_count",
+        "rst_flag_count",
+        "urg_flag_count",
+        "flow_packet_rate",
+        "fwd_packet_rate",
+        "bwd_packet_rate",
+        "packet_length_min",
+        "packet_length_max",
+        "packet_length_mean",
+        "packet_length_std",
+        "packet_length_variance"
+    ]
+}

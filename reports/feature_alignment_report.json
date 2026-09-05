@@ -1,0 +1,222 @@
+{
+    "ids_feature_count": 77,
+    "iot_feature_count": 46,
+    "safe_common_features_count": 15,
+    "confident_mapping": [
+        {
+            "ids2018": "Protocol",
+            "ciciot2023": "Protocol Type",
+            "common": "protocol_type",
+            "reason": "Both represent the transport/network protocol integer identifier."
+        },
+        {
+            "ids2018": "Flow Duration",
+            "ciciot2023": "flow_duration",
+            "common": "flow_duration",
+            "reason": "Total duration of the network flow in microseconds/seconds."
+        },
+        {
+            "ids2018": "ACK Flag Count",
+            "ciciot2023": "ack_count",
+            "common": "ack_flag_count",
+            "reason": "Count of packets with ACK flag set."
+        },
+        {
+            "ids2018": "SYN Flag Count",
+            "ciciot2023": "syn_count",
+            "common": "syn_flag_count",
+            "reason": "Count of packets with SYN flag set."
+        },
+        {
+            "ids2018": "FIN Flag Count",
+            "ciciot2023": "fin_count",
+            "common": "fin_flag_count",
+            "reason": "Count of packets with FIN flag set."
+        },
+        {
+            "ids2018": "RST Flag Count",
+            "ciciot2023": "rst_count",
+            "common": "rst_flag_count",
+            "reason": "Count of packets with RST flag set."
+        },
+        {
+            "ids2018": "URG Flag Count",
+            "ciciot2023": "urg_count",
+            "common": "urg_flag_count",
+            "reason": "Count of packets with URG flag set."
+        },
+        {
+            "ids2018": "Flow Packets/s",
+            "ciciot2023": "Rate",
+            "common": "flow_packet_rate",
+            "reason": "Overall flow packet rate (packets per second)."
+        },
+        {
+            "ids2018": "Fwd Packets/s",
+            "ciciot2023": "Srate",
+            "common": "fwd_packet_rate",
+            "reason": "Forward (Source) packet rate."
+        },
+        {
+            "ids2018": "Bwd Packets/s",
+            "ciciot2023": "Drate",
+            "common": "bwd_packet_rate",
+            "reason": "Backward (Destination) packet rate."
+        },
+        {
+            "ids2018": "Packet Length Min",
+            "ciciot2023": "Min",
+            "common": "packet_length_min",
+            "reason": "Minimum length of a packet in the flow."
+        },
+        {
+            "ids2018": "Packet Length Max",
+            "ciciot2023": "Max",
+            "common": "packet_length_max",
+            "reason": "Maximum length of a packet in the flow."
+        },
+        {
+            "ids2018": "Packet Length Mean",
+            "ciciot2023": "AVG",
+            "common": "packet_length_mean",
+            "reason": "Average packet length."
+        },
+        {
+            "ids2018": "Packet Length Std",
+            "ciciot2023": "Std",
+            "common": "packet_length_std",
+            "reason": "Standard deviation of packet length."
+        },
+        {
+            "ids2018": "Packet Length Variance",
+            "ciciot2023": "Variance",
+            "common": "packet_length_variance",
+            "reason": "Variance of packet length."
+        }
+    ],
+    "uncertain_features": [
+        {
+            "ids2018": "Flow IAT Mean/Total/Max",
+            "ciciot2023": "IAT",
+            "reason": "IDS2018 splits IAT into mean, max, min, total. CICIoT2023 only has a single 'IAT' metric (unknown aggregation)."
+        },
+        {
+            "ids2018": "Fwd/Bwd Header Length",
+            "ciciot2023": "Header_Length",
+            "reason": "IDS2018 is directional; CICIoT2023 is aggregated."
+        },
+        {
+            "ids2018": "CWE Flag Count",
+            "ciciot2023": "cwr_flag_number",
+            "reason": "Count vs boolean flag presence."
+        },
+        {
+            "ids2018": "ECE Flag Count",
+            "ciciot2023": "ece_flag_number",
+            "reason": "Count vs boolean flag presence."
+        },
+        {
+            "ids2018": "PSH Flag Count",
+            "ciciot2023": "psh_flag_number",
+            "reason": "Count vs boolean flag presence."
+        }
+    ],
+    "unmatched_ids2018": [
+        "Total Fwd Packets",
+        "Total Backward Packets",
+        "Fwd Packets Length Total",
+        "Bwd Packets Length Total",
+        "Fwd Packet Length Max",
+        "Fwd Packet Length Min",
+        "Fwd Packet Length Mean",
+        "Fwd Packet Length Std",
+        "Bwd Packet Length Max",
+        "Bwd Packet Length Min",
+        "Bwd Packet Length Mean",
+        "Bwd Packet Length Std",
+        "Flow Bytes/s",
+        "Flow IAT Mean",
+        "Flow IAT Std",
+        "Flow IAT Max",
+        "Flow IAT Min",
+        "Fwd IAT Total",
+        "Fwd IAT Mean",
+        "Fwd IAT Std",
+        "Fwd IAT Max",
+        "Fwd IAT Min",
+        "Bwd IAT Total",
+        "Bwd IAT Mean",
+        "Bwd IAT Std",
+        "Bwd IAT Max",
+        "Bwd IAT Min",
+        "Fwd PSH Flags",
+        "Bwd PSH Flags",
+        "Fwd URG Flags",
+        "Bwd URG Flags",
+        "Fwd Header Length",
+        "Bwd Header Length",
+        "PSH Flag Count",
+        "CWE Flag Count",
+        "ECE Flag Count",
+        "Down/Up Ratio",
+        "Avg Packet Size",
+        "Avg Fwd Segment Size",
+        "Avg Bwd Segment Size",
+        "Fwd Avg Bytes/Bulk",
+        "Fwd Avg Packets/Bulk",
+        "Fwd Avg Bulk Rate",
+        "Bwd Avg Bytes/Bulk",
+        "Bwd Avg Packets/Bulk",
+        "Bwd Avg Bulk Rate",
+        "Subflow Fwd Packets",
+        "Subflow Fwd Bytes",
+        "Subflow Bwd Packets",
+        "Subflow Bwd Bytes",
+        "Init Fwd Win Bytes",
+        "Init Bwd Win Bytes",
+        "Fwd Act Data Packets",
+        "Fwd Seg Size Min",
+        "Active Mean",
+        "Active Std",
+        "Active Max",
+        "Active Min",
+        "Idle Mean",
+        "Idle Std",
+        "Idle Max",
+        "Idle Min"
+    ],
+    "unmatched_ciciot2023": [
+        "Header_Length",
+        "Duration",
+        "fin_flag_number",
+        "syn_flag_number",
+        "rst_flag_number",
+        "psh_flag_number",
+        "ack_flag_number",
+        "ece_flag_number",
+        "cwr_flag_number",
+        "HTTP",
+        "HTTPS",
+        "DNS",
+        "Telnet",
+        "SMTP",
+        "SSH",
+        "IRC",
+        "TCP",
+        "UDP",
+        "DHCP",
+        "ARP",
+        "ICMP",
+        "IPv",
+        "LLC",
+        "Tot sum",
+        "Tot size",
+        "IAT",
+        "Number",
+        "Magnitue",
+        "Radius",
+        "Covariance",
+        "Weight"
+    ],
+    "recommendation": "WARNING: Only 15 features can be safely shared out of 78 (IDS) and 46 (IoT). Merging these datasets is highly risky and will severely bottleneck the model's ability to detect complex directional or timing-based attacks (e.g., Slowloris, Heartbleed, Infiltration) which rely heavily on Fwd/Bwd split features, Subflow states, and Idle/Active times. It is recommended to either train separate specialized models, or rethink the dataset combination approach."
+}

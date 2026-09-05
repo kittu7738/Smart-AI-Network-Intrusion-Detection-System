@@ -1,0 +1,466 @@
+{
+    "final_categories_status": {
+        "Benign": {
+            "total": 5513774,
+            "ids2018": 5329008,
+            "ciciot2023": 184766
+        },
+        "DDoS": {
+            "total": 6487959,
+            "ids2018": 775955,
+            "ciciot2023": 5712004
+        },
+        "DoS": {
+            "total": 1554919,
+            "ids2018": 196568,
+            "ciciot2023": 1358351
+        },
+        "Botnet": {
+            "total": 587143,
+            "ids2018": 144535,
+            "ciciot2023": 442608
+        },
+        "Infiltration": {
+            "total": 119057,
+            "ids2018": 118483,
+            "ciciot2023": 574
+        },
+        "Brute Force": {
+            "total": 96251,
+            "ids2018": 94101,
+            "ciciot2023": 2150
+        },
+        "Web Attack": {
+            "total": 4412,
+            "ids2018": 882,
+            "ciciot2023": 3530
+        },
+        "Spoofing": {
+            "total": 30349,
+            "ids2018": 0,
+            "ciciot2023": 30349
+        },
+        "Recon / Port Scan": {
+            "total": 59444,
+            "ids2018": 0,
+            "ciciot2023": 59444
+        },
+        "MITM": {
+            "total": 51897,
+            "ids2018": 0,
+            "ciciot2023": 51897
+        },
+        "Heartbleed": {
+            "total": 0,
+            "ids2018": 0,
+            "ciciot2023": 0
+        }
+    },
+    "heartbleed_analysis": {
+        "count": 0,
+        "status": "Missing. Zero records exist in the processed dataset.",
+        "note": "Heartbleed has 0 samples in the current processed data. In the original IDS2017 it had ~11 samples, which is statistically insufficient for supervised Deep Learning/ML. It should be DROPPED from the taxonomy unless augmented via synthetic data (e.g. SMOTE/GAN) or external datasets."
+    },
+    "recommendations": {
+        "recon_vs_port_scan": "Recon and Port Scan MUST be combined into 'Recon / Port Scan' to satisfy the strict 11-class requirement. Leaving them separate creates 12 classes.",
+        "ddos_vs_dos": "They can be reliably separated. Both datasets explicitly prefix and isolate DoS vs DDoS attacks at the label level.",
+        "web_attack_grouping": "Yes, group Web Attacks (SQLi, XSS, Browser Hijacking, Uploading) into 'Web Attack'. This prevents extreme class imbalance among micro-categories (e.g. 85 SQLi samples).",
+        "bruteforce_grouping": "Group network service brute force (SSH, FTP, Dictionary) into 'Brute Force', but web-based brute force (Brute Force -Web) should be categorized as 'Web Attack'.",
+        "spoofing_vs_mitm": "CICIoT2023 isolates these nicely. 'DNS_Spoofing' goes to 'Spoofing'. 'MITM-ArpSpoofing' goes to 'MITM'. This respects the separation.",
+        "model_output_architecture": "DO NOT force the exact same 11-class output space on both models during training. IDS2018 has NO MITM/Spoofing/Recon in this subset. CICIoT2023 has NO Infiltration (cleanly). Train each model on its valid sub-taxonomy (e.g. IDS2018 on 7 classes, IoT on 9 classes). The backend Flask routing layer will normalize predictions into the universal 11-class taxonomy."
+    },
+    "mapping_details": [
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "Benign",
+            "final_category": "Benign",
+            "reasoning": "Direct match",
+            "confidence": "exact",
+            "count": 5329008
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DDoS attacks-LOIC-HTTP",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 575364
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DDOS attack-HOIC",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 198861
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DoS attacks-Hulk",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 145199
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "Bot",
+            "final_category": "Botnet",
+            "reasoning": "Bot traffic maps to Botnet",
+            "confidence": "exact",
+            "count": 144535
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "Infilteration",
+            "final_category": "Infiltration",
+            "reasoning": "Direct match despite typo",
+            "confidence": "exact",
+            "count": 118483
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "SSH-Bruteforce",
+            "final_category": "Brute Force",
+            "reasoning": "Network service brute force",
+            "confidence": "exact",
+            "count": 94048
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DoS attacks-GoldenEye",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 41406
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DoS attacks-Slowloris",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 9908
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DDOS attack-LOIC-UDP",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 1730
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "Brute Force -Web",
+            "final_category": "Web Attack",
+            "reasoning": "Web-specific injection/brute force mapped to Web Attack",
+            "confidence": "broad",
+            "count": 568
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "Brute Force -XSS",
+            "final_category": "Web Attack",
+            "reasoning": "Web-specific injection/brute force mapped to Web Attack",
+            "confidence": "broad",
+            "count": 229
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "SQL Injection",
+            "final_category": "Web Attack",
+            "reasoning": "Web-specific injection/brute force mapped to Web Attack",
+            "confidence": "broad",
+            "count": 85
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "DoS attacks-SlowHTTPTest",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 55
+        },
+        {
+            "original_dataset": "IDS2018",
+            "original_label": "FTP-BruteForce",
+            "final_category": "Brute Force",
+            "reasoning": "Network service brute force",
+            "confidence": "exact",
+            "count": 53
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-ICMP_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 1210546
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-UDP_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 910741
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-TCP_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 756122
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-SYN_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 683505
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-PSHACK_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 687565
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-RSTFINFlood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 678823
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-SynonymousIP_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 603358
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DoS-UDP_Flood",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 557495
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DoS-TCP_Flood",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 448927
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DoS-SYN_Flood",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 339804
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "BenignTraffic",
+            "final_category": "Benign",
+            "reasoning": "Direct match",
+            "confidence": "exact",
+            "count": 184766
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Mirai-greeth_flood",
+            "final_category": "Botnet",
+            "reasoning": "Mirai is a prominent IoT botnet",
+            "confidence": "exact",
+            "count": 165977
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Mirai-udpplain",
+            "final_category": "Botnet",
+            "reasoning": "Mirai is a prominent IoT botnet",
+            "confidence": "exact",
+            "count": 149664
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Mirai-greip_flood",
+            "final_category": "Botnet",
+            "reasoning": "Mirai is a prominent IoT botnet",
+            "confidence": "exact",
+            "count": 126967
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-ICMP_Fragmentation",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 75878
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "MITM-ArpSpoofing",
+            "final_category": "MITM",
+            "reasoning": "ARP spoofing is functionally a Man-in-the-Middle technique",
+            "confidence": "exact",
+            "count": 51897
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-UDP_Fragmentation",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 48614
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-ACK_Fragmentation",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 48067
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DNS_Spoofing",
+            "final_category": "Spoofing",
+            "reasoning": "DNS spoofing mapped cleanly to Spoofing to keep separated from MITM",
+            "confidence": "exact",
+            "count": 30349
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Recon-HostDiscovery",
+            "final_category": "Recon / Port Scan",
+            "reasoning": "Aggregated into the single required 11-class category",
+            "confidence": "exact",
+            "count": 22550
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Recon-OSScan",
+            "final_category": "Recon / Port Scan",
+            "reasoning": "Aggregated into the single required 11-class category",
+            "confidence": "exact",
+            "count": 16520
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Recon-PortScan",
+            "final_category": "Recon / Port Scan",
+            "reasoning": "Aggregated into the single required 11-class category",
+            "confidence": "exact",
+            "count": 13813
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DoS-HTTP_Flood",
+            "final_category": "DoS",
+            "reasoning": "Explicitly labeled DoS",
+            "confidence": "exact",
+            "count": 12125
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "VulnerabilityScan",
+            "final_category": "Recon / Port Scan",
+            "reasoning": "Aggregated into the single required 11-class category",
+            "confidence": "exact",
+            "count": 6214
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-HTTP_Flood",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 4786
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DDoS-SlowLoris",
+            "final_category": "DDoS",
+            "reasoning": "Explicitly labeled DDoS",
+            "confidence": "exact",
+            "count": 3999
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "DictionaryBruteForce",
+            "final_category": "Brute Force",
+            "reasoning": "Explicit brute force",
+            "confidence": "exact",
+            "count": 2150
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "BrowserHijacking",
+            "final_category": "Web Attack",
+            "reasoning": "Application layer vulnerabilities/injections",
+            "confidence": "broad",
+            "count": 957
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "SqlInjection",
+            "final_category": "Web Attack",
+            "reasoning": "Application layer vulnerabilities/injections",
+            "confidence": "broad",
+            "count": 886
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "CommandInjection",
+            "final_category": "Web Attack",
+            "reasoning": "Application layer vulnerabilities/injections",
+            "confidence": "broad",
+            "count": 871
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "XSS",
+            "final_category": "Web Attack",
+            "reasoning": "Application layer vulnerabilities/injections",
+            "confidence": "broad",
+            "count": 608
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Backdoor_Malware",
+            "final_category": "Infiltration",
+            "reasoning": "Backdoors are post-infiltration implants. Mapped to Infiltration as closest fit, though Botnet is also valid.",
+            "confidence": "uncertain",
+            "count": 574
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Recon-PingSweep",
+            "final_category": "Recon / Port Scan",
+            "reasoning": "Aggregated into the single required 11-class category",
+            "confidence": "exact",
+            "count": 347
+        },
+        {
+            "original_dataset": "CICIoT2023",
+            "original_label": "Uploading_Attack",
+            "final_category": "Web Attack",
+            "reasoning": "Application layer vulnerabilities/injections",
+            "confidence": "broad",
+            "count": 208
+        }
+    ]
+}

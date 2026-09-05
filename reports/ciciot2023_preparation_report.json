@@ -1,0 +1,29 @@
+{
+    "initial_rows": 7845673,
+    "clean_rows": 7698427,
+    "class_counts": {
+        "DDoS": 5604918,
+        "DoS": 1332595,
+        "Botnet": 434432,
+        "Benign": 181353,
+        "Recon / Port Scan": 58303,
+        "MITM": 50900,
+        "Spoofing": 29790,
+        "Web Attack": 3474,
+        "Brute Force": 2093,
+        "Infiltration": 569
+    },
+    "splits": {
+        "train": 5357406,
+        "val": 1170554,
+        "test": 1170467
+    },
+    "suspicious_cols": [
+        "IPv"
+    ],
+    "constant_cols": [
+        "Telnet",
+        "IRC"
+    ],
+    "feature_count": 46
+}

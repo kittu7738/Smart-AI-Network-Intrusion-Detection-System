@@ -1,0 +1,29 @@
+{
+    "ids2018": {
+        "constant_features": [
+            "Bwd PSH Flags",
+            "Bwd URG Flags",
+            "Fwd Avg Bytes/Bulk",
+            "Fwd Avg Packets/Bulk",
+            "Fwd Avg Bulk Rate",
+            "Bwd Avg Bytes/Bulk",
+            "Bwd Avg Packets/Bulk",
+            "Bwd Avg Bulk Rate"
+        ],
+        "suspicious_identifiers": [
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min"
+        ]
+    },
+    "ciciot2023": {
+        "constant_features": [
+            "Telnet",
+            "IRC"
+        ],
+        "suspicious_identifiers": [
+            "IPv"
+        ]
+    }
+}

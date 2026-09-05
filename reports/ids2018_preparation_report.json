@@ -1,0 +1,44 @@
+{
+    "initial_rows": 6659532,
+    "mapped_rows": 6659532,
+    "clean_rows": 6320003,
+    "dropped_rows": 339529,
+    "feature_count": 77,
+    "classes": [
+        "Benign",
+        "DDoS",
+        "Web Attack",
+        "Botnet",
+        "DoS",
+        "Infiltration",
+        "Brute Force"
+    ],
+    "class_counts": {
+        "Benign": 4994160,
+        "DDoS": 775955,
+        "DoS": 196568,
+        "Botnet": 144535,
+        "Infiltration": 113819,
+        "Brute Force": 94101,
+        "Web Attack": 865
+    },
+    "train_count": 4424002,
+    "val_count": 948001,
+    "test_count": 948000,
+    "suspicious_cols": [
+        "Idle Mean",
+        "Idle Std",
+        "Idle Max",
+        "Idle Min"
+    ],
+    "constant_cols": [
+        "Bwd PSH Flags",
+        "Bwd URG Flags",
+        "Fwd Avg Bytes/Bulk",
+        "Fwd Avg Packets/Bulk",
+        "Fwd Avg Bulk Rate",
+        "Bwd Avg Bytes/Bulk",
+        "Bwd Avg Packets/Bulk",
+        "Bwd Avg Bulk Rate"
+    ]
+}

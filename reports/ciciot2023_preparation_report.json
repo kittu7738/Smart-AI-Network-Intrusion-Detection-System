@@ -1,29 +1,41 @@
 {
+    "pipeline_version": "1.0",
+    "timestamp": 1788592198.964963,
+    "source_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/Datasets/CICIOT23",
+    "output_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/data/processed/CICIoT2023",
     "initial_rows": 7845673,
     "clean_rows": 7698427,
+    "final_row_count": 7582836,
     "class_counts": {
-        "DDoS": 5604918,
-        "DoS": 1332595,
-        "Botnet": 434432,
-        "Benign": 181353,
-        "Recon / Port Scan": 58303,
-        "MITM": 50900,
-        "Spoofing": 29790,
-        "Web Attack": 3474,
-        "Brute Force": 2093,
-        "Infiltration": 569
+        "DDoS": 5520800,
+        "DoS": 1312503,
+        "Botnet": 427879,
+        "Benign": 178665,
+        "Recon / Port Scan": 57441,
+        "MITM": 50155,
+        "Spoofing": 29344,
+        "Web Attack": 3425,
+        "Brute Force": 2063,
+        "Infiltration": 561
     },
     "splits": {
         "train": 5357406,
-        "val": 1170554,
-        "test": 1170467
+        "val": 1112810,
+        "test": 1112620
     },
-    "suspicious_cols": [
-        "IPv"
-    ],
-    "constant_cols": [
-        "Telnet",
-        "IRC"
-    ],
+    "train_val_overlaps_removed": 57744,
+    "train_test_overlaps_removed": 57847,
+    "val_test_overlap_remaining": 12422,
+    "dropped_invalid_numeric": 0,
+    "leakage_checks": {
+        "suspicious_identifiers": [
+            "IPv"
+        ],
+        "constant_columns": [
+            "Telnet",
+            "IRC"
+        ]
+    },
+    "strategy": "Option B: Train boundary strict overlap removal.",
     "feature_count": 46
 }

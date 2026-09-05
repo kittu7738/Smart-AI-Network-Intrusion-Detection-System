@@ -20,7 +20,7 @@ def load_label_mapping():
         return json.load(f)
 
 def update_env_checkpoint(key, value):
-    env_path = resolve_path("env_config.json")
+    env_path = resolve_path("checkpoints/progress.json")
     if os.path.exists(env_path):
         with open(env_path, "r") as f:
             cfg = json.load(f)
@@ -41,7 +41,6 @@ def check_existing_files(processed_dir, required_files):
 
 def handle_invalid_numeric(df):
     """Replace Inf with NaN, then drop NaNs to avoid synthesizing artificial values."""
-    # We do not use inplace=True here to avoid pandas SettingWithCopy warnings in tests
     df = df.replace([np.inf, -np.inf], np.nan)
     initial_rows = len(df)
     df = df.dropna()
@@ -83,15 +82,25 @@ def split_stratified(df, label_col, seed):
     X_test = pd.concat(test_dfs).sample(frac=1, random_state=seed)
     return X_train, X_val, X_test
 
+def remove_conflicting_label_groups(df, label_col):
+    feature_cols = [c for c in df.columns if c not in [label_col, "Label", "label"]]
+    df['hash'] = pd.util.hash_pandas_object(df[feature_cols], index=False)
+    
+    # Find hashes with > 1 unique label
+    hash_label_counts = df.groupby('hash')[label_col].nunique()
+    conflicting_hashes = hash_label_counts[hash_label_counts > 1].index
+    
+    conflicting_groups = len(conflicting_hashes)
+    conflicting_rows = len(df[df['hash'].isin(conflicting_hashes)])
+    
+    df_clean = df[~df['hash'].isin(conflicting_hashes)].drop(columns=['hash'])
+    return df_clean, conflicting_groups, conflicting_rows
+
 def process_ids2018(config, mapping):
     processed_dir = config["paths"]["processed_ids2018"]
-    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
-        print("IDS2018 processed data already exists. Validating and skipping regeneration.")
-        # Load report to simulate return
-        with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ids2018_preparation_report.json")), "r") as f:
-            return json.load(f)
-            
-    print("Processing IDS2018 pipeline...")
+    
+    # We always re-run because we need final_label and Option C implementation
+    print("Processing IDS2018 pipeline (Option C: Remove conflicting hashes)...")
     raw_path = resolve_path(config["paths"]["raw_ids2018"])
     df = pd.read_parquet(raw_path)
     
@@ -107,17 +116,23 @@ def process_ids2018(config, mapping):
     
     df, dropped_invalid = handle_invalid_numeric(df)
     
-    df = df.drop_duplicates()
+    # Standard exact duplicate drop (ignore original Label to prevent duplicate feature+final_label combos)
+    subset_cols = [c for c in df.columns if c != "Label"]
+    df = df.drop_duplicates(subset=subset_cols)
     clean_rows = len(df)
+    
+    # Option C: Remove feature-identical rows with conflicting labels
+    df, conflicting_groups, conflicting_rows_removed = remove_conflicting_label_groups(df, "final_label")
     
     suspicious, constant = check_leakage(df, "final_label")
     
     X_train, X_val, X_test = split_stratified(df, "final_label", config["parameters"]["random_seed"])
     
     os.makedirs(resolve_path(processed_dir), exist_ok=True)
-    X_train.drop(columns=["Label", "final_label"]).to_parquet(resolve_path(os.path.join(processed_dir, "train.parquet")))
-    X_val.drop(columns=["Label", "final_label"]).to_parquet(resolve_path(os.path.join(processed_dir, "val.parquet")))
-    X_test.drop(columns=["Label", "final_label"]).to_parquet(resolve_path(os.path.join(processed_dir, "test.parquet")))
+    # Retain final_label, but drop original Label
+    X_train.drop(columns=["Label"]).to_parquet(resolve_path(os.path.join(processed_dir, "train.parquet")))
+    X_val.drop(columns=["Label"]).to_parquet(resolve_path(os.path.join(processed_dir, "val.parquet")))
+    X_test.drop(columns=["Label"]).to_parquet(resolve_path(os.path.join(processed_dir, "test.parquet")))
     
     os.makedirs(resolve_path(config["paths"]["samples_dir"]), exist_ok=True)
     X_train.head(100).to_csv(resolve_path(os.path.join(config["paths"]["samples_dir"], "ids2018_sample.csv")), index=False)
@@ -132,7 +147,9 @@ def process_ids2018(config, mapping):
         "mapped_rows": mapped_rows,
         "clean_rows": clean_rows,
         "dropped_invalid_numeric": dropped_invalid,
-        "total_dropped_rows": initial_rows - clean_rows,
+        "conflicting_groups_found": conflicting_groups,
+        "conflicting_rows_removed": conflicting_rows_removed,
+        "final_row_count": len(df),
         "feature_count": features_before,
         "classes": list(df["final_label"].unique()),
         "class_counts": df["final_label"].value_counts().to_dict(),
@@ -142,9 +159,11 @@ def process_ids2018(config, mapping):
         "leakage_checks": {
             "suspicious_identifiers": suspicious,
             "constant_columns": constant
-        }
+        },
+        "strategy": "Option C: Conflicting feature groups removed completely."
     }
     
+    os.makedirs(resolve_path(config["paths"]["reports_dir"]), exist_ok=True)
     with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ids2018_preparation_report.json")), "w") as f:
         json.dump(report, f, indent=4)
         
@@ -152,12 +171,8 @@ def process_ids2018(config, mapping):
 
 def process_ciciot2023(config, mapping):
     processed_dir = config["paths"]["processed_ciciot2023"]
-    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
-        print("CICIoT2023 processed data already exists. Validating and skipping regeneration.")
-        with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ciciot2023_preparation_report.json")), "r") as f:
-            return json.load(f)
-            
-    print("Processing CICIoT2023 pipeline...")
+    
+    print("Processing CICIoT2023 pipeline (Option B: Drop cross-split duplicates)...")
     raw_dir = resolve_path(config["paths"]["raw_ciciot2023_dir"])
     iot_map = mapping["CICIoT2023"]
     valid_classes = config["classes"]["ciciot2023"]
@@ -172,12 +187,18 @@ def process_ciciot2023(config, mapping):
         "output_path": resolve_path(processed_dir),
         "initial_rows": 0,
         "clean_rows": 0,
+        "final_row_count": 0,
         "class_counts": {},
         "splits": {},
+        "train_val_overlaps_removed": 0,
+        "train_test_overlaps_removed": 0,
+        "val_test_overlap_remaining": 0,
         "dropped_invalid_numeric": 0,
-        "leakage_checks": {"suspicious_identifiers": [], "constant_columns": []}
+        "leakage_checks": {"suspicious_identifiers": [], "constant_columns": []},
+        "strategy": "Option B: Train boundary strict overlap removal."
     }
     
+    loaded_dfs = {}
     for split_name, file_name in splits.items():
         df = pd.read_csv(os.path.join(raw_dir, file_name))
         report["initial_rows"] += len(df)
@@ -190,8 +211,45 @@ def process_ciciot2023(config, mapping):
         
         df = df.drop_duplicates()
         report["clean_rows"] += len(df)
-        report["splits"][split_name] = len(df)
+        loaded_dfs[split_name] = df
         
+    # Option B Logic
+    train_df = loaded_dfs["train"]
+    val_df = loaded_dfs["val"]
+    test_df = loaded_dfs["test"]
+    
+    feature_cols = [c for c in train_df.columns if c not in ["label", "final_label"]]
+    train_df['hash'] = pd.util.hash_pandas_object(train_df[feature_cols], index=False)
+    val_df['hash'] = pd.util.hash_pandas_object(val_df[feature_cols], index=False)
+    test_df['hash'] = pd.util.hash_pandas_object(test_df[feature_cols], index=False)
+    
+    train_hashes = set(train_df['hash'])
+    
+    # Remove from val
+    val_overlap = val_df['hash'].isin(train_hashes)
+    report["train_val_overlaps_removed"] = int(val_overlap.sum())
+    val_df = val_df[~val_overlap]
+    
+    # Remove from test
+    test_overlap = test_df['hash'].isin(train_hashes)
+    report["train_test_overlaps_removed"] = int(test_overlap.sum())
+    test_df = test_df[~test_overlap]
+    
+    # Check val/test overlap (but do not remove)
+    val_hashes = set(val_df['hash'])
+    test_hashes = set(test_df['hash'])
+    report["val_test_overlap_remaining"] = len(val_hashes.intersection(test_hashes))
+    
+    # Drop temp hashes
+    train_df = train_df.drop(columns=['hash'])
+    val_df = val_df.drop(columns=['hash'])
+    test_df = test_df.drop(columns=['hash'])
+    
+    final_dfs = {"train": train_df, "val": val_df, "test": test_df}
+    
+    for split_name, df in final_dfs.items():
+        report["final_row_count"] += len(df)
+        report["splits"][split_name] = len(df)
         for k, v in df["final_label"].value_counts().to_dict().items():
             report["class_counts"][k] = report["class_counts"].get(k, 0) + v
             
@@ -200,9 +258,10 @@ def process_ciciot2023(config, mapping):
             report["leakage_checks"]["suspicious_identifiers"] = suspicious
             report["leakage_checks"]["constant_columns"] = constant
             df.head(100).to_csv(resolve_path(os.path.join(config["paths"]["samples_dir"], "ciciot2023_sample.csv")), index=False)
-            report["feature_count"] = len(df.columns) - 2
+            report["feature_count"] = len(df.columns) - 2 # excluding label & final_label
             
-        df.drop(columns=["label", "final_label"]).to_parquet(resolve_path(os.path.join(processed_dir, f"{split_name}.parquet")))
+        # Drop original label, keep final_label
+        df.drop(columns=["label"]).to_parquet(resolve_path(os.path.join(processed_dir, f"{split_name}.parquet")))
         
     with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ciciot2023_preparation_report.json")), "w") as f:
         json.dump(report, f, indent=4)

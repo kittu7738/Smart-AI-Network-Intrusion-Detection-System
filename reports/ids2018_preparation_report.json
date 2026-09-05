@@ -1,8 +1,16 @@
 {
+    "pipeline_version": "1.0",
+    "timestamp": 1788592198.679059,
+    "random_seed": 42,
+    "source_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/Datasets/ids2018_combined_7attacks_benign.parquet",
+    "output_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/data/processed/IDS2018",
     "initial_rows": 6659532,
     "mapped_rows": 6659532,
-    "clean_rows": 6320003,
-    "dropped_rows": 339529,
+    "clean_rows": 6319990,
+    "dropped_invalid_numeric": 0,
+    "conflicting_groups_found": 21979,
+    "conflicting_rows_removed": 43985,
+    "final_row_count": 6276005,
     "feature_count": 77,
     "classes": [
         "Benign",
@@ -14,31 +22,34 @@
         "Brute Force"
     ],
     "class_counts": {
-        "Benign": 4994160,
+        "Benign": 4972213,
         "DDoS": 775955,
-        "DoS": 196568,
-        "Botnet": 144535,
-        "Infiltration": 113819,
-        "Brute Force": 94101,
-        "Web Attack": 865
+        "DoS": 196504,
+        "Botnet": 144318,
+        "Brute Force": 94082,
+        "Infiltration": 92081,
+        "Web Attack": 852
     },
-    "train_count": 4424002,
-    "val_count": 948001,
-    "test_count": 948000,
-    "suspicious_cols": [
-        "Idle Mean",
-        "Idle Std",
-        "Idle Max",
-        "Idle Min"
-    ],
-    "constant_cols": [
-        "Bwd PSH Flags",
-        "Bwd URG Flags",
-        "Fwd Avg Bytes/Bulk",
-        "Fwd Avg Packets/Bulk",
-        "Fwd Avg Bulk Rate",
-        "Bwd Avg Bytes/Bulk",
-        "Bwd Avg Packets/Bulk",
-        "Bwd Avg Bulk Rate"
-    ]
+    "train_count": 4393203,
+    "val_count": 941402,
+    "test_count": 941400,
+    "leakage_checks": {
+        "suspicious_identifiers": [
+            "Idle Mean",
+            "Idle Std",
+            "Idle Max",
+            "Idle Min"
+        ],
+        "constant_columns": [
+            "Bwd PSH Flags",
+            "Bwd URG Flags",
+            "Fwd Avg Bytes/Bulk",
+            "Fwd Avg Packets/Bulk",
+            "Fwd Avg Bulk Rate",
+            "Bwd Avg Bytes/Bulk",
+            "Bwd Avg Packets/Bulk",
+            "Bwd Avg Bulk Rate"
+        ]
+    },
+    "strategy": "Option C: Conflicting feature groups removed completely."
 }

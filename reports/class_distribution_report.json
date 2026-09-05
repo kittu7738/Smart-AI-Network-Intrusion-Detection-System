@@ -1,23 +1,23 @@
 {
     "IDS2018": {
-        "Benign": 4994160,
+        "Benign": 4972213,
         "DDoS": 775955,
-        "DoS": 196568,
-        "Botnet": 144535,
-        "Infiltration": 113819,
-        "Brute Force": 94101,
-        "Web Attack": 865
+        "DoS": 196504,
+        "Botnet": 144318,
+        "Brute Force": 94082,
+        "Infiltration": 92081,
+        "Web Attack": 852
     },
     "CICIoT2023": {
-        "DDoS": 5604918,
-        "DoS": 1332595,
-        "Botnet": 434432,
-        "Benign": 181353,
-        "Recon / Port Scan": 58303,
-        "MITM": 50900,
-        "Spoofing": 29790,
-        "Web Attack": 3474,
-        "Brute Force": 2093,
-        "Infiltration": 569
+        "DDoS": 5520800,
+        "DoS": 1312503,
+        "Botnet": 427879,
+        "Benign": 178665,
+        "Recon / Port Scan": 57441,
+        "MITM": 50155,
+        "Spoofing": 29344,
+        "Web Attack": 3425,
+        "Brute Force": 2063,
+        "Infiltration": 561
     }
 }

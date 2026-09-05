@@ -1,0 +1,59 @@
+{
+    "timestamp": 1788591389.859183,
+    "methodology": "Hashed feature columns (excluding labels). Cross-referenced hashes across splits. Evaluated whether identical feature vectors shared the same or conflicting labels.",
+    "datasets": {
+        "IDS2018": [
+            {
+                "split_pair": "train_val",
+                "overlap_count": 4597,
+                "percentage_of_df1": 0.10391044127014408,
+                "percentage_of_df2": 0.4849151003005271,
+                "same_label_count": 6,
+                "conflicting_label_count": 4604
+            },
+            {
+                "split_pair": "train_test",
+                "overlap_count": 4633,
+                "percentage_of_df1": 0.10472418412107408,
+                "percentage_of_df2": 0.4887130801687764,
+                "same_label_count": 3,
+                "conflicting_label_count": 4634
+            },
+            {
+                "split_pair": "val_test",
+                "overlap_count": 960,
+                "percentage_of_df1": 0.10126571596443462,
+                "percentage_of_df2": 0.10126582278481014,
+                "same_label_count": 0,
+                "conflicting_label_count": 960
+            }
+        ],
+        "CICIoT2023": [
+            {
+                "split_pair": "train_val",
+                "overlap_count": 57744,
+                "percentage_of_df1": 1.077835056742013,
+                "percentage_of_df2": 4.933048795698447,
+                "same_label_count": 57744,
+                "conflicting_label_count": 0
+            },
+            {
+                "split_pair": "train_test",
+                "overlap_count": 57847,
+                "percentage_of_df1": 1.0797576289719315,
+                "percentage_of_df2": 4.942215372154875,
+                "same_label_count": 57847,
+                "conflicting_label_count": 0
+            },
+            {
+                "split_pair": "val_test",
+                "overlap_count": 12422,
+                "percentage_of_df1": 1.0612069156997457,
+                "percentage_of_df2": 1.061285794473488,
+                "same_label_count": 12422,
+                "conflicting_label_count": 0
+            }
+        ]
+    },
+    "recommendation": "For IDS2018: The overlaps are likely conflicting labels (identical features but different labels, which bypass drop_duplicates). These should be removed to prevent confusion. For CICIoT2023: The overlaps are primarily identical patterns (same labels) that naturally occur in network bursts. Since they appear across official splits, keeping them mimics real-world identical packet bursts, but removing them ensures zero train/test leakage. Recommendation: B. remove cross-split duplicates for absolute strict ML evaluation."
+}

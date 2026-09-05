@@ -1,0 +1,18 @@
+{
+    "checkpoints": {
+        "dataset_verification_completed": true,
+        "feature_alignment_completed": true,
+        "label_strategy_analysis_completed": true,
+        "data_preparation_completed": true,
+        "data_preparation_started": true,
+        "ids2018_preparation_status": "Success",
+        "ciciot2023_preparation_status": "Success",
+        "leakage_check_completed": true
+    },
+    "preparation_metadata": {
+        "timestamp": 1788588562.533073,
+        "pipeline_version": "1.0",
+        "random_seed": 42,
+        "strategy": "Dropped NaNs/Infs, deduplicated, 70/15/15 stratify for IDS2018. Official splits kept for CICIoT2023."
+    }
+}

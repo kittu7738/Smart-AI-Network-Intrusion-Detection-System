@@ -1,0 +1,24 @@
+{
+    "timestamp": 1788590588.626575,
+    "IDS2018": {
+        "dataset": "IDS2018",
+        "train_val_duplicate_rows": 4597,
+        "train_test_duplicate_rows": 4633,
+        "val_test_duplicate_rows": 960,
+        "parquet_reopen_status": "Success",
+        "feature_count_train": 77,
+        "feature_count_val": 77,
+        "feature_count_test": 77
+    },
+    "CICIoT2023": {
+        "dataset": "CICIoT2023",
+        "train_val_duplicate_rows": 57744,
+        "train_test_duplicate_rows": 57847,
+        "val_test_duplicate_rows": 12422,
+        "parquet_reopen_status": "Success",
+        "feature_count_train": 47,
+        "feature_count_val": 47,
+        "feature_count_test": 47
+    },
+    "action_required": "Investigate cross-split leakage."
+}

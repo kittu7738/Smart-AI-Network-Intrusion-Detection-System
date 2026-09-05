@@ -1,6 +1,6 @@
 # 🛡️ AI-Powered Network Intrusion Detection System (NIDS)
 
-> A Machine Learning-based Network Intrusion Detection System that detects malicious network traffic using AI algorithms and provides real-time attack analysis through an interactive web dashboard.
+> A Multi-Model Machine Learning-based Network Intrusion Detection System that detects malicious network traffic using AI algorithms, specializing in both enterprise and IoT networks, and providing real-time attack analysis through an interactive web dashboard.
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue)
 ![Flask](https://img.shields.io/badge/Flask-Web%20Framework-black)
@@ -12,237 +12,136 @@
 
 # 📌 Overview
 
-The **AI-Powered Network Intrusion Detection System (NIDS)** is a cybersecurity application that uses Machine Learning to identify malicious network traffic and classify different cyber attacks.
+The **AI-Powered Network Intrusion Detection System (NIDS)** is a cybersecurity application that leverages advanced Machine Learning to identify malicious network traffic and classify complex cyber attacks. 
 
-Unlike traditional signature-based Intrusion Detection Systems, this project leverages Artificial Intelligence to analyze network traffic patterns and accurately detect both known and unknown attacks.
+To ensure maximum accuracy without sacrificing critical feature semantics, this project utilizes a **multi-model architecture**:
+1. **Enterprise NIDS Model:** Trained on the **CSE-CIC-IDS2018** dataset, utilizing 77 directional and timing-based flow features (via CICFlowMeter) to catch complex attacks like Infiltration and Slowloris.
+2. **IoT NIDS Model:** Trained on the **CICIoT2023** dataset, utilizing 46 abstracted network metrics to catch rapid, high-volume IoT-centric attacks like Mirai, ARP Spoofing, and DNS Spoofing.
 
-The application provides a modern web dashboard for monitoring traffic, uploading datasets, analyzing attacks, and generating security reports.
+The backend dynamically routes traffic to the appropriate model and unifies their outputs into a single **10-class taxonomy**.
 
 ---
 
 # 🚀 Features
 
 ## 🔍 Network Traffic Analysis
-
 - Upload CSV traffic datasets
 - Analyze captured network traffic
-- Detect malicious packets
-- Display attack statistics
+- Multi-model intelligent routing
+- Display unified attack statistics
 
----
-
-## 🤖 Machine Learning
-
-- Random Forest Classifier
-- XGBoost Classifier
-- Decision Tree
-- Model Performance Comparison
+## 🤖 Machine Learning Models
+- Random Forest / XGBoost Classifiers
+- **Dual Architecture:** Standard Network Model (7 classes) & IoT Network Model (10 classes)
 - Feature Importance Analysis
 
----
-
-## 🛡️ Attack Detection
-
-Detects multiple cyber attacks including:
-
+## 🛡️ Unified Attack Detection (10-Class Taxonomy)
+- Benign
 - DDoS
 - DoS
-- Brute Force
-- Botnet
-- Heartbleed
-- Web Attack
+- Botnet (including Mirai)
 - Infiltration
-- Benign Traffic
+- Brute Force
+- Web Attack
+- Spoofing
+- Recon / Port Scan
+- MITM
 
 ---
 
-## 📊 Interactive Dashboard
+# 📁 Datasets Used
 
-- Total Traffic
-- Total Attacks
-- Normal Traffic
-- Attack Distribution
-- Risk Analysis
-- Live Statistics
-- Detection History
+1. **CSE-CIC-IDS2018** (Enterprise Traffic)
+2. **CICIoT2023** (IoT Traffic)
 
----
-
-## 📁 Dataset Support
-
-Supported Formats
-
-- CSV
-- PCAP (via CICFlowMeter)
-
-Dataset Used
-
-**CSE-CIC-IDS2018**
-
----
-
-## 📈 Reports
-
-Generate
-
-- PDF Reports
-- CSV Reports
-- Attack History
-- Detection Logs
-
----
-
-## 💾 Database
-
-Stores
-
-- Detection History
-- Attack Logs
-- Prediction Results
-- User Activity
+*(Note: Data cleaning pipelines heavily process these into `data/processed/` using specialized schema alignments available in `config/`.)*
 
 ---
 
 # 🏗️ System Architecture
 
+```text
+                  Internet Traffic (PCAP/CSV)
+                              │
+                    Backend Routing Layer
+                              │
+            ┌─────────────────┴─────────────────┐
+            ▼                                   ▼
+    Enterprise NIDS Model                 IoT NIDS Model
+    (CSE-CIC-IDS2018 based)             (CICIoT2023 based)
+            │                                   │
+            └─────────────────┬─────────────────┘
+                              ▼
+                Taxonomy Normalization Layer
+                    (10 Unified Classes)
+                              │
+                              ▼
+                     Flask Web Server
+                              │
+                              ▼
+                    Interactive Dashboard
 ```
-                Internet
-                    │
-                    ▼
-           Wireshark Capture
-                    │
-             traffic.pcapng
-                    │
-                    ▼
-            CICFlowMeter
-                    │
-              traffic.csv
-                    │
-                    ▼
-          Data Preprocessing
-                    │
-                    ▼
-          Machine Learning
-      (Random Forest/XGBoost)
-                    │
-                    ▼
-            Attack Prediction
-                    │
-                    ▼
-             Flask Backend
-                    │
-                    ▼
-          Interactive Dashboard
-                    │
-     ┌──────────────┼──────────────┐
-     ▼              ▼              ▼
- Attack History   Reports     Live Charts
-```
-
----
-
-# 🛠️ Technology Stack
-
-## Programming
-
-- Python
-
-## Machine Learning
-
-- Scikit-learn
-- XGBoost
-- Pandas
-- NumPy
-
-## Backend
-
-- Flask
-
-## Frontend
-
-- HTML
-- CSS
-- JavaScript
-- Bootstrap
-- Chart.js
-
-## Database
-
-- SQLite
-
-## Network Analysis
-
-- Wireshark
-- CICFlowMeter
 
 ---
 
 # 📂 Project Structure
 
-```
+```text
 AI-Network-Intrusion-Detection-System
 │
-├── app.py
-├── requirements.txt
-├── README.md
-│
-├── dataset/
-├── uploads/
-├── captures/
-├── models/
-├── preprocessing/
-├── training/
-├── notebooks/
-├── templates/
-├── static/
-├── reports/
-├── database/
-└── utils/
+├── config/                  # Label and feature mappings
+├── data/
+│   ├── processed/           # Cleaned train/val/test splits (ignored in git)
+│   └── samples/             # 100-row sample CSVs for testing
+├── dataset/                 # Raw datasets (ignored in git)
+├── notebooks/               # Colab/Jupyter environment setup scripts
+├── reports/                 # Pipeline JSON reports (inspection, alignment, splits)
+├── uploads/                 # User-uploaded traffic files
+├── captures/                # Network captures
+├── models/                  # Trained serialized ML models
+├── preprocessing/           # Data cleaning modules
+├── training/                # Model training scripts
+├── templates/               # Flask HTML templates
+├── static/                  # CSS/JS and assets
+├── database/                # SQLite DB files
+├── utils/                   # Python utility scripts
+├── app.py                   # Main Flask application
+├── requirements.txt         # Project dependencies
+├── env_config.json          # Pipeline state checkpointing
+└── README.md
 ```
 
 ---
 
 # ⚙️ Installation
 
-## Clone Repository
+## 1. Clone Repository
 
 ```bash
-git clone https://github.com/yourusername/AI-Network-Intrusion-Detection-System.git
+git clone https://github.com/kittu7738/Smart-AI-Network-Intrusion-Detection-System.git
+cd Smart-AI-Network-Intrusion-Detection-System
 ```
 
----
-
-## Create Virtual Environment
+## 2. Create Virtual Environment
 
 ```bash
 python -m venv venv
 ```
 
-Activate
+**Activate:**
+- Windows: `venv\Scripts\activate`
+- Mac/Linux: `source venv/bin/activate`
 
-Windows
-
-```bash
-venv\Scripts\activate
-```
-
-Mac/Linux
-
-```bash
-source venv/bin/activate
-```
-
----
-
-## Install Dependencies
+## 3. Install Dependencies
 
 ```bash
 pip install -r requirements.txt
 ```
 
----
+## 4. Prepare Data & Train Models
+*(Scripts for data prep and training must be executed before starting the server. Data processing reports are available in `reports/`.)*
 
-## Run Application
+## 5. Run Application
 
 ```bash
 python app.py
@@ -250,107 +149,8 @@ python app.py
 
 ---
 
-# 📊 Machine Learning Workflow
-
-```
-Dataset
-   │
-   ▼
-Cleaning
-   │
-   ▼
-Feature Engineering
-   │
-   ▼
-Model Training
-   │
-   ▼
-Evaluation
-   │
-   ▼
-Prediction
-   │
-   ▼
-Dashboard
-```
-
----
-
-# 📈 Evaluation Metrics
-
-The project evaluates the models using:
-
-- Accuracy
-- Precision
-- Recall
-- F1 Score
-- Confusion Matrix
-- ROC Curve
-
----
-
-# 🎯 Future Enhancements
-
-- Real-time Packet Capture
-- Live Intrusion Detection
-- Email Alerts
-- Explainable AI (SHAP)
-- Docker Deployment
-- Cloud Deployment
-- Threat Intelligence Integration
-- User Authentication
-- Role-Based Access Control
-
----
-
-# 📚 Dataset
-
-Dataset Used
-
-**CSE-CIC-IDS2018**
-
-Includes
-
-- DDoS
-- DoS
-- Brute Force
-- Botnet
-- Heartbleed
-- Infiltration
-- Web Attack
-- Benign
-
----
-
-# 🤝 Contributing
-
-Contributions are welcome.
-
-Fork the repository and submit a Pull Request.
-
----
-
-# 📄 License
-
-This project is licensed under the MIT License.
-
----
-
 # 👨‍💻 Author
 
 **CH. Anjan Prasad**
-
 B.Tech Computer Science Engineering
-
 Indian Institute of Information Technology Vadodara – International Campus Diu
-
-Interested in
-
-- Cybersecurity
-- Artificial Intelligence
-- Network Security
-- Machine Learning
-
----
-
-⭐ If you like this project, consider giving it a Star.

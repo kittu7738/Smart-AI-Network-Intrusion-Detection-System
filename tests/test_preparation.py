@@ -161,6 +161,14 @@ class TestDataPreparation(unittest.TestCase):
             
             del os.environ["NIDS_PROJECT_ROOT"]
 
+
+    def test_additional_raw_paths(self):
+        from utils.data_preparation import load_config
+        config = load_config()
+        self.assertEqual(config["paths"]["raw_arp_dir"], "raw/additional/ARP_Spoofing")
+        self.assertEqual(config["paths"]["raw_5g_dir"], "raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset")
+        self.assertEqual(config["paths"]["raw_dns_dir"], "raw/additional/DNS_Tunneling")
+
     def test_dns_feature_extraction(self):
         from utils.data_preparation import extract_dns_features
         import pandas as pd

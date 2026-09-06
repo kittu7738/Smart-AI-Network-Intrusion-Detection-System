@@ -7,9 +7,9 @@
         "processed_ciciot2023": "data/processed/CICIoT2023",
         "samples_dir": "data/samples",
         "reports_dir": "reports",
-        "raw_arp_dir": "Datasets/ARP_Spoofing",
-        "raw_5g_dir": "Datasets/5G-Intrusion-Detection-Dataset",
-        "raw_dns_dir": "Datasets/DNS_Tunneling",
+        "raw_arp_dir": "raw/additional/ARP_Spoofing",
+        "raw_5g_dir": "raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset",
+        "raw_dns_dir": "raw/additional/DNS_Tunneling",
         "processed_arp": "data/processed/additional/ARP_Spoofing",
         "processed_5g": "data/processed/additional/IP_Spoofing",
         "processed_dns": "data/processed/additional/DNS_Tunneling"

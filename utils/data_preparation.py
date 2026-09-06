@@ -475,11 +475,11 @@ def extract_dns_features(df):
     queries = df.iloc[:, 1].fillna("").astype(str)
     
     df["query_length"] = queries.str.len()
-    df["num_dots"] = queries.str.count("\.")
+    df["num_dots"] = queries.str.count(r"\.")
     df["num_subdomains"] = df["num_dots"] + 1
     
     # Label lengths (labels are parts between dots)
-    label_parts = queries.str.split("\.")
+    label_parts = queries.str.split(r"\.")
     df["max_label_length"] = label_parts.apply(lambda x: max((len(p) for p in x)) if x else 0)
     df["avg_label_length"] = label_parts.apply(lambda x: sum(len(p) for p in x)/len(x) if x and len(x)>0 else 0)
     

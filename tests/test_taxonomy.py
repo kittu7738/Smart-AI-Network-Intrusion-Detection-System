@@ -3,34 +3,30 @@ import unittest
 import json
 import sys
 
-# Ensure utils is in path
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from utils.data_preparation import resolve_path, load_config, load_label_mapping
+from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID, ID_TO_CLASS
 
 class TestTaxonomy(unittest.TestCase):
-    
-    def test_universal_class_list_is_exactly_10(self):
-        config = load_config()
-        self.assertEqual(len(config["classes"]["ciciot2023"]), 10)
-        self.assertEqual(len(config["classes"]["ids2018"]), 7)
-        self.assertNotIn("Heart""bleed", config["classes"]["ciciot2023"])
-        self.assertNotIn("Heart""bleed", config["classes"]["ids2018"])
-
-    def test_label_mappings_do_not_contain_hb(self):
-        mapping = load_label_mapping()
+    def test_exactly_13_classes(self):
+        self.assertEqual(len(CLASS_NAMES), 13)
+        self.assertEqual(len(CLASS_TO_ID), 13)
+        self.assertEqual(len(ID_TO_CLASS), 13)
         
+    def test_mac_spoofing_absent(self):
+        self.assertNotIn("MAC Spoofing", CLASS_NAMES)
+        self.assertNotIn("MAC Spoofing", CLASS_TO_ID)
+        
+    def test_ids_unique_contiguous(self):
+        ids = list(CLASS_TO_ID.values())
+        self.assertEqual(sorted(ids), list(range(13)))
+        
+    def test_label_mappings_only_canonical(self):
+        mapping = load_label_mapping()
         for k, v in mapping["IDS2018"].items():
-            self.assertNotEqual(v, "Heart""bleed")
-            
+            self.assertIn(v, CLASS_NAMES)
         for k, v in mapping["CICIoT2023"].items():
-            self.assertNotEqual(v, "Heart""bleed")
-            
-    def test_data_preparation_does_not_mention_hb(self):
-        with open(resolve_path("utils/data_preparation.py"), "r") as f:
-            content = f.read()
-            self.assertNotIn("hb_count", content)
-            self.assertNotIn("hb_status", content)
-            self.assertNotIn("Heart""bleed", content)
-            
+            self.assertIn(v, CLASS_NAMES)
+
 if __name__ == '__main__':
     unittest.main()

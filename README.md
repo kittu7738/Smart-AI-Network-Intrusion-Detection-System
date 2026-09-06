@@ -18,7 +18,7 @@ To ensure maximum accuracy without sacrificing critical feature semantics, this 
 1. **Enterprise NIDS Model:** Trained on the **CSE-CIC-IDS2018** dataset, utilizing 77 directional and timing-based flow features (via CICFlowMeter) to catch complex attacks like Infiltration and Slowloris.
 2. **IoT NIDS Model:** Trained on the **CICIoT2023** dataset, utilizing 46 abstracted network metrics to catch rapid, high-volume IoT-centric attacks like Mirai, ARP Spoofing, and DNS Spoofing.
 
-The backend dynamically routes traffic to the appropriate model and unifies their outputs into a single **10-class taxonomy**.
+The backend dynamically routes traffic to the appropriate model and unifies their outputs into a single **13-class taxonomy**.
 
 ---
 
@@ -32,21 +32,24 @@ The backend dynamically routes traffic to the appropriate model and unifies thei
 
 ## 🤖 Machine Learning Models
 - Random Forest / XGBoost Classifiers
-- **Dual Architecture:** Standard Network Model (7 classes) & IoT Network Model (10 classes)
+- **Dual Architecture:** Standard Network Model (7 classes) & IoT Network Model (13 classes)
 - Feature Importance Analysis
 
-## 🛡️ Unified Attack Detection (10-Class Taxonomy)
-Smart AI NIDS uses a 10-class intrusion/traffic classification taxonomy.
+## 🛡️ Unified Attack Detection (13-Class Taxonomy)
+Smart AI NIDS uses a 13-class intrusion/traffic classification taxonomy.
 - Benign
 - DDoS
 - DoS
-- Botnet (including Mirai)
+- Botnet
 - Infiltration
 - Brute Force
 - Web Attack
-- Spoofing
+- DNS Spoofing
+- IP Spoofing
+- ARP Spoofing
 - Recon / Port Scan
 - MITM
+- DNS Tunneling
 
 ---
 
@@ -74,7 +77,7 @@ Smart AI NIDS uses a 10-class intrusion/traffic classification taxonomy.
             └─────────────────┬─────────────────┘
                               ▼
                 Taxonomy Normalization Layer
-                    (10 Unified Classes)
+                    (13 Unified Classes)
                               │
                               ▼
                      Flask Web Server
@@ -155,3 +158,5 @@ python app.py
 **CH. Anjan Prasad**
 B.Tech Computer Science Engineering
 Indian Institute of Information Technology Vadodara – International Campus Diu
+
+Note: MAC Spoofing is not part of the current taxonomy.

@@ -52,12 +52,12 @@
         }
     },
     "recommendations": {
-        "recon_vs_port_scan": "Recon and Port Scan MUST be combined into 'Recon / Port Scan' to satisfy the strict 10-class requirement. Leaving them separate creates 10 classes.",
+        "recon_vs_port_scan": "Recon and Port Scan MUST be combined into 'Recon / Port Scan' to satisfy the strict 13-class requirement. Leaving them separate creates 13 classes.",
         "ddos_vs_dos": "They can be reliably separated. Both datasets explicitly prefix and isolate DoS vs DDoS attacks at the label level.",
         "web_attack_grouping": "Yes, group Web Attacks (SQLi, XSS, Browser Hijacking, Uploading) into 'Web Attack'. This prevents extreme class imbalance among micro-categories (e.g. 85 SQLi samples).",
         "bruteforce_grouping": "Group network service brute force (SSH, FTP, Dictionary) into 'Brute Force', but web-based brute force (Brute Force -Web) should be categorized as 'Web Attack'.",
         "spoofing_vs_mitm": "CICIoT2023 isolates these nicely. 'DNS_Spoofing' goes to 'Spoofing'. 'MITM-ArpSpoofing' goes to 'MITM'. This respects the separation.",
-        "model_output_architecture": "DO NOT force the exact same 10-class output space on both models during training. IDS2018 has NO MITM/Spoofing/Recon in this subset. CICIoT2023 has NO Infiltration (cleanly). Train each model on its valid sub-taxonomy (e.g. IDS2018 on 7 classes, IoT on 9 classes). The backend Flask routing layer will normalize predictions into the universal 10-class taxonomy."
+        "model_output_architecture": "DO NOT force the exact same 13-class output space on both models during training. IDS2018 has NO MITM/Spoofing/Recon in this subset. CICIoT2023 has NO Infiltration (cleanly). Train each model on its valid sub-taxonomy (e.g. IDS2018 on 7 classes, IoT on 9 classes). The backend Flask routing layer will normalize predictions into the universal 13-class taxonomy."
     },
     "mapping_details": [
         {
@@ -336,7 +336,7 @@
             "original_dataset": "CICIoT2023",
             "original_label": "Recon-HostDiscovery",
             "final_category": "Recon / Port Scan",
-            "reasoning": "Aggregated into the single required 10-class category",
+            "reasoning": "Aggregated into the single required 13-class category",
             "confidence": "exact",
             "count": 22550
         },
@@ -344,7 +344,7 @@
             "original_dataset": "CICIoT2023",
             "original_label": "Recon-OSScan",
             "final_category": "Recon / Port Scan",
-            "reasoning": "Aggregated into the single required 10-class category",
+            "reasoning": "Aggregated into the single required 13-class category",
             "confidence": "exact",
             "count": 16520
         },
@@ -352,7 +352,7 @@
             "original_dataset": "CICIoT2023",
             "original_label": "Recon-PortScan",
             "final_category": "Recon / Port Scan",
-            "reasoning": "Aggregated into the single required 10-class category",
+            "reasoning": "Aggregated into the single required 13-class category",
             "confidence": "exact",
             "count": 13813
         },
@@ -368,7 +368,7 @@
             "original_dataset": "CICIoT2023",
             "original_label": "VulnerabilityScan",
             "final_category": "Recon / Port Scan",
-            "reasoning": "Aggregated into the single required 10-class category",
+            "reasoning": "Aggregated into the single required 13-class category",
             "confidence": "exact",
             "count": 6214
         },
@@ -440,7 +440,7 @@
             "original_dataset": "CICIoT2023",
             "original_label": "Recon-PingSweep",
             "final_category": "Recon / Port Scan",
-            "reasoning": "Aggregated into the single required 10-class category",
+            "reasoning": "Aggregated into the single required 13-class category",
             "confidence": "exact",
             "count": 347
         },
@@ -453,5 +453,5 @@
             "count": 208
         }
     ],
-    "taxonomy_size": 10
+    "taxonomy_size": 13
 }

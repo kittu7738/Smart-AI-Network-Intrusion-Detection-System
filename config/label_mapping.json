@@ -35,7 +35,7 @@
         "MITM-ArpSpoofing": "MITM",
         "DDoS-UDP_Fragmentation": "DDoS",
         "DDoS-ACK_Fragmentation": "DDoS",
-        "DNS_Spoofing": "Spoofing",
+        "DNS_Spoofing": "DNS Spoofing",
         "Recon-HostDiscovery": "Recon / Port Scan",
         "Recon-OSScan": "Recon / Port Scan",
         "Recon-PortScan": "Recon / Port Scan",

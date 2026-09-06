@@ -500,7 +500,7 @@ def extract_arp_features(df):
     defensible = [
         "frame_number", "frame_time_delta", "arp_opcode", "tcp_seq", 
         "tcp_hdr_len", "data_len", "icmp_type", "tcp_flag_fin", 
-        "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack", "label"
+        "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack", "label", "final_label"
     ]
     # Filter to only columns that actually exist in the dataframe
     cols_to_keep = [c for c in defensible if c in df.columns]

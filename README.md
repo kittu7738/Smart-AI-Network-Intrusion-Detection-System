@@ -36,6 +36,7 @@ The backend dynamically routes traffic to the appropriate model and unifies thei
 - Feature Importance Analysis
 
 ## 🛡️ Unified Attack Detection (10-Class Taxonomy)
+Smart AI NIDS uses a 10-class intrusion/traffic classification taxonomy.
 - Benign
 - DDoS
 - DoS

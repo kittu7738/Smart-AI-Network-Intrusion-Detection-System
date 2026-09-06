@@ -243,8 +243,6 @@ def process_ids2018(config, mapping):
             "suspicious_identifiers": suspicious,
             "constant_columns": constant
         },
-        "heartbleed_status": "unavailable / requires legitimate additional data",
-        "heartbleed_count": 0,
         "strategy": "Option C: Conflicting feature groups removed completely (Memory Safe)."
     }
     
@@ -282,8 +280,6 @@ def process_ciciot2023(config, mapping):
         "val_test_overlap_remaining": 0,
         "dropped_invalid_numeric": 0,
         "leakage_checks": {"suspicious_identifiers": [], "constant_columns": []},
-        "heartbleed_status": "unavailable / requires legitimate additional data",
-        "heartbleed_count": 0,
         "strategy": "Option B: Train boundary strict overlap removal (Memory Safe)."
     }
     

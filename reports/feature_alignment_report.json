@@ -218,5 +218,5 @@
         "Covariance",
         "Weight"
     ],
-    "recommendation": "WARNING: Only 15 features can be safely shared out of 78 (IDS) and 46 (IoT). Merging these datasets is highly risky and will severely bottleneck the model's ability to detect complex directional or timing-based attacks (e.g., Slowloris, Heartbleed, Infiltration) which rely heavily on Fwd/Bwd split features, Subflow states, and Idle/Active times. It is recommended to either train separate specialized models, or rethink the dataset combination approach."
+    "recommendation": "WARNING: Only 15 features can be safely shared out of 78 (IDS) and 46 (IoT). Merging these datasets is highly risky and will severely bottleneck the model's ability to detect complex directional or timing-based attacks (e.g., Slowloris, Infiltration) which rely heavily on Fwd/Bwd split features, Subflow states, and Idle/Active times. It is recommended to either train separate specialized models, or rethink the dataset combination approach."
 }

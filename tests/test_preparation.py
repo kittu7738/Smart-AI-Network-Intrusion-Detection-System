@@ -161,5 +161,35 @@ class TestDataPreparation(unittest.TestCase):
             
             del os.environ["NIDS_PROJECT_ROOT"]
 
+    def test_dns_feature_extraction(self):
+        from utils.data_preparation import extract_dns_features
+        import pandas as pd
+        df = pd.DataFrame({0: [1, 0], 1: ["www.google.com", "abc"]})
+        res = extract_dns_features(df)
+        self.assertIn("query_length", res.columns)
+        self.assertIn("num_dots", res.columns)
+        self.assertEqual(res["num_dots"].iloc[0], 2)
+        self.assertEqual(res["num_dots"].iloc[1], 0)
+        self.assertNotIn(1, res.columns)
+        self.assertNotIn("1", res.columns)
+
+    def test_arp_feature_extraction(self):
+        from utils.data_preparation import extract_arp_features
+        import pandas as pd
+        df = pd.DataFrame({"frame_number": [1], "arp_src_hw_mac": ["aa:bb"], "tcp_flag_fin": [0], "label": ["Benign"]})
+        res = extract_arp_features(df)
+        self.assertIn("frame_number", res.columns)
+        self.assertIn("tcp_flag_fin", res.columns)
+        self.assertNotIn("arp_src_hw_mac", res.columns)
+
+    def test_5g_feature_extraction(self):
+        from utils.data_preparation import extract_5g_features
+        import pandas as pd
+        df = pd.DataFrame({"some_metric": [1.0], "Src_IP": ["1.1.1.1"], "Dst_MAC": ["aa:bb"]})
+        res = extract_5g_features(df)
+        self.assertIn("some_metric", res.columns)
+        self.assertNotIn("Src_IP", res.columns)
+        self.assertNotIn("Dst_MAC", res.columns)
+
 if __name__ == '__main__':
     unittest.main()

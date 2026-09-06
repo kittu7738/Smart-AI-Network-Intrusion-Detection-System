@@ -460,6 +460,190 @@ def process_ciciot2023(config, mapping):
         
     return report
 
+
+def calculate_entropy(text):
+    import math
+    from collections import Counter
+    if not text: return 0.0
+    freq = Counter(text)
+    length = len(text)
+    return -sum((count/length) * math.log2(count/length) for count in freq.values())
+
+def extract_dns_features(df):
+    """Extract statistical features from raw DNS query strings."""
+    # query is at column 1 (0 is label)
+    queries = df.iloc[:, 1].fillna("").astype(str)
+    
+    df["query_length"] = queries.str.len()
+    df["num_dots"] = queries.str.count("\.")
+    df["num_subdomains"] = df["num_dots"] + 1
+    
+    # Label lengths (labels are parts between dots)
+    label_parts = queries.str.split("\.")
+    df["max_label_length"] = label_parts.apply(lambda x: max((len(p) for p in x)) if x else 0)
+    df["avg_label_length"] = label_parts.apply(lambda x: sum(len(p) for p in x)/len(x) if x and len(x)>0 else 0)
+    
+    # Char counts
+    df["digit_count"] = queries.str.count(r"[0-9]")
+    df["alpha_count"] = queries.str.count(r"[a-zA-Z]")
+    df["special_character_count"] = queries.str.count(r"[^a-zA-Z0-9\.]")
+    
+    # Entropy
+    df["entropy"] = queries.apply(calculate_entropy)
+    
+    # Drop the raw query
+    df = df.drop(columns=[df.columns[1]])
+    return df
+
+def extract_arp_features(df):
+    """Keep only defensible ARP/TCP/ICMP features."""
+    defensible = [
+        "frame_number", "frame_time_delta", "arp_opcode", "tcp_seq", 
+        "tcp_hdr_len", "data_len", "icmp_type", "tcp_flag_fin", 
+        "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack", "label"
+    ]
+    # Filter to only columns that actually exist in the dataframe
+    cols_to_keep = [c for c in defensible if c in df.columns]
+    
+    # Ensure no MAC addresses
+    mac_cols = [c for c in df.columns if "mac" in c.lower()]
+    cols_to_keep = [c for c in cols_to_keep if c not in mac_cols]
+    
+    return df[cols_to_keep]
+
+def extract_5g_features(df):
+    """Keep defensible 5G features, stripping raw IPs."""
+    # Drop source and destination IPs if they exist
+    ip_cols = [c for c in df.columns if "ip" in c.lower() and ("src" in c.lower() or "dst" in c.lower())]
+    mac_cols = [c for c in df.columns if "mac" in c.lower()]
+    bad_cols = ip_cols + mac_cols
+    cols_to_keep = [c for c in df.columns if c not in bad_cols]
+    return df[cols_to_keep]
+
+def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processed_dir_key, file_splits, feature_extractor, map_key):
+    """A generic memory-safe processor for new datasets."""
+    processed_dir = config["paths"][processed_dir_key]
+    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
+        print(f"{dataset_name} already processed. Skipping.")
+        report_path = resolve_path(os.path.join(config["paths"]["reports_dir"], f"{dataset_name.lower()}_preparation_report.json"))
+        if os.path.exists(report_path):
+            with open(report_path, "r") as f:
+                return json.load(f)
+        return None
+        
+    print(f"Processing {dataset_name} memory-safely...")
+    raw_dir = resolve_path(config["paths"][raw_dir_key])
+    label_map = mapping[map_key]
+    valid_classes = config["classes"].get(map_key.lower(), config["classes"].get(dataset_name.lower(), []))
+    
+    os.makedirs(resolve_path(processed_dir), exist_ok=True)
+    
+    report = {
+        "pipeline_version": config["version"],
+        "timestamp": time.time(),
+        "source_path": raw_dir,
+        "output_path": resolve_path(processed_dir),
+        "initial_rows": 0,
+        "clean_rows": 0,
+        "final_row_count": 0,
+        "class_counts": {},
+        "splits": {},
+        "dropped_invalid_numeric": 0,
+        "leakage_checks": {"suspicious_identifiers": [], "constant_columns": []},
+        "strategy": f"Source-specific extraction for {dataset_name}"
+    }
+    
+    for split_name, file_list in file_splits.items():
+        print(f"  Processing {split_name}...")
+        tmp_out = resolve_path(os.path.join(processed_dir, f"{split_name}.tmp.parquet"))
+        final_out = resolve_path(os.path.join(processed_dir, f"{split_name}.parquet"))
+        writer = None
+        writer_schema = None
+        
+        for file_name in file_list:
+            file_path = os.path.join(raw_dir, file_name)
+            if not os.path.exists(file_path):
+                print(f"Missing {file_path}")
+                continue
+                
+            # For DNS, no header
+            header = None if dataset_name == "DNS_Tunneling" else "infer"
+            
+            for chunk_idx, chunk in enumerate(pd.read_csv(file_path, chunksize=250000, header=header, low_memory=False)):
+                report["initial_rows"] += len(chunk)
+                
+                # Standardize label column name
+                if dataset_name == "DNS_Tunneling":
+                    chunk = chunk.rename(columns={0: "label"})
+                
+                label_col = "label"
+                if "Label" in chunk.columns: label_col = "Label"
+                
+                # Map labels safely
+                chunk["final_label"] = chunk[label_col].map(label_map)
+                chunk = chunk[chunk["final_label"].isin(valid_classes)]
+                
+                # Extract features
+                chunk = feature_extractor(chunk)
+                
+                # Numeric cleanup
+                chunk, dropped = handle_invalid_numeric(chunk)
+                report["dropped_invalid_numeric"] += dropped
+                chunk = downcast_dtypes(chunk)
+                
+                # Drop original label
+                if label_col in chunk.columns:
+                    chunk = chunk.drop(columns=[label_col])
+                    
+                report["final_row_count"] += len(chunk)
+                report["splits"][split_name] = report["splits"].get(split_name, 0) + len(chunk)
+                
+                for k, v in chunk["final_label"].value_counts().to_dict().items():
+                    report["class_counts"][k] = report["class_counts"].get(k, 0) + v
+                    
+                if len(chunk) > 0:
+                    # Leakage check on first chunk
+                    if report["splits"][split_name] == len(chunk):
+                        suspicious, constant = check_leakage(chunk, "final_label")
+                        report["leakage_checks"]["suspicious_identifiers"].extend(suspicious)
+                        report["leakage_checks"]["constant_columns"].extend(constant)
+                        report["feature_count"] = len(chunk.columns) - 1
+                        
+                    table = pa.Table.from_pandas(chunk, preserve_index=False)
+                    if writer is None:
+                        writer_schema = table.schema
+                        writer = pq.ParquetWriter(tmp_out, writer_schema)
+                    else:
+                        if table.schema != writer_schema:
+                            try:
+                                chunk = chunk[[field.name for field in writer_schema]]
+                                table = pa.Table.from_pandas(chunk, preserve_index=False).cast(writer_schema)
+                            except Exception as e:
+                                raise ValueError(f"Schema mismatch! Writer: {writer_schema}, Chunk: {table.schema}") from e
+                    writer.write_table(table)
+                gc.collect()
+                
+        if writer is not None: writer.close()
+        if os.path.exists(tmp_out): os.rename(tmp_out, final_out)
+        
+    with open(resolve_path(os.path.join(config["paths"]["reports_dir"], f"{dataset_name.lower()}_preparation_report.json")), "w") as f:
+        json.dump(report, f, indent=4)
+        
+    return report
+
+def process_arp(config, mapping):
+    file_splits = {"train": ["train.csv"], "test": ["test.csv"]}
+    return process_dataset_generic(config, mapping, "ARP_Spoofing", "raw_arp_dir", "processed_arp", file_splits, extract_arp_features, "ARP")
+
+def process_5g(config, mapping):
+    file_splits = {"train": ["data/Train_subset_1.csv", "data/Train_subset_2.csv"], "test": ["data/Test_Data.csv"]}
+    return process_dataset_generic(config, mapping, "5G_NIDD", "raw_5g_dir", "processed_5g", file_splits, extract_5g_features, "5G")
+
+def process_dns(config, mapping):
+    file_splits = {"train": ["training.csv"], "val": ["validating.csv"]}
+    return process_dataset_generic(config, mapping, "DNS_Tunneling", "raw_dns_dir", "processed_dns", file_splits, extract_dns_features, "DNS")
+
+
 def main():
     update_env_checkpoint("data_preparation_started", True)
     config = load_config()
@@ -469,10 +653,16 @@ def main():
     
     ids_report = process_ids2018(config, mapping)
     iot_report = process_ciciot2023(config, mapping)
+    arp_report = process_arp(config, mapping)
+    nidd_report = process_5g(config, mapping)
+    dns_report = process_dns(config, mapping)
     
     dist = {}
     if ids_report: dist["IDS2018"] = ids_report["class_counts"]
     if iot_report: dist["CICIoT2023"] = iot_report["class_counts"]
+    if arp_report: dist["ARP_Spoofing"] = arp_report["class_counts"]
+    if nidd_report: dist["5G_NIDD"] = nidd_report["class_counts"]
+    if dns_report: dist["DNS_Tunneling"] = dns_report["class_counts"]
         
     with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "class_distribution_report.json")), "w") as f:
         json.dump(dist, f, indent=4)

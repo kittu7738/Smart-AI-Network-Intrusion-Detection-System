@@ -14,11 +14,14 @@
 
 The **AI-Powered Network Intrusion Detection System (NIDS)** is a cybersecurity application that leverages advanced Machine Learning to identify malicious network traffic and classify complex cyber attacks. 
 
-To ensure maximum accuracy without sacrificing critical feature semantics, this project utilizes a **multi-model architecture**:
-1. **Enterprise NIDS Model:** Trained on the **CSE-CIC-IDS2018** dataset, utilizing 77 directional and timing-based flow features (via CICFlowMeter) to catch complex attacks like Infiltration and Slowloris.
-2. **IoT NIDS Model:** Trained on the **CICIoT2023** dataset, utilizing 46 abstracted network metrics to catch rapid, high-volume IoT-centric attacks like Mirai, ARP Spoofing, and DNS Spoofing.
+To ensure maximum accuracy without sacrificing critical feature semantics or forcing incompatible data into a single schema, this project utilizes a strict **source-specific multi-model architecture**:
+1. **Enterprise Flow Model:** Trained on the **CSE-CIC-IDS2018** dataset, utilizing 77 directional and timing-based flow features to catch complex attacks like Infiltration and Slowloris.
+2. **IoT NIDS Model:** Trained on the **CICIoT2023** dataset, utilizing 46 abstracted network metrics to catch rapid, high-volume IoT-centric attacks.
+3. **ARP/Packet Model:** Trained on an ARP/SYN/PING dataset using defensible packet-level features (e.g., tcp_flags, frame metrics).
+4. **5G IP Spoofing Model:** Trained on the 5G-NIDD dataset targeting IP Spoofing scenarios using generic 5G/GTP packet metrics (raw IPs are excluded).
+5. **DNS Statistical Model:** Trained on a DNS Tunneling dataset, evaluating statistical features derived from raw DNS queries (e.g., entropy, subdomain counts, length) without relying on verbatim query strings.
 
-The backend dynamically routes traffic to the appropriate model and unifies their outputs into a single **13-class taxonomy**.
+The backend dynamically routes traffic to the appropriate model and unifies their outputs into a single **frozen 13-class taxonomy**.
 
 ---
 
@@ -55,10 +58,13 @@ Smart AI NIDS uses a 13-class intrusion/traffic classification taxonomy.
 
 # 📁 Datasets Used
 
-1. **CSE-CIC-IDS2018** (Enterprise Traffic)
-2. **CICIoT2023** (IoT Traffic)
+1. **CSE-CIC-IDS2018** (Enterprise Traffic) -> `processed/IDS2018/`
+2. **CICIoT2023** (IoT Traffic) -> `processed/CICIoT2023/`
+3. **ARP/SYN/PING Dataset** (Packet data for ARP/DoS) -> `processed/additional/ARP_Spoofing/`
+4. **5G-Intrusion-Detection-Dataset** (Used specifically for IP Spoofing) -> `processed/additional/IP_Spoofing/`
+5. **DNS Tunneling Dataset** (Raw queries translated to statistical metrics) -> `processed/additional/DNS_Tunneling/`
 
-*(Note: Data cleaning pipelines heavily process these into `data/processed/` using specialized schema alignments available in `config/`.)*
+*(Note: Data cleaning pipelines extract source-specific features safely without injecting target leakage. MAC Spoofing is deliberately excluded from the taxonomy. Raw IP/MAC addresses are stripped. The 5G dataset provides a binary Normal/Attack label, but it is explicitly mapped to IP Spoofing based on its documented Distributed IP Spoofing scenario.)*
 
 ---
 

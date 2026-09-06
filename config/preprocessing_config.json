@@ -6,7 +6,13 @@
         "processed_ids2018": "data/processed/IDS2018",
         "processed_ciciot2023": "data/processed/CICIoT2023",
         "samples_dir": "data/samples",
-        "reports_dir": "reports"
+        "reports_dir": "reports",
+        "raw_arp_dir": "Datasets/ARP_Spoofing",
+        "raw_5g_dir": "Datasets/5G-Intrusion-Detection-Dataset",
+        "raw_dns_dir": "Datasets/DNS_Tunneling",
+        "processed_arp": "data/processed/additional/ARP_Spoofing",
+        "processed_5g": "data/processed/additional/IP_Spoofing",
+        "processed_dns": "data/processed/additional/DNS_Tunneling"
     },
     "parameters": {
         "random_seed": 42,
@@ -37,6 +43,49 @@
             "DNS Spoofing",
             "Recon / Port Scan",
             "MITM"
+        ],
+        "arp": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "5g": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "dns": [
+            "Benign",
+            "DNS Tunneling"
         ]
+    },
+    "taxonomy": {
+        "0": "Benign",
+        "1": "DDoS",
+        "2": "DoS",
+        "3": "Botnet",
+        "4": "Infiltration",
+        "5": "Brute Force",
+        "6": "Web Attack",
+        "7": "DNS Spoofing",
+        "8": "IP Spoofing",
+        "9": "ARP Spoofing",
+        "10": "Recon / Port Scan",
+        "11": "MITM",
+        "12": "DNS Tunneling"
+    },
+    "taxonomy_classes": {
+        "0": "Benign",
+        "1": "DDoS",
+        "2": "DoS",
+        "3": "Botnet",
+        "4": "Infiltration",
+        "5": "Brute Force",
+        "6": "Web Attack",
+        "7": "DNS Spoofing",
+        "8": "IP Spoofing",
+        "9": "ARP Spoofing",
+        "10": "Recon / Port Scan",
+        "11": "MITM",
+        "12": "DNS Tunneling"
     }
 }

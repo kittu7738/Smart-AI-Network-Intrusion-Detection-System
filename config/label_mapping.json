@@ -51,5 +51,20 @@
         "Backdoor_Malware": "Infiltration",
         "Recon-PingSweep": "Recon / Port Scan",
         "Uploading_Attack": "Web Attack"
+    },
+    "ARP": {
+        "Normal": "Benign",
+        "ARP_Spoofing": "ARP Spoofing",
+        "ARP_Storm": "DoS",
+        "PING_Flood": "DoS",
+        "SYN_Flood": "DoS"
+    },
+    "5G": {
+        "0": "Benign",
+        "1": "IP Spoofing"
+    },
+    "DNS": {
+        "0": "Benign",
+        "1": "DNS Tunneling"
     }
 }

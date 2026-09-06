@@ -168,8 +168,9 @@ def process_ids2018(config, mapping):
         feat_cols = [c for c in df.columns if c not in ["Label", "label", "final_label"]]
         df['hash'] = pd.util.hash_pandas_object(df[feat_cols], index=False)
         
-        # Track which labels each hash is associated with
-        for h, l in zip(df['hash'], df['final_label']):
+        # Track which labels each hash is associated with using fast vectorization
+        unique_pairs = df[['hash', 'final_label']].drop_duplicates()
+        for h, l in zip(unique_pairs['hash'], unique_pairs['final_label']):
             hash_to_labels[h].add(l)
             
         del df
@@ -182,12 +183,30 @@ def process_ids2018(config, mapping):
     gc.collect()
     
     # Pass 2: Extract valid rows, downcast, drop exact duplicates, and split
-    print("  Pass 2: Extracting clean data and splitting...")
-    clean_dfs = []
+    print("  Pass 2: Extracting clean data and streaming to parquet (Memory Safe)...")
     seen_hashes = set()
     conflicting_rows_removed = 0
+    clean_rows = 0
+    features_before = 0
     
-    for batch in parquet_file.iter_batches(batch_size=500000):
+    os.makedirs(resolve_path(processed_dir), exist_ok=True)
+    tmp_train = resolve_path(os.path.join(processed_dir, "train.tmp.parquet"))
+    tmp_val = resolve_path(os.path.join(processed_dir, "val.tmp.parquet"))
+    tmp_test = resolve_path(os.path.join(processed_dir, "test.tmp.parquet"))
+    
+    writer_train = None
+    writer_val = None
+    writer_test = None
+    
+    suspicious, constant = [], []
+    class_counts = defaultdict(int)
+    train_count = 0
+    val_count = 0
+    test_count = 0
+    classes = set()
+    
+    for i, batch in enumerate(parquet_file.iter_batches(batch_size=500000)):
+        start_t = time.time()
         df = batch.to_pandas()
         df["final_label"] = df["Label"].map(ids_map)
         df = df[df["final_label"].isin(valid_classes)]
@@ -208,27 +227,46 @@ def process_ids2018(config, mapping):
         
         df = df.drop(columns=["hash", "Label"])
         df = downcast_dtypes(df)
-        clean_dfs.append(df)
+        clean_rows += len(df)
+        if len(df.columns) > features_before: features_before = len(df.columns) - 1
         
-    df_clean = pd.concat(clean_dfs) if clean_dfs else pd.DataFrame()
-    del clean_dfs, seen_hashes, conflicting_hashes
+        if len(df) > 0:
+            if clean_rows == len(df): # First chunk
+                suspicious, constant = check_leakage(df, "final_label")
+                
+            X_train, X_val, X_test = split_stratified(df, "final_label", config["parameters"]["random_seed"])
+            
+            for k, v in df["final_label"].value_counts().to_dict().items():
+                class_counts[k] += v
+                classes.add(k)
+                
+            train_count += train_count
+            val_count += val_count
+            test_count += test_count
+            
+            if train_count > 0:
+                table = pa.Table.from_pandas(X_train)
+                if writer_train is None: writer_train = pq.ParquetWriter(tmp_train, table.schema)
+                writer_train.write_table(table)
+                
+            if val_count > 0:
+                table = pa.Table.from_pandas(X_val)
+                if writer_val is None: writer_val = pq.ParquetWriter(tmp_val, table.schema)
+                writer_val.write_table(table)
+                
+            if test_count > 0:
+                table = pa.Table.from_pandas(X_test)
+                if writer_test is None: writer_test = pq.ParquetWriter(tmp_test, table.schema)
+                writer_test.write_table(table)
+                
+        print(f"    Pass 2 Chunk {i+1} processed in {time.time()-start_t:.1f}s. Total clean: {clean_rows}")
+        gc.collect()
+        
+    if writer_train: writer_train.close()
+    if writer_val: writer_val.close()
+    if writer_test: writer_test.close()
+    del seen_hashes, conflicting_hashes
     gc.collect()
-    
-    clean_rows = len(df_clean)
-    features_before = len(df_clean.columns) - 1
-    
-    suspicious, constant = check_leakage(df_clean, "final_label")
-    X_train, X_val, X_test = split_stratified(df_clean, "final_label", config["parameters"]["random_seed"])
-    
-    os.makedirs(resolve_path(processed_dir), exist_ok=True)
-    # Write to tmp first
-    tmp_train = resolve_path(os.path.join(processed_dir, "train.tmp.parquet"))
-    tmp_val = resolve_path(os.path.join(processed_dir, "val.tmp.parquet"))
-    tmp_test = resolve_path(os.path.join(processed_dir, "test.tmp.parquet"))
-    
-    X_train.to_parquet(tmp_train)
-    X_val.to_parquet(tmp_val)
-    X_test.to_parquet(tmp_test)
     
     os.rename(tmp_train, resolve_path(os.path.join(processed_dir, "train.parquet")))
     os.rename(tmp_val, resolve_path(os.path.join(processed_dir, "val.parquet")))
@@ -246,13 +284,13 @@ def process_ids2018(config, mapping):
         "dropped_invalid_numeric": dropped_invalid_numeric,
         "conflicting_groups_found": conflicting_groups,
         "conflicting_rows_removed": int(conflicting_rows_removed),
-        "final_row_count": len(df_clean),
+        "final_row_count": clean_rows,
         "feature_count": features_before,
-        "classes": list(df_clean["final_label"].unique()),
-        "class_counts": df_clean["final_label"].value_counts().to_dict(),
-        "train_count": len(X_train),
-        "val_count": len(X_val),
-        "test_count": len(X_test),
+        "classes": list(classes),
+        "class_counts": dict(class_counts),
+        "train_count": train_count,
+        "val_count": val_count,
+        "test_count": test_count,
         "leakage_checks": {
             "suspicious_identifiers": suspicious,
             "constant_columns": constant
@@ -303,12 +341,16 @@ def process_ciciot2023(config, mapping):
             print(f"Missing {file_path}")
             return None, set(), 0
             
-        chunk_dfs = []
         split_hashes = set()
         overlaps_removed = 0
         seen_in_split = set()
         
-        for chunk in pd.read_csv(file_path, chunksize=500000, low_memory=False):
+        tmp_out = resolve_path(os.path.join(processed_dir, f"{split_name}.tmp.parquet"))
+        final_out = resolve_path(os.path.join(processed_dir, f"{split_name}.parquet"))
+        writer = None
+        
+        for i, chunk in enumerate(pd.read_csv(file_path, chunksize=500000, low_memory=False)):
+            start_t = time.time()
             report["initial_rows"] += len(chunk)
             chunk["final_label"] = chunk["label"].map(iot_map)
             chunk = chunk[chunk["final_label"].isin(valid_classes)]
@@ -331,45 +373,47 @@ def process_ciciot2023(config, mapping):
                 chunk = chunk[~overlap]
                 
             split_hashes.update(chunk["hash"])
-            chunk_dfs.append(chunk)
+            
+            chunk = chunk.drop(columns=["hash", "label"])
+            report["final_row_count"] += len(chunk)
+            report["splits"][split_name] = report["splits"].get(split_name, 0) + len(chunk)
+            
+            for k, v in chunk["final_label"].value_counts().to_dict().items():
+                report["class_counts"][k] = report["class_counts"].get(k, 0) + v
+                
+            if is_train and report["splits"][split_name] == len(chunk) and len(chunk) > 0:
+                # First chunk of train
+                suspicious, constant = check_leakage(chunk, "final_label")
+                report["leakage_checks"]["suspicious_identifiers"] = suspicious
+                report["leakage_checks"]["constant_columns"] = constant
+                report["feature_count"] = len(chunk.columns) - 1 # excluding final_label
+                
+            if len(chunk) > 0:
+                table = pa.Table.from_pandas(chunk)
+                if writer is None: writer = pq.ParquetWriter(tmp_out, table.schema)
+                writer.write_table(table)
+                
+            print(f"    {split_name} Chunk {i+1} processed in {time.time()-start_t:.1f}s. Clean rows: {len(chunk)}")
             gc.collect()
             
-        df = pd.concat(chunk_dfs) if chunk_dfs else pd.DataFrame()
-        return df, split_hashes, overlaps_removed
+        if writer is not None: writer.close()
+        if os.path.exists(tmp_out): os.rename(tmp_out, final_out)
+        
+        return True, split_hashes, overlaps_removed
     
-    print("  Processing Train...")
-    train_df, train_hashes, _ = process_file_chunked("train.csv", "train", is_train=True)
-    if train_df is None: return None
+    print("  Processing Train streaming to Parquet (Memory Safe)...")
+    train_success, train_hashes, _ = process_file_chunked("train.csv", "train", is_train=True)
+    if train_success is None: return None
     
-    print("  Processing Validation...")
-    val_df, val_hashes, val_removed = process_file_chunked("validation.csv", "val", known_hashes=train_hashes)
+    print("  Processing Validation streaming...")
+    val_success, val_hashes, val_removed = process_file_chunked("validation.csv", "val", known_hashes=train_hashes)
     report["train_val_overlaps_removed"] = int(val_removed)
     
-    print("  Processing Test...")
-    test_df, test_hashes, test_removed = process_file_chunked("test.csv", "test", known_hashes=train_hashes)
+    print("  Processing Test streaming...")
+    test_success, test_hashes, test_removed = process_file_chunked("test.csv", "test", known_hashes=train_hashes)
     report["train_test_overlaps_removed"] = int(test_removed)
     
     report["val_test_overlap_remaining"] = len(val_hashes.intersection(test_hashes))
-    
-    final_dfs = {"train": train_df, "val": val_df, "test": test_df}
-    for split_name, df in final_dfs.items():
-        df = df.drop(columns=["hash"])
-        report["final_row_count"] += len(df)
-        report["splits"][split_name] = len(df)
-        
-        for k, v in df["final_label"].value_counts().to_dict().items():
-            report["class_counts"][k] = report["class_counts"].get(k, 0) + v
-            
-        if split_name == "train":
-            suspicious, constant = check_leakage(df, "final_label")
-            report["leakage_checks"]["suspicious_identifiers"] = suspicious
-            report["leakage_checks"]["constant_columns"] = constant
-            report["feature_count"] = len(df.columns) - 2 # excluding label & final_label
-            
-        tmp_out = resolve_path(os.path.join(processed_dir, f"{split_name}.tmp.parquet"))
-        final_out = resolve_path(os.path.join(processed_dir, f"{split_name}.parquet"))
-        df.drop(columns=["label"]).to_parquet(tmp_out)
-        os.rename(tmp_out, final_out)
         
     with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ciciot2023_preparation_report.json")), "w") as f:
         json.dump(report, f, indent=4)

@@ -41,7 +41,11 @@ def update_env_checkpoint(key, value):
         with open(env_path, "r") as f:
             cfg = json.load(f)
     else:
-        cfg = {"checkpoints": {}}
+        cfg = {}
+        
+    if "checkpoints" not in cfg:
+        cfg["checkpoints"] = {}
+        
     cfg["checkpoints"][key] = value
     
     os.makedirs(os.path.dirname(env_path), exist_ok=True)

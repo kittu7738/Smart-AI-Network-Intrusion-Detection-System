@@ -89,5 +89,36 @@ class TestDataPreparation(unittest.TestCase):
         result = process_ciciot2023(config, mapping)
         self.assertIsNone(result)
 
+    def test_update_env_checkpoint_missing_key(self):
+        import json
+        import tempfile
+        from utils.data_preparation import update_env_checkpoint
+        
+        # Create a temporary progress.json without the "checkpoints" key
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # We must monkeypatch resolve_path temporarily to write to our tmpdir
+            # or just change NIDS_PROJECT_ROOT so resolve_path writes there
+            os.environ["NIDS_PROJECT_ROOT"] = tmpdir
+            
+            progress_path = os.path.join(tmpdir, "checkpoints", "progress.json")
+            os.makedirs(os.path.dirname(progress_path), exist_ok=True)
+            
+            # Write invalid config without 'checkpoints' key
+            with open(progress_path, "w") as f:
+                json.dump({"some_other_key": {}}, f)
+                
+            # Should safely initialize 'checkpoints' and update
+            update_env_checkpoint("test_key", "Success")
+            
+            # Verify
+            with open(progress_path, "r") as f:
+                cfg = json.load(f)
+                
+            self.assertIn("some_other_key", cfg)
+            self.assertIn("checkpoints", cfg)
+            self.assertEqual(cfg["checkpoints"]["test_key"], "Success")
+            
+            del os.environ["NIDS_PROJECT_ROOT"]
+
 if __name__ == '__main__':
     unittest.main()

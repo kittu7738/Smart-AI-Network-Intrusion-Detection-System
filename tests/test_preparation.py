@@ -187,12 +187,14 @@ class TestDataPreparation(unittest.TestCase):
         import pandas as pd
         
         # Test feature extraction contract
-        df = pd.DataFrame({"frame_number": [1], "arp_src_hw_mac": ["aa:bb"], "tcp_flag_fin": [0], "label": ["Normal"], "final_label": ["Benign"]})
+        df = pd.DataFrame({"frame_number": [1], "arp_src_hw_mac": ["aa:bb"], "tcp_flag_fin": [0], "label_name": ["Normal"], "final_label": ["Benign"]})
         res = extract_arp_features(df)
         self.assertIn("frame_number", res.columns)
         self.assertIn("tcp_flag_fin", res.columns)
         self.assertNotIn("arp_src_hw_mac", res.columns)
         self.assertIn("final_label", res.columns)
+        self.assertNotIn("label", res.columns)
+        self.assertNotIn("label_name", res.columns)
         
         # Test mapping classes
         mapping = load_label_mapping()
@@ -204,6 +206,54 @@ class TestDataPreparation(unittest.TestCase):
         self.assertEqual(arp_map["SYN_Flood"], "DoS")
         valid_labels = set(arp_map.values())
         self.assertTrue(valid_labels.issubset({"Benign", "ARP Spoofing", "DoS"}))
+
+    def test_arp_pipeline_processing_valid_labels(self):
+        import tempfile
+        import os
+        import pandas as pd
+        import pyarrow.parquet as pq
+        from utils.data_preparation import process_dataset_generic, extract_arp_features, load_label_mapping
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_arp_dir": os.path.join(tmpdir, "raw"),
+                    "processed_arp": os.path.join(tmpdir, "processed"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "classes": {
+                    "arp": ["Benign", "ARP Spoofing", "DoS"]
+                }
+            }
+            mapping = load_label_mapping()
+            
+            os.makedirs(config["paths"]["raw_arp_dir"], exist_ok=True)
+            os.makedirs(config["paths"]["reports_dir"], exist_ok=True)
+            
+            # The REAL ARP label spellings: Normal, ARP_Storm, SYN_Flood, PING_Flood, ARP_Spoofing
+            pd.DataFrame({
+                "frame_number": [1, 2, 3, 4, 5],
+                "label": [0, 1, 2, 3, 4], # Numeric IDs
+                "label_name": ["Normal", "ARP_Storm", "SYN_Flood", "PING_Flood", "ARP_Spoofing"] # String names
+            }).to_csv(os.path.join(config["paths"]["raw_arp_dir"], "train.csv"), index=False)
+            
+            file_splits = {"train": ["train.csv"]}
+            
+            # This should process successfully without raising RuntimeError
+            process_dataset_generic(config, mapping, "ARP_Spoofing", "raw_arp_dir", "processed_arp", file_splits, extract_arp_features, "ARP")
+            
+            final_out = os.path.join(config["paths"]["processed_arp"], "train.parquet")
+            self.assertTrue(os.path.exists(final_out))
+            
+            df_out = pd.read_parquet(final_out)
+            self.assertEqual(len(df_out), 5)
+            self.assertIn("final_label", df_out.columns)
+            self.assertNotIn("label", df_out.columns)
+            self.assertNotIn("label_name", df_out.columns)
+            
+            expected_labels = ["Benign", "DoS", "DoS", "DoS", "ARP Spoofing"]
+            self.assertListEqual(list(df_out["final_label"].values), expected_labels)
 
     def test_5g_feature_extraction(self):
         from utils.data_preparation import extract_5g_features

@@ -500,7 +500,7 @@ def extract_arp_features(df):
     defensible = [
         "frame_number", "frame_time_delta", "arp_opcode", "tcp_seq", 
         "tcp_hdr_len", "data_len", "icmp_type", "tcp_flag_fin", 
-        "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack", "label", "final_label"
+        "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack", "final_label"
     ]
     # Filter to only columns that actually exist in the dataframe
     cols_to_keep = [c for c in defensible if c in df.columns]
@@ -578,6 +578,8 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
                 
                 label_col = "label"
                 if "Label" in chunk.columns: label_col = "Label"
+                if "label_name" in chunk.columns: label_col = "label_name"
+                if "Label_Name" in chunk.columns: label_col = "Label_Name"
                 
                 # Standardize label mapping: string cast and strip
                 chunk_labels = chunk[label_col].astype(str).str.strip()
@@ -597,9 +599,10 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
                 report["dropped_invalid_numeric"] += dropped
                 chunk = downcast_dtypes(chunk)
                 
-                # Drop original label
-                if label_col in chunk.columns:
-                    chunk = chunk.drop(columns=[label_col])
+                # Drop original label columns to ensure no leakage
+                for l_col in ["label", "Label", "label_name", "Label_Name"]:
+                    if l_col in chunk.columns:
+                        chunk = chunk.drop(columns=[l_col])
                     
                 report["final_row_count"] += len(chunk)
                 report["splits"][split_name] = report["splits"].get(split_name, 0) + len(chunk)

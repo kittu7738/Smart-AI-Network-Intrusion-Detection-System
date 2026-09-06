@@ -63,16 +63,21 @@ class TestDataPreparation(unittest.TestCase):
     def test_resolve_path_with_env(self):
         from utils.data_preparation import resolve_path
         os.environ["NIDS_DATA_ROOT"] = "/test_drive_root"
+        os.environ["NIDS_PROJECT_ROOT"] = "/test_project_root"
         
         # Test specific Colab mappings
         self.assertEqual(resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet"), "/test_drive_root/raw/IDS2018/ids2018_combined_7attacks_benign.parquet")
         self.assertEqual(resolve_path("Datasets/CICIOT23"), "/test_drive_root/raw/CICIoT2023")
         self.assertEqual(resolve_path("data/processed/IDS2018"), "/test_drive_root/processed/IDS2018")
+        self.assertEqual(resolve_path("checkpoints/progress.json"), "/test_drive_root/checkpoints/progress.json")
+        self.assertEqual(resolve_path("reports/label_strategy.json"), "/test_drive_root/reports/label_strategy.json")
         
-        # Test generic fallback
-        self.assertEqual(resolve_path("config/preprocessing_config.json"), "/test_drive_root/config/preprocessing_config.json")
+        # Test generic fallback for repo files
+        self.assertEqual(resolve_path("config/preprocessing_config.json"), "/test_project_root/config/preprocessing_config.json")
+        self.assertEqual(resolve_path("config/label_mapping.json"), "/test_project_root/config/label_mapping.json")
         
         del os.environ["NIDS_DATA_ROOT"]
+        del os.environ["NIDS_PROJECT_ROOT"]
 
     def test_process_ciciot2023_missing_file_contract(self):
         # Tests that process_file_chunked properly returns 3 values (None, set(), 0) when missing,

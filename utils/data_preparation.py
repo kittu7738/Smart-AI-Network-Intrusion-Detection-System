@@ -11,21 +11,35 @@ from collections import defaultdict
 def resolve_path(rel_path):
     """Resolve paths dynamically based on NIDS_DATA_ROOT, NIDS_PROJECT_ROOT, or CWD."""
     data_root = os.environ.get("NIDS_DATA_ROOT")
+    project_root = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+    
     if data_root:
-        # Map local config paths to Colab Drive structure
+        # 1. Drive-backed raw data
         if rel_path == "Datasets/ids2018_combined_7attacks_benign.parquet":
             return os.path.join(data_root, "raw", "IDS2018", "ids2018_combined_7attacks_benign.parquet")
         if rel_path == "Datasets/CICIOT23":
             return os.path.join(data_root, "raw", "CICIoT2023")
+            
+        # 2. Known repository config/code paths
+        repo_prefixes = ("config", "utils", "tests", "README.md", "app.py")
+        if any(rel_path.startswith(p) for p in repo_prefixes):
+            return os.path.join(project_root, rel_path)
+            
+        # 3. Known runtime output directories (Drive-backed)
+        data_prefixes = ("checkpoints", "reports", "models", "colab_state", "backups")
+        if any(rel_path.startswith(p) for p in data_prefixes):
+            return os.path.join(data_root, rel_path)
+            
+        # 4. Processed data/samples
         if rel_path.startswith("data/processed"):
             return os.path.join(data_root, rel_path.replace("data/", "", 1))
         if rel_path.startswith("data/samples"):
             return os.path.join(data_root, rel_path.replace("data/", "", 1))
         
+        # Fallback to data root if NIDS_DATA_ROOT is set
         return os.path.join(data_root, rel_path)
         
-    base_dir = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
-    return os.path.join(base_dir, rel_path)
+    return os.path.join(project_root, rel_path)
 
 def load_config():
     with open(resolve_path("config/preprocessing_config.json"), "r") as f:

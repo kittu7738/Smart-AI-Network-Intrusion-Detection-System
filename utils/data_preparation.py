@@ -195,8 +195,11 @@ def process_ids2018(config, mapping):
     tmp_test = resolve_path(os.path.join(processed_dir, "test.tmp.parquet"))
     
     writer_train = None
+    writer_train_schema = None
     writer_val = None
+    writer_val_schema = None
     writer_test = None
+    writer_test_schema = None
     
     suspicious, constant = [], []
     class_counts = defaultdict(int)
@@ -240,23 +243,50 @@ def process_ids2018(config, mapping):
                 class_counts[k] += v
                 classes.add(k)
                 
-            train_count += train_count
-            val_count += val_count
-            test_count += test_count
+            train_count += len(X_train)
+            val_count += len(X_val)
+            test_count += len(X_test)
             
-            if train_count > 0:
-                table = pa.Table.from_pandas(X_train)
-                if writer_train is None: writer_train = pq.ParquetWriter(tmp_train, table.schema)
+            if len(X_train) > 0:
+                table = pa.Table.from_pandas(X_train, preserve_index=False)
+                if writer_train is None: 
+                    writer_train_schema = table.schema
+                    writer_train = pq.ParquetWriter(tmp_train, writer_train_schema)
+                else:
+                    if table.schema != writer_train_schema:
+                        try:
+                            X_train = X_train[[field.name for field in writer_train_schema]]
+                            table = pa.Table.from_pandas(X_train, preserve_index=False).cast(writer_train_schema)
+                        except Exception as e:
+                            raise ValueError(f"Schema mismatch! Writer schema: {writer_train_schema}, Chunk schema: {table.schema}") from e
                 writer_train.write_table(table)
                 
-            if val_count > 0:
-                table = pa.Table.from_pandas(X_val)
-                if writer_val is None: writer_val = pq.ParquetWriter(tmp_val, table.schema)
+            if len(X_val) > 0:
+                table = pa.Table.from_pandas(X_val, preserve_index=False)
+                if writer_val is None: 
+                    writer_val_schema = table.schema
+                    writer_val = pq.ParquetWriter(tmp_val, writer_val_schema)
+                else:
+                    if table.schema != writer_val_schema:
+                        try:
+                            X_val = X_val[[field.name for field in writer_val_schema]]
+                            table = pa.Table.from_pandas(X_val, preserve_index=False).cast(writer_val_schema)
+                        except Exception as e:
+                            raise ValueError(f"Schema mismatch! Writer schema: {writer_val_schema}, Chunk schema: {table.schema}") from e
                 writer_val.write_table(table)
                 
-            if test_count > 0:
-                table = pa.Table.from_pandas(X_test)
-                if writer_test is None: writer_test = pq.ParquetWriter(tmp_test, table.schema)
+            if len(X_test) > 0:
+                table = pa.Table.from_pandas(X_test, preserve_index=False)
+                if writer_test is None: 
+                    writer_test_schema = table.schema
+                    writer_test = pq.ParquetWriter(tmp_test, writer_test_schema)
+                else:
+                    if table.schema != writer_test_schema:
+                        try:
+                            X_test = X_test[[field.name for field in writer_test_schema]]
+                            table = pa.Table.from_pandas(X_test, preserve_index=False).cast(writer_test_schema)
+                        except Exception as e:
+                            raise ValueError(f"Schema mismatch! Writer schema: {writer_test_schema}, Chunk schema: {table.schema}") from e
                 writer_test.write_table(table)
                 
         print(f"    Pass 2 Chunk {i+1} processed in {time.time()-start_t:.1f}s. Total clean: {clean_rows}")
@@ -348,6 +378,7 @@ def process_ciciot2023(config, mapping):
         tmp_out = resolve_path(os.path.join(processed_dir, f"{split_name}.tmp.parquet"))
         final_out = resolve_path(os.path.join(processed_dir, f"{split_name}.parquet"))
         writer = None
+        writer_schema = None
         
         for i, chunk in enumerate(pd.read_csv(file_path, chunksize=500000, low_memory=False)):
             start_t = time.time()
@@ -389,8 +420,17 @@ def process_ciciot2023(config, mapping):
                 report["feature_count"] = len(chunk.columns) - 1 # excluding final_label
                 
             if len(chunk) > 0:
-                table = pa.Table.from_pandas(chunk)
-                if writer is None: writer = pq.ParquetWriter(tmp_out, table.schema)
+                table = pa.Table.from_pandas(chunk, preserve_index=False)
+                if writer is None: 
+                    writer_schema = table.schema
+                    writer = pq.ParquetWriter(tmp_out, writer_schema)
+                else:
+                    if table.schema != writer_schema:
+                        try:
+                            chunk = chunk[[field.name for field in writer_schema]]
+                            table = pa.Table.from_pandas(chunk, preserve_index=False).cast(writer_schema)
+                        except Exception as e:
+                            raise ValueError(f"Schema mismatch! Writer schema: {writer_schema}, Chunk schema: {table.schema}") from e
                 writer.write_table(table)
                 
             print(f"    {split_name} Chunk {i+1} processed in {time.time()-start_t:.1f}s. Clean rows: {len(chunk)}")

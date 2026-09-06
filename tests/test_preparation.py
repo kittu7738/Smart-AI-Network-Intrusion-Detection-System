@@ -9,6 +9,42 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from utils.data_preparation import handle_invalid_numeric, check_leakage, split_stratified, load_config
 
 class TestDataPreparation(unittest.TestCase):
+    def test_schema_consistency_no_index(self):
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        import pandas as pd
+        import tempfile
+        import os
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            out_file = os.path.join(tmpdir, "test.parquet")
+            
+            # Chunk 1 (clean index)
+            df1 = pd.DataFrame({'feat1': [1.0, 2.0], 'final_label': ['Benign', 'DDoS']})
+            table1 = pa.Table.from_pandas(df1, preserve_index=False)
+            writer = pq.ParquetWriter(out_file, table1.schema)
+            writer.write_table(table1)
+            
+            # Chunk 2 (dropped rows causing index to not be 0,1,2...)
+            df2 = pd.DataFrame({'feat1': [3.0, 4.0, 5.0], 'final_label': ['DoS', 'Benign', 'DDoS']})
+            df2 = df2.drop(1) # Index is now [0, 2]
+            
+            table2 = pa.Table.from_pandas(df2, preserve_index=False)
+            
+            # Ensure index did not leak into schema
+            self.assertNotIn('__index_level_0__', table2.schema.names)
+            
+            # Ensure schema matches chunk 1
+            self.assertEqual(table1.schema, table2.schema)
+            
+            writer.write_table(table2)
+            writer.close()
+            
+            # Read back
+            read_table = pq.read_table(out_file)
+            self.assertEqual(read_table.num_rows, 4)
+            self.assertNotIn('__index_level_0__', read_table.column_names)
+
     
     def test_invalid_numeric_handling(self):
         df = pd.DataFrame({

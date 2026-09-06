@@ -579,8 +579,14 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
                 label_col = "label"
                 if "Label" in chunk.columns: label_col = "Label"
                 
+                # Standardize label mapping: string cast and strip
+                chunk_labels = chunk[label_col].astype(str).str.strip()
+                
+                # Make label_map robust against int/string mismatches
+                robust_map = {str(k).strip(): v for k, v in label_map.items()}
+                
                 # Map labels safely
-                chunk["final_label"] = chunk[label_col].map(label_map)
+                chunk["final_label"] = chunk_labels.map(robust_map)
                 chunk = chunk[chunk["final_label"].isin(valid_classes)]
                 
                 # Extract features
@@ -624,7 +630,17 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
                 gc.collect()
                 
         if writer is not None: writer.close()
-        if os.path.exists(tmp_out): os.rename(tmp_out, final_out)
+        
+        if report["splits"][split_name] == 0:
+            raise RuntimeError(f"Pipeline failure: {dataset_name} {split_name} resulted in 0 valid rows. Check label mapping or raw data.")
+            
+        if not os.path.exists(tmp_out):
+            raise RuntimeError(f"Pipeline failure: tmp parquet not found for {dataset_name} {split_name} at {tmp_out}")
+            
+        os.rename(tmp_out, final_out)
+        
+        if not os.path.exists(final_out):
+            raise RuntimeError(f"Pipeline failure: Final parquet not found at {final_out}")
         
     with open(resolve_path(os.path.join(config["paths"]["reports_dir"], f"{dataset_name.lower()}_preparation_report.json")), "w") as f:
         json.dump(report, f, indent=4)

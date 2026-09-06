@@ -214,6 +214,86 @@ class TestDataPreparation(unittest.TestCase):
         self.assertNotIn("Src_IP", res.columns)
         self.assertNotIn("Dst_MAC", res.columns)
         self.assertIn("final_label", res.columns)
-
+    def test_pipeline_output_creation_and_contract(self):
+        import tempfile
+        import os
+        import pandas as pd
+        import pyarrow.parquet as pq
+        from utils.data_preparation import process_dataset_generic, extract_5g_features
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Setup dummy config
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_dummy_dir": os.path.join(tmpdir, "raw"),
+                    "processed_dummy": os.path.join(tmpdir, "processed"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "classes": {
+                    "dummy": ["Benign", "Malicious"]
+                }
+            }
+            mapping = {"DUMMY": {"0": "Benign", "1": "Malicious"}}
+            
+            os.makedirs(config["paths"]["raw_dummy_dir"], exist_ok=True)
+            os.makedirs(config["paths"]["reports_dir"], exist_ok=True)
+            # Write integer labels that need robust mapping
+            pd.DataFrame({
+                "Src_IP": ["1.1.1.1"],
+                "metric": [1.0],
+                "label": [0]
+            }).to_csv(os.path.join(config["paths"]["raw_dummy_dir"], "train.csv"), index=False)
+            
+            file_splits = {"train": ["train.csv"]}
+            
+            # This should pass without raising RuntimeError, and create a file
+            process_dataset_generic(config, mapping, "DummySet", "raw_dummy_dir", "processed_dummy", file_splits, extract_5g_features, "DUMMY")
+            
+            final_out = os.path.join(config["paths"]["processed_dummy"], "train.parquet")
+            self.assertTrue(os.path.exists(final_out))
+            
+            # Verify the contract of the output
+            df_out = pd.read_parquet(final_out)
+            self.assertGreater(len(df_out), 0)
+            self.assertIn("final_label", df_out.columns)
+            self.assertNotIn("Src_IP", df_out.columns)
+            self.assertNotIn("label", df_out.columns)
+            self.assertEqual(df_out["final_label"].iloc[0], "Benign")
+            
+    def test_pipeline_fails_on_empty_output(self):
+        import tempfile
+        import os
+        import pandas as pd
+        from utils.data_preparation import process_dataset_generic, extract_5g_features
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_dummy_dir": os.path.join(tmpdir, "raw"),
+                    "processed_dummy": os.path.join(tmpdir, "processed"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "classes": {
+                    "dummy": ["Benign"]
+                }
+            }
+            mapping = {"DUMMY": {"0": "Benign"}}
+            
+            os.makedirs(config["paths"]["raw_dummy_dir"], exist_ok=True)
+            os.makedirs(config["paths"]["reports_dir"], exist_ok=True)
+            # Write label that maps to NOTHING (or is filtered out)
+            pd.DataFrame({
+                "metric": [1.0],
+                "label": [99] # Unmapped
+            }).to_csv(os.path.join(config["paths"]["raw_dummy_dir"], "train.csv"), index=False)
+            
+            file_splits = {"train": ["train.csv"]}
+            
+            # This should raise RuntimeError because 0 valid rows
+            with self.assertRaises(RuntimeError) as context:
+                process_dataset_generic(config, mapping, "DummySet", "raw_dummy_dir", "processed_dummy", file_splits, extract_5g_features, "DUMMY")
+            self.assertIn("resulted in 0 valid rows", str(context.exception))
 if __name__ == '__main__':
     unittest.main()

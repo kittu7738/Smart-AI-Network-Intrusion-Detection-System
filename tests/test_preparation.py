@@ -60,5 +60,34 @@ class TestDataPreparation(unittest.TestCase):
         self.assertIn("version", config)
         self.assertIn("raw_ids2018", config["paths"])
 
+    def test_resolve_path_with_env(self):
+        from utils.data_preparation import resolve_path
+        os.environ["NIDS_DATA_ROOT"] = "/test_drive_root"
+        
+        # Test specific Colab mappings
+        self.assertEqual(resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet"), "/test_drive_root/raw/IDS2018/ids2018_combined_7attacks_benign.parquet")
+        self.assertEqual(resolve_path("Datasets/CICIOT23"), "/test_drive_root/raw/CICIoT2023")
+        self.assertEqual(resolve_path("data/processed/IDS2018"), "/test_drive_root/processed/IDS2018")
+        
+        # Test generic fallback
+        self.assertEqual(resolve_path("config/preprocessing_config.json"), "/test_drive_root/config/preprocessing_config.json")
+        
+        del os.environ["NIDS_DATA_ROOT"]
+
+    def test_process_ciciot2023_missing_file_contract(self):
+        # Tests that process_file_chunked properly returns 3 values (None, set(), 0) when missing,
+        # avoiding a ValueError unpack exception.
+        from utils.data_preparation import process_ciciot2023
+        config = load_config()
+        
+        # Point to a fake raw directory that definitely doesn't exist
+        config["paths"]["raw_ciciot2023_dir"] = "fake_non_existent_directory_for_test"
+        config["paths"]["processed_ciciot2023"] = "fake_non_existent_processed_dir"
+        
+        # Should gracefully return None because train.csv is missing
+        mapping = {"CICIoT2023": {}}
+        result = process_ciciot2023(config, mapping)
+        self.assertIsNone(result)
+
 if __name__ == '__main__':
     unittest.main()

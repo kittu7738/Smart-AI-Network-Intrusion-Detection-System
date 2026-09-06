@@ -9,7 +9,21 @@ import pyarrow as pa
 from collections import defaultdict
 
 def resolve_path(rel_path):
-    """Resolve paths dynamically based on NIDS_PROJECT_ROOT or CWD to support Mac and Colab."""
+    """Resolve paths dynamically based on NIDS_DATA_ROOT, NIDS_PROJECT_ROOT, or CWD."""
+    data_root = os.environ.get("NIDS_DATA_ROOT")
+    if data_root:
+        # Map local config paths to Colab Drive structure
+        if rel_path == "Datasets/ids2018_combined_7attacks_benign.parquet":
+            return os.path.join(data_root, "raw", "IDS2018", "ids2018_combined_7attacks_benign.parquet")
+        if rel_path == "Datasets/CICIOT23":
+            return os.path.join(data_root, "raw", "CICIoT2023")
+        if rel_path.startswith("data/processed"):
+            return os.path.join(data_root, rel_path.replace("data/", "", 1))
+        if rel_path.startswith("data/samples"):
+            return os.path.join(data_root, rel_path.replace("data/", "", 1))
+        
+        return os.path.join(data_root, rel_path)
+        
     base_dir = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
     return os.path.join(base_dir, rel_path)
 
@@ -273,7 +287,7 @@ def process_ciciot2023(config, mapping):
         file_path = os.path.join(raw_dir, file_name)
         if not os.path.exists(file_path):
             print(f"Missing {file_path}")
-            return None, set()
+            return None, set(), 0
             
         chunk_dfs = []
         split_hashes = set()

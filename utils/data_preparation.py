@@ -223,7 +223,10 @@ def process_ids2018(config, mapping):
         conflicting_rows_removed += is_conflict.sum()
         df = df[~is_conflict]
         
-        # Deduplicate globally
+        # Deduplicate internally within the chunk first
+        df = df.drop_duplicates(subset=['hash'])
+        
+        # Deduplicate globally across chunks
         is_dup = df['hash'].isin(seen_hashes)
         df = df[~is_dup]
         seen_hashes.update(df['hash'])
@@ -393,7 +396,10 @@ def process_ciciot2023(config, mapping):
             feat_cols = [c for c in chunk.columns if c not in ["label", "final_label"]]
             chunk["hash"] = pd.util.hash_pandas_object(chunk[feat_cols], index=False)
             
-            # Deduplicate internally
+            # Deduplicate internally within the chunk first
+            chunk = chunk.drop_duplicates(subset=['hash'])
+            
+            # Deduplicate across chunks within the same split
             chunk = chunk[~chunk["hash"].isin(seen_in_split)]
             seen_in_split.update(chunk["hash"])
             

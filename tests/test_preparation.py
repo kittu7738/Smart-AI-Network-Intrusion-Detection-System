@@ -345,5 +345,68 @@ class TestDataPreparation(unittest.TestCase):
             with self.assertRaises(RuntimeError) as context:
                 process_dataset_generic(config, mapping, "DummySet", "raw_dummy_dir", "processed_dummy", file_splits, extract_5g_features, "DUMMY")
             self.assertIn("resulted in 0 valid rows", str(context.exception))
+
+    def test_ids2018_pipeline_deduplication(self):
+        from utils.data_preparation import process_ids2018
+        import pyarrow as pa
+        import tempfile
+        import os
+        import pandas as pd
+        import pyarrow.parquet as pq
+        
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_ids2018": os.path.join(tmpdir, "raw_ids2018.parquet"),
+                    "processed_ids2018": os.path.join(tmpdir, "processed_ids2018"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "parameters": {"random_seed": 42},
+                "classes": {
+                    "ids2018": ["Benign", "DDoS"]
+                }
+            }
+            mapping = {"IDS2018": {"0": "Benign", "1": "DDoS", "2": "Benign"}}
+            
+            # Enough rows to get split into train, val, test for both classes
+            df_raw = pd.DataFrame({
+                "Protocol": list(range(30)) + list(range(30)),
+                "Flow Duration": [100]*30 + [200]*30,
+                "Label": ["0"]*30 + ["1"]*30 
+            })
+            # Add duplicates
+            df_raw = pd.concat([df_raw, df_raw])
+            
+            table = pa.Table.from_pandas(df_raw)
+            pq.write_table(table, config["paths"]["raw_ids2018"])
+            
+            import utils.data_preparation
+            old_resolve = utils.data_preparation.resolve_path
+            utils.data_preparation.resolve_path = lambda p: p
+            try:
+                process_ids2018(config, mapping)
+            finally:
+                utils.data_preparation.resolve_path = old_resolve
+            
+            train = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "train.parquet"))
+            val = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "val.parquet"))
+            test = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "test.parquet"))
+            
+            for split_name, df_split in zip(["train", "val", "test"], [train, val, test]):
+                self.assertIn("final_label", df_split.columns)
+                self.assertNotIn("Label", df_split.columns)
+                self.assertNotIn("__index_level_0__", df_split.columns)
+                self.assertEqual(df_split.isnull().sum().sum(), 0) 
+            
+            feat_cols = [c for c in train.columns if c != "final_label"]
+            train_hashes = pd.util.hash_pandas_object(train[feat_cols], index=False)
+            val_hashes = pd.util.hash_pandas_object(val[feat_cols], index=False)
+            test_hashes = pd.util.hash_pandas_object(test[feat_cols], index=False)
+            
+            self.assertEqual(len(set(train_hashes).intersection(set(val_hashes))), 0)
+            self.assertEqual(len(set(train_hashes).intersection(set(test_hashes))), 0)
+            self.assertEqual(len(set(val_hashes).intersection(set(test_hashes))), 0)
+
 if __name__ == '__main__':
     unittest.main()

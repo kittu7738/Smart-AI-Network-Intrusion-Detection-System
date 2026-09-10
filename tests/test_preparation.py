@@ -101,18 +101,57 @@ class TestDataPreparation(unittest.TestCase):
         os.environ["NIDS_DATA_ROOT"] = "/test_drive_root"
         os.environ["NIDS_PROJECT_ROOT"] = "/test_project_root"
         
-        # Test specific Colab mappings
+        # Test IDS2018 raw resolution (multiple path variants)
         self.assertEqual(resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet"), "/test_drive_root/raw/IDS2018/ids2018_combined_7attacks_benign.parquet")
-        self.assertEqual(resolve_path("Datasets/CICIOT23"), "/test_drive_root/raw/CICIoT2023")
+        self.assertEqual(resolve_path("raw/IDS2018/ids2018_combined_7attacks_benign.parquet"), "/test_drive_root/raw/IDS2018/ids2018_combined_7attacks_benign.parquet")
+        self.assertEqual(resolve_path("IDS2018/ids2018_combined_7attacks_benign.parquet"), "/test_drive_root/raw/IDS2018/ids2018_combined_7attacks_benign.parquet")
+        
+        # Test IDS2018 processed resolution
         self.assertEqual(resolve_path("data/processed/IDS2018"), "/test_drive_root/processed/IDS2018")
+        self.assertEqual(resolve_path("processed/IDS2018"), "/test_drive_root/processed/IDS2018")
+        self.assertEqual(resolve_path("data/processed/IDS2018/train.parquet"), "/test_drive_root/processed/IDS2018/train.parquet")
+        self.assertEqual(resolve_path("processed/IDS2018/train.parquet"), "/test_drive_root/processed/IDS2018/train.parquet")
+
+        # Test CICIoT2023 raw and processed
+        self.assertEqual(resolve_path("Datasets/CICIOT23"), "/test_drive_root/raw/CICIoT2023")
+        self.assertEqual(resolve_path("data/processed/CICIoT2023"), "/test_drive_root/processed/CICIoT2023")
+
+        # Test additional dataset raw and processed
+        self.assertEqual(resolve_path("raw/additional/ARP_Spoofing"), "/test_drive_root/raw/additional/ARP_Spoofing")
+        self.assertEqual(resolve_path("data/processed/additional/ARP_Spoofing"), "/test_drive_root/processed/additional/ARP_Spoofing")
+        self.assertEqual(resolve_path("raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset"), "/test_drive_root/raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset")
+        self.assertEqual(resolve_path("data/processed/additional/IP_Spoofing"), "/test_drive_root/processed/additional/IP_Spoofing")
+        self.assertEqual(resolve_path("raw/additional/DNS_Tunneling"), "/test_drive_root/raw/additional/DNS_Tunneling")
+        self.assertEqual(resolve_path("data/processed/additional/DNS_Tunneling"), "/test_drive_root/processed/additional/DNS_Tunneling")
+
+        # Test runtime outputs
         self.assertEqual(resolve_path("checkpoints/progress.json"), "/test_drive_root/checkpoints/progress.json")
         self.assertEqual(resolve_path("reports/label_strategy.json"), "/test_drive_root/reports/label_strategy.json")
+        self.assertEqual(resolve_path("data/samples"), "/test_drive_root/samples")
         
-        # Test generic fallback for repo files
+        # Test generic fallback for repo files (always resolved to project_root)
         self.assertEqual(resolve_path("config/preprocessing_config.json"), "/test_project_root/config/preprocessing_config.json")
         self.assertEqual(resolve_path("config/label_mapping.json"), "/test_project_root/config/label_mapping.json")
         
+        # Test exact Colab paths
+        os.environ["NIDS_PROJECT_ROOT"] = "/content/Smart-AI-Network-Intrusion-Detection-System"
+        os.environ["NIDS_DATA_ROOT"] = "/content/drive/MyDrive/Smart-AI-NIDS"
+        self.assertEqual(
+            resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet"),
+            "/content/drive/MyDrive/Smart-AI-NIDS/raw/IDS2018/ids2018_combined_7attacks_benign.parquet"
+        )
+        self.assertEqual(
+            resolve_path("data/processed/IDS2018"),
+            "/content/drive/MyDrive/Smart-AI-NIDS/processed/IDS2018"
+        )
+
         del os.environ["NIDS_DATA_ROOT"]
+        del os.environ["NIDS_PROJECT_ROOT"]
+
+        # Test fallback without NIDS_DATA_ROOT
+        os.environ["NIDS_PROJECT_ROOT"] = "/local_project_root"
+        self.assertEqual(resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet"), "/local_project_root/Datasets/ids2018_combined_7attacks_benign.parquet")
+        self.assertEqual(resolve_path("data/processed/IDS2018"), "/local_project_root/data/processed/IDS2018")
         del os.environ["NIDS_PROJECT_ROOT"]
 
     def test_process_ciciot2023_missing_file_contract(self):

@@ -4,10 +4,10 @@ import time
 import pandas as pd
 import glob
 
-BASE_DIR = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+from utils.data_preparation import resolve_path
 
 def update_checkpoint(key, value):
-    ckpt_path = os.path.join(BASE_DIR, "checkpoints", "progress.json")
+    ckpt_path = resolve_path("checkpoints/progress.json")
     if os.path.exists(ckpt_path):
         with open(ckpt_path, "r") as f:
             cfg = json.load(f)
@@ -61,8 +61,8 @@ def check_cross_split_leakage(dataset_name, data_dir):
         return {"dataset": dataset_name, "error": str(e), "parquet_reopen_status": "Failed", "final_label_exists": False}
 
 def main():
-    ids2018_dir = os.path.join(BASE_DIR, "data", "processed", "IDS2018")
-    ciciot2023_dir = os.path.join(BASE_DIR, "data", "processed", "CICIoT2023")
+    ids2018_dir = resolve_path("data/processed/IDS2018")
+    ciciot2023_dir = resolve_path("data/processed/CICIoT2023")
     
     ids_leak = check_cross_split_leakage("IDS2018", ids2018_dir)
     ciciot_leak = check_cross_split_leakage("CICIoT2023", ciciot2023_dir)
@@ -79,8 +79,9 @@ def main():
         ) else "Failed"
     }
     
-    os.makedirs(os.path.join(BASE_DIR, "reports"), exist_ok=True)
-    with open(os.path.join(BASE_DIR, "reports", "leakage_report.json"), "w") as f:
+    reports_dir = resolve_path("reports")
+    os.makedirs(reports_dir, exist_ok=True)
+    with open(resolve_path("reports/leakage_report.json"), "w") as f:
         json.dump(leakage_report, f, indent=4)
         
     update_checkpoint("leakage_check_completed", True)

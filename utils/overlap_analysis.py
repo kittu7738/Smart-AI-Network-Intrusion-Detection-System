@@ -4,10 +4,10 @@ import pandas as pd
 import numpy as np
 import time
 
-BASE_DIR = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+from utils.data_preparation import resolve_path
 
 def load_label_mapping():
-    mapping_path = os.path.join(BASE_DIR, "config", "label_mapping.json")
+    mapping_path = resolve_path("config/label_mapping.json")
     with open(mapping_path, "r") as f:
         return json.load(f)
 
@@ -62,7 +62,7 @@ def analyze_dataset_overlaps(train, val, test, label_col):
 
 def analyze_ids2018(mapping):
     print("Analyzing IDS2018...")
-    raw_path = os.path.join(BASE_DIR, "Datasets", "ids2018_combined_7attacks_benign.parquet")
+    raw_path = resolve_path("Datasets/ids2018_combined_7attacks_benign.parquet")
     df = pd.read_parquet(raw_path)
     
     ids_map = mapping["IDS2018"]
@@ -97,7 +97,7 @@ def analyze_ids2018(mapping):
 
 def analyze_ciciot(mapping):
     print("Analyzing CICIoT2023...")
-    raw_dir = os.path.join(BASE_DIR, "Datasets", "CICIOT23")
+    raw_dir = resolve_path("Datasets/CICIOT23")
     iot_map = mapping["CICIoT2023"]
     valid_classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack", "Spoofing", "Recon / Port Scan", "MITM"]
     
@@ -127,8 +127,9 @@ def main():
         "recommendation": "For IDS2018: The overlaps are likely conflicting labels (identical features but different labels, which bypass drop_duplicates). These should be removed to prevent confusion. For CICIoT2023: The overlaps are primarily identical patterns (same labels) that naturally occur in network bursts. Since they appear across official splits, keeping them mimics real-world identical packet bursts, but removing them ensures zero train/test leakage. Recommendation: B. remove cross-split duplicates for absolute strict ML evaluation."
     }
     
-    os.makedirs(os.path.join(BASE_DIR, "reports"), exist_ok=True)
-    with open(os.path.join(BASE_DIR, "reports", "cross_split_overlap_analysis.json"), "w") as f:
+    reports_dir = resolve_path("reports")
+    os.makedirs(reports_dir, exist_ok=True)
+    with open(os.path.join(reports_dir, "cross_split_overlap_analysis.json"), "w") as f:
         json.dump(report, f, indent=4)
         
     print("Analysis complete.")

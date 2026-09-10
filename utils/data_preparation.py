@@ -10,36 +10,75 @@ from collections import defaultdict
 
 def resolve_path(rel_path):
     """Resolve paths dynamically based on NIDS_DATA_ROOT, NIDS_PROJECT_ROOT, or CWD."""
+    if not rel_path:
+        return rel_path
+
+    if os.path.isabs(rel_path):
+        return os.path.normpath(rel_path)
+
+    norm_rel = os.path.normpath(rel_path).replace("\\", "/")
+
     data_root = os.environ.get("NIDS_DATA_ROOT")
-    project_root = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
-    
     if data_root:
-        # 1. Drive-backed raw data
-        if rel_path == "Datasets/ids2018_combined_7attacks_benign.parquet":
-            return os.path.join(data_root, "raw", "IDS2018", "ids2018_combined_7attacks_benign.parquet")
-        if rel_path == "Datasets/CICIOT23":
-            return os.path.join(data_root, "raw", "CICIoT2023")
-            
-        # 2. Known repository config/code paths
-        repo_prefixes = ("config", "utils", "tests", "README.md", "app.py")
-        if any(rel_path.startswith(p) for p in repo_prefixes):
-            return os.path.join(project_root, rel_path)
-            
-        # 3. Known runtime output directories (Drive-backed)
+        data_root = data_root.strip().strip('"').strip("'")
+
+    # Auto-detect standard Colab Google Drive mount if NIDS_DATA_ROOT is not explicitly set
+    if not data_root:
+        colab_default = "/content/drive/MyDrive/Smart-AI-NIDS"
+        if os.path.isdir(colab_default):
+            data_root = colab_default
+
+    project_root = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+    if project_root:
+        project_root = project_root.strip().strip('"').strip("'")
+
+    if data_root:
+        # 1. Known repository config / code paths -> project_root
+        repo_prefixes = ("config", "utils", "tests", "notebooks", "README.md", "app.py", "requirements.txt")
+        if any(norm_rel == p or norm_rel.startswith(p + "/") for p in repo_prefixes):
+            return os.path.normpath(os.path.join(project_root, norm_rel))
+
+        # 2. Processed datasets & samples (checked before raw to avoid matching dataset name suffixes)
+        if norm_rel.startswith("data/processed/"):
+            return os.path.normpath(os.path.join(data_root, norm_rel[len("data/"):]))
+        if norm_rel == "data/processed":
+            return os.path.normpath(os.path.join(data_root, "processed"))
+        if norm_rel.startswith("processed/"):
+            return os.path.normpath(os.path.join(data_root, norm_rel))
+        if norm_rel == "processed":
+            return os.path.normpath(os.path.join(data_root, "processed"))
+
+        if norm_rel.startswith("data/samples/"):
+            return os.path.normpath(os.path.join(data_root, norm_rel[len("data/"):]))
+        if norm_rel == "data/samples":
+            return os.path.normpath(os.path.join(data_root, "samples"))
+
+        # 3. Raw datasets
+        # IDS2018 raw dataset
+        if norm_rel in (
+            "Datasets/ids2018_combined_7attacks_benign.parquet",
+            "raw/IDS2018/ids2018_combined_7attacks_benign.parquet",
+            "IDS2018/ids2018_combined_7attacks_benign.parquet"
+        ) or norm_rel.endswith("/ids2018_combined_7attacks_benign.parquet") or norm_rel == "ids2018_combined_7attacks_benign.parquet":
+            return os.path.normpath(os.path.join(data_root, "raw", "IDS2018", "ids2018_combined_7attacks_benign.parquet"))
+
+        # CICIoT2023 raw dataset directory
+        if norm_rel in ("Datasets/CICIOT23", "raw/CICIoT2023", "Datasets/CICIoT2023", "raw/CICIOT23"):
+            return os.path.normpath(os.path.join(data_root, "raw", "CICIoT2023"))
+
+        # Other raw datasets (e.g. raw/additional/...)
+        if norm_rel.startswith("raw/"):
+            return os.path.normpath(os.path.join(data_root, norm_rel))
+
+        # 4. Known runtime output directories (Drive-backed)
         data_prefixes = ("checkpoints", "reports", "models", "colab_state", "backups")
-        if any(rel_path.startswith(p) for p in data_prefixes):
-            return os.path.join(data_root, rel_path)
-            
-        # 4. Processed data/samples
-        if rel_path.startswith("data/processed"):
-            return os.path.join(data_root, rel_path.replace("data/", "", 1))
-        if rel_path.startswith("data/samples"):
-            return os.path.join(data_root, rel_path.replace("data/", "", 1))
-        
-        # Fallback to data root if NIDS_DATA_ROOT is set
-        return os.path.join(data_root, rel_path)
-        
-    return os.path.join(project_root, rel_path)
+        if any(norm_rel == p or norm_rel.startswith(p + "/") for p in data_prefixes):
+            return os.path.normpath(os.path.join(data_root, norm_rel))
+
+        # General fallback with data_root
+        return os.path.normpath(os.path.join(data_root, norm_rel))
+
+    return os.path.normpath(os.path.join(project_root, norm_rel))
 
 def load_config():
     with open(resolve_path("config/preprocessing_config.json"), "r") as f:

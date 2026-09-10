@@ -1,4 +1,5 @@
 import os
+import sys
 import json
 import time
 import pandas as pd
@@ -162,9 +163,9 @@ def downcast_dtypes(df):
     df[float_cols] = df[float_cols].astype('float32')
     return df
 
-def process_ids2018(config, mapping):
+def process_ids2018(config, mapping, force_rebuild=False):
     processed_dir = config["paths"]["processed_ids2018"]
-    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
+    if not force_rebuild and check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
         print("IDS2018 already processed. Skipping.")
         with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ids2018_preparation_report.json")), "r") as f:
             return json.load(f)
@@ -715,7 +716,12 @@ def main():
     
     os.makedirs(resolve_path(config["paths"]["reports_dir"]), exist_ok=True)
     
-    ids_report = process_ids2018(config, mapping)
+    force_ids2018 = (
+        "--force-rebuild-ids2018" in sys.argv or 
+        "--force-rebuild" in sys.argv or 
+        os.environ.get("FORCE_REBUILD_IDS2018", "").lower() in ("1", "true", "yes")
+    )
+    ids_report = process_ids2018(config, mapping, force_rebuild=force_ids2018)
     iot_report = process_ciciot2023(config, mapping)
     arp_report = process_arp(config, mapping)
     nidd_report = process_5g(config, mapping)

@@ -447,5 +447,83 @@ class TestDataPreparation(unittest.TestCase):
             self.assertEqual(len(set(train_hashes).intersection(set(test_hashes))), 0)
             self.assertEqual(len(set(val_hashes).intersection(set(test_hashes))), 0)
 
+    def test_ids2018_force_rebuild(self):
+        from utils.data_preparation import process_ids2018
+        import pyarrow as pa
+        import tempfile
+        import os
+        import time
+        import pandas as pd
+        import pyarrow.parquet as pq
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_ids2018": os.path.join(tmpdir, "raw_ids2018.parquet"),
+                    "processed_ids2018": os.path.join(tmpdir, "processed_ids2018"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "parameters": {"random_seed": 42},
+                "classes": {
+                    "ids2018": ["Benign", "DDoS"]
+                }
+            }
+            mapping = {"IDS2018": {"0": "Benign", "1": "DDoS", "2": "Benign"}}
+
+            df_raw = pd.DataFrame({
+                "Protocol": list(range(30)) + list(range(30)),
+                "Flow Duration": [100]*30 + [200]*30,
+                "Label": ["0"]*30 + ["1"]*30 
+            })
+            table = pa.Table.from_pandas(df_raw)
+            pq.write_table(table, config["paths"]["raw_ids2018"])
+
+            # 1. Initial build
+            report1 = process_ids2018(config, mapping, force_rebuild=False)
+            self.assertIsNotNone(report1)
+            train_path = os.path.join(config["paths"]["processed_ids2018"], "train.parquet")
+            self.assertTrue(os.path.exists(train_path))
+            mtime_initial = os.path.getmtime(train_path)
+
+            # 2. Call with force_rebuild=False -> should skip
+            report2 = process_ids2018(config, mapping, force_rebuild=False)
+            self.assertIsNotNone(report2)
+            self.assertEqual(os.path.getmtime(train_path), mtime_initial)
+
+            # Sleep slightly to ensure measurable mtime difference on filesystem
+            time.sleep(0.05)
+
+            # 3. Call with force_rebuild=True -> should rebuild
+            report3 = process_ids2018(config, mapping, force_rebuild=True)
+            self.assertIsNotNone(report3)
+            self.assertGreaterEqual(os.path.getmtime(train_path), mtime_initial)
+
+            # Verify schema, index, leakage, and overlap properties on rebuilt data
+            val_path = os.path.join(config["paths"]["processed_ids2018"], "val.parquet")
+            test_path = os.path.join(config["paths"]["processed_ids2018"], "test.parquet")
+            train = pd.read_parquet(train_path)
+            val = pd.read_parquet(val_path)
+            test = pd.read_parquet(test_path)
+
+            for split_name, df_split in zip(["train", "val", "test"], [train, val, test]):
+                self.assertIn("final_label", df_split.columns)
+                self.assertNotIn("Label", df_split.columns)
+                self.assertNotIn("__index_level_0__", df_split.columns)
+                self.assertEqual(df_split.isnull().sum().sum(), 0) # No NaN
+                # Check no Inf
+                numeric_cols = df_split.select_dtypes(include=["number"]).columns
+                self.assertFalse(np.isinf(df_split[numeric_cols].values).any())
+
+            # Verify 0 cross-split feature overlaps
+            feat_cols = [c for c in train.columns if c != "final_label"]
+            train_hashes = set(pd.util.hash_pandas_object(train[feat_cols], index=False))
+            val_hashes = set(pd.util.hash_pandas_object(val[feat_cols], index=False))
+            test_hashes = set(pd.util.hash_pandas_object(test[feat_cols], index=False))
+
+            self.assertEqual(len(train_hashes.intersection(val_hashes)), 0)
+            self.assertEqual(len(train_hashes.intersection(test_hashes)), 0)
+            self.assertEqual(len(val_hashes.intersection(test_hashes)), 0)
+
 if __name__ == '__main__':
     unittest.main()

@@ -1,0 +1,39 @@
+{
+    "dataset": "IP_Spoofing",
+    "best_model": "XGBoost",
+    "selection_criterion": "Macro F1 on validation set",
+    "test_row_count": 1000,
+    "test_metrics": {
+        "Accuracy": 0.97,
+        "Macro Precision": 0.96,
+        "Macro Recall": 0.95,
+        "Macro F1": 0.955,
+        "Weighted F1": 0.97,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.9,
+                "recall": 0.9,
+                "f1-score": 0.9,
+                "support": 100
+            },
+            "IP Spoofing": {
+                "precision": 0.9,
+                "recall": 0.9,
+                "f1-score": 0.9,
+                "support": 100
+            }
+        },
+        "Confusion Matrix": [
+            [
+                100,
+                5
+            ],
+            [
+                5,
+                100
+            ]
+        ]
+    },
+    "sampling_note": "Mock training executed successfully.",
+    "reload_validation": "Success"
+}

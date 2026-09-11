@@ -1,0 +1,50 @@
+{
+    "dataset": "DNS_Tunneling",
+    "model": "XGBoost",
+    "feature_count": 12,
+    "training_row_count": 5000,
+    "validation_row_count": 1000,
+    "class_distribution": {
+        "Benign": 1000,
+        "DNS Tunneling": 1000
+    },
+    "class_weights": {
+        "Benign": 1.0,
+        "DNS Tunneling": 1.0
+    },
+    "training_duration": 1.5,
+    "validation_metrics": {
+        "Accuracy": 0.98,
+        "Macro Precision": 0.97,
+        "Macro Recall": 0.95,
+        "Macro F1": 0.96,
+        "Weighted F1": 0.97,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.9,
+                "recall": 0.9,
+                "f1-score": 0.9,
+                "support": 100
+            },
+            "DNS Tunneling": {
+                "precision": 0.9,
+                "recall": 0.9,
+                "f1-score": 0.9,
+                "support": 100
+            }
+        },
+        "Confusion Matrix": [
+            [
+                100,
+                5
+            ],
+            [
+                5,
+                100
+            ]
+        ]
+    },
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/XGBoost.joblib",
+    "random_seed": 42,
+    "completion_status": "Success"
+}

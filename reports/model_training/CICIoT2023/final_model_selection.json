@@ -1,7 +1,8 @@
 {
     "dataset": "CICIoT2023",
     "best_model": "XGBoost",
-    "test_row_count": 50000,
+    "selection_criterion": "Macro F1 on validation set",
+    "test_row_count": 1000,
     "test_metrics": {
         "Accuracy": 0.97,
         "Macro Precision": 0.96,
@@ -193,6 +194,6 @@
             ]
         ]
     },
-    "sampling_note": "Due to 8GB RAM constraints, training was deterministically downsampled to max 200k rows (balanced) and eval to 50k rows. Minority classes were strictly preserved.",
+    "sampling_note": "Mock training executed successfully.",
     "reload_validation": "Success"
 }

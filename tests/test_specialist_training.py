@@ -1,0 +1,182 @@
+import os
+import sys
+import json
+import tempfile
+import unittest
+import numpy as np
+import pandas as pd
+from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID
+from utils.specialist_preprocessor import SpecialistPreprocessor
+from utils.specialist_evaluator import evaluate_predictions, evaluate_model, predict_batched
+from utils.train_models import (
+    SPECIALIST_SPECS,
+    resolve_specialist_name,
+    load_specialist_splits,
+    sample_training_data,
+    train_specialist,
+    DecisionTreeClassifier
+)
+
+class TestSpecialistTraining(unittest.TestCase):
+
+    def test_specialist_specs_configuration(self):
+        """All 5 specialist datasets must be configured with aliases and valid taxonomy classes."""
+        expected_specialists = ["IDS2018", "CICIoT2023", "ARP_Spoofing", "IP_Spoofing", "DNS_Tunneling"]
+        for spec in expected_specialists:
+            self.assertIn(spec, SPECIALIST_SPECS)
+            info = SPECIALIST_SPECS[spec]
+            self.assertIn("config_path_key", info)
+            self.assertIn("config_class_key", info)
+            self.assertIn("split_type", info)
+            self.assertIn("description", info)
+            self.assertIn("aliases", info)
+
+        # Resolvable aliases
+        self.assertEqual(resolve_specialist_name("ids2018"), "IDS2018")
+        self.assertEqual(resolve_specialist_name("ciciot"), "CICIoT2023")
+        self.assertEqual(resolve_specialist_name("arp"), "ARP_Spoofing")
+        self.assertEqual(resolve_specialist_name("5g"), "IP_Spoofing")
+        self.assertEqual(resolve_specialist_name("dns"), "DNS_Tunneling")
+        
+        with self.assertRaises(ValueError):
+            resolve_specialist_name("unknown_specialist")
+
+    def test_preprocessor_excludes_labels_and_identifiers(self):
+        """Preprocessor must exclude final_label, raw labels, MAC, and IP columns from feature names."""
+        df_train = pd.DataFrame({
+            "flow_duration": [10.0, 20.0, 30.0],
+            "packet_count": [5, 10, 15],
+            "src_mac": ["aa:bb:cc:dd:ee:ff", "11:22:33:44:55:66", "00:11:22:33:44:55"],
+            "dst_ip": ["192.168.1.1", "10.0.0.1", "172.16.0.1"],
+            "Label": ["Benign", "DDoS", "Benign"],
+            "final_label": ["Benign", "DDoS", "Benign"]
+        })
+        preprocessor = SpecialistPreprocessor(dataset_name="TestSpec")
+        X, y = preprocessor.fit_transform(df_train)
+        
+        self.assertNotIn("final_label", preprocessor.feature_names_in_)
+        self.assertNotIn("Label", preprocessor.feature_names_in_)
+        self.assertNotIn("src_mac", preprocessor.feature_names_in_)
+        self.assertNotIn("dst_ip", preprocessor.feature_names_in_)
+        self.assertListEqual(preprocessor.feature_names_in_, ["flow_duration", "packet_count"])
+        self.assertEqual(X.shape[1], 2)
+        self.assertEqual(len(y), 3)
+
+    def test_preprocessor_no_data_leakage(self):
+        """Preprocessor fit statistics (median, scaler) must come strictly from train."""
+        df_train = pd.DataFrame({
+            "feature_a": [10.0, 20.0, np.nan, 30.0],
+            "final_label": ["Benign", "DoS", "Benign", "DoS"]
+        })
+        df_test = pd.DataFrame({
+            "feature_a": [np.nan, 100.0],
+            "final_label": ["Benign", "DoS"]
+        })
+        preprocessor = SpecialistPreprocessor(dataset_name="TestSpec", scale=False)
+        X_train, _ = preprocessor.fit_transform(df_train)
+        X_test, _ = preprocessor.transform(df_test)
+        
+        # Median of [10.0, 20.0, 30.0] is 20.0
+        # In test set, NaN must be imputed with train median (20.0), NOT influenced by 100.0
+        self.assertEqual(X_test[0, 0], 20.0)
+
+    def test_local_to_canonical_mapping(self):
+        """Local prediction class IDs must correctly map to canonical 13-class taxonomy IDs."""
+        classes = ["Benign", "ARP Spoofing", "DoS"]
+        df_train = pd.DataFrame({
+            "feat": [1.0, 2.0, 3.0],
+            "final_label": classes
+        })
+        preprocessor = SpecialistPreprocessor(dataset_name="ARP_Spoofing")
+        preprocessor.fit(df_train)
+        
+        # Verify local class mapping
+        self.assertEqual(preprocessor.classes_, ["ARP Spoofing", "Benign", "DoS"])
+        local_ids = np.array([0, 1, 2]) # corresponding to ["ARP Spoofing", "Benign", "DoS"]
+        canonical_ids = preprocessor.local_to_canonical_ids(local_ids)
+        
+        self.assertEqual(canonical_ids[0], CLASS_TO_ID["ARP Spoofing"]) # 9
+        self.assertEqual(canonical_ids[1], CLASS_TO_ID["Benign"])       # 0
+        self.assertEqual(canonical_ids[2], CLASS_TO_ID["DoS"])          # 2
+
+    def test_load_specialist_splits_deterministic_derivation(self):
+        """Test derivation of validation split for 2-way splits (ARP / IP Spoofing)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # Create synthetic train and test files
+            train_df = pd.DataFrame({
+                "feat1": np.random.randn(100),
+                "final_label": ["Benign"] * 50 + ["ARP Spoofing"] * 50
+            })
+            test_df = pd.DataFrame({
+                "feat1": np.random.randn(30),
+                "final_label": ["Benign"] * 15 + ["ARP Spoofing"] * 15
+            })
+            train_df.to_parquet(os.path.join(tmpdir, "train.parquet"), index=False)
+            test_df.to_parquet(os.path.join(tmpdir, "test.parquet"), index=False)
+            
+            # Load splits
+            train, val, test = load_specialist_splits(tmpdir, split_type="train_test", random_seed=42)
+            
+            # Test split should be completely untouched
+            self.assertEqual(len(test), 30)
+            self.assertTrue(np.allclose(test["feat1"].values, test_df["feat1"].values))
+            
+            # Train and Val should be derived from train_df (80/20)
+            self.assertEqual(len(train), 80)
+            self.assertEqual(len(val), 20)
+            self.assertEqual(len(train) + len(val), 100)
+            
+            # Distribution should be stratified
+            self.assertEqual((val["final_label"] == "Benign").sum(), 10)
+            self.assertEqual((val["final_label"] == "ARP Spoofing").sum(), 10)
+
+    def test_sampling_minority_preservation(self):
+        """sample_training_data must preserve rare minority classes when downsampling."""
+        # 1000 rows: 950 Benign, 40 DoS, 10 Botnet
+        df = pd.DataFrame({
+            "feat": np.random.randn(1000),
+            "final_label": ["Benign"] * 950 + ["DoS"] * 40 + ["Botnet"] * 10
+        })
+        sampled, meta = sample_training_data(df, max_samples=100, random_seed=42)
+        
+        self.assertLessEqual(len(sampled), 100)
+        self.assertTrue(meta["sampled"])
+        # Minority class Botnet (10 instances) should be preserved
+        botnet_count = (sampled["final_label"] == "Botnet").sum()
+        self.assertGreaterEqual(botnet_count, 1)
+
+    def test_batched_evaluation(self):
+        """predict_batched and evaluate_predictions must correctly evaluate batches."""
+        X_test = np.random.randn(250, 4)
+        y_test = np.array([0] * 150 + [1] * 100)
+        
+        model = DecisionTreeClassifier(random_state=42)
+        model.fit(X_test, y_test)
+        
+        preds = predict_batched(model, X_test, batch_size=50)
+        self.assertEqual(len(preds), 250)
+        
+        metrics = evaluate_predictions(y_test, preds, class_names=["Benign", "DoS"])
+        self.assertIn("Accuracy", metrics)
+        self.assertIn("Macro F1", metrics)
+        self.assertIn("Per Class", metrics)
+        self.assertIn("Confusion Matrix", metrics)
+
+    def test_smoke_test_execution(self):
+        """train_specialist smoke test should run cleanly without errors."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            spec_name = "ARP_Spoofing"
+            results = train_specialist(
+                spec_name,
+                model_names=["DecisionTree"],
+                max_train_samples=200,
+                smoke_test=True,
+                save_artifacts=False
+            )
+            self.assertIn("best_model", results)
+            self.assertEqual(results["best_model"], "DecisionTree")
+            self.assertIn("test_metrics", results)
+            self.assertIn("Macro F1", results["test_metrics"])
+
+if __name__ == "__main__":
+    unittest.main()

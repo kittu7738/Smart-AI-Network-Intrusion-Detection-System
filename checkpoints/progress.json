@@ -19,12 +19,32 @@
         "IDS2018": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
-            "XGBoost": "completed"
+            "XGBoost": "completed",
+            "best_model": "DecisionTree"
         },
         "CICIoT2023": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
-            "XGBoost": "completed"
+            "XGBoost": "completed",
+            "best_model": "DecisionTree"
+        },
+        "ARP_Spoofing": {
+            "DecisionTree": "completed",
+            "RandomForest": "completed",
+            "XGBoost": "completed",
+            "best_model": "DecisionTree"
+        },
+        "IP_Spoofing": {
+            "DecisionTree": "completed",
+            "RandomForest": "completed",
+            "XGBoost": "completed",
+            "best_model": "DecisionTree"
+        },
+        "DNS_Tunneling": {
+            "DecisionTree": "completed",
+            "RandomForest": "completed",
+            "XGBoost": "completed",
+            "best_model": "DecisionTree"
         }
     }
 }

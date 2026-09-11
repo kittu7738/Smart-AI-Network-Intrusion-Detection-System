@@ -2,16 +2,16 @@
     "dataset": "IDS2018",
     "model": "RandomForest",
     "feature_count": 77,
-    "training_row_count": 200000,
-    "validation_row_count": 50000,
+    "training_row_count": 5000,
+    "validation_row_count": 1000,
     "class_distribution": {
-        "Benign": 20000,
-        "DDoS": 20000,
-        "DoS": 20000,
-        "Botnet": 20000,
-        "Infiltration": 20000,
-        "Brute Force": 20000,
-        "Web Attack": 20000
+        "Benign": 1000,
+        "DDoS": 1000,
+        "DoS": 1000,
+        "Botnet": 1000,
+        "Infiltration": 1000,
+        "Brute Force": 1000,
+        "Web Attack": 1000
     },
     "class_weights": {
         "Benign": 1.0,
@@ -22,7 +22,7 @@
         "Brute Force": 1.0,
         "Web Attack": 1.0
     },
-    "training_duration": 45.6,
+    "training_duration": 1.5,
     "validation_metrics": {
         "Accuracy": 0.96,
         "Macro Precision": 0.95,

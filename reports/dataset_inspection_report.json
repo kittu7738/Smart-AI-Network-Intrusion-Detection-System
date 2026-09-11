@@ -492,8 +492,7 @@
         }
     },
     "ciciot2023_mapped_labels": {
-        "Spoofing": [
-            "MITM-ArpSpoofing",
+        "DNS Spoofing": [
             "DNS_Spoofing"
         ],
         "Recon / Port Scan": [

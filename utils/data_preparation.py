@@ -384,12 +384,15 @@ def process_ids2018(config, mapping, force_rebuild=False):
         
     return report
 
-def process_ciciot2023(config, mapping):
+def process_ciciot2023(config, mapping, force_rebuild=False):
     processed_dir = config["paths"]["processed_ciciot2023"]
-    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
+    if not force_rebuild and check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
         print("CICIoT2023 already processed. Skipping.")
-        with open(resolve_path(os.path.join(config["paths"]["reports_dir"], "ciciot2023_preparation_report.json")), "r") as f:
-            return json.load(f)
+        report_path = resolve_path(os.path.join(config["paths"]["reports_dir"], "ciciot2023_preparation_report.json"))
+        if os.path.exists(report_path):
+            with open(report_path, "r") as f:
+                return json.load(f)
+        return None
             
     print("Processing CICIoT2023 memory-safely (Option B)...")
     raw_dir = resolve_path(config["paths"]["raw_ciciot2023_dir"])
@@ -573,10 +576,11 @@ def extract_5g_features(df):
     cols_to_keep = [c for c in df.columns if c not in bad_cols]
     return df[cols_to_keep]
 
-def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processed_dir_key, file_splits, feature_extractor, map_key):
+def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processed_dir_key, file_splits, feature_extractor, map_key, force_rebuild=False):
     """A generic memory-safe processor for new datasets."""
     processed_dir = config["paths"][processed_dir_key]
-    if check_existing_files(processed_dir, ["train.parquet", "val.parquet", "test.parquet"]):
+    expected_outputs = [f"{split}.parquet" for split in file_splits.keys()]
+    if not force_rebuild and check_existing_files(processed_dir, expected_outputs):
         print(f"{dataset_name} already processed. Skipping.")
         report_path = resolve_path(os.path.join(config["paths"]["reports_dir"], f"{dataset_name.lower()}_preparation_report.json"))
         if os.path.exists(report_path):
@@ -629,10 +633,13 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
                 if dataset_name == "DNS_Tunneling":
                     chunk = chunk.rename(columns={0: "label"})
                 
-                label_col = "label"
-                if "Label" in chunk.columns: label_col = "Label"
-                if "label_name" in chunk.columns: label_col = "label_name"
-                if "Label_Name" in chunk.columns: label_col = "Label_Name"
+                label_col = None
+                for candidate in ["label_name", "Label_Name", "Label", "label", 0, "0"]:
+                    if candidate in chunk.columns:
+                        label_col = candidate
+                        break
+                if label_col is None:
+                    label_col = chunk.columns[0]
                 
                 # Standardize label mapping: string cast and strip
                 chunk_labels = chunk[label_col].astype(str).str.strip()
@@ -698,22 +705,24 @@ def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processe
         if not os.path.exists(final_out):
             raise RuntimeError(f"Pipeline failure: Final parquet not found at {final_out}")
         
-    with open(resolve_path(os.path.join(config["paths"]["reports_dir"], f"{dataset_name.lower()}_preparation_report.json")), "w") as f:
+    rep_dir = resolve_path(config["paths"]["reports_dir"])
+    os.makedirs(rep_dir, exist_ok=True)
+    with open(os.path.join(rep_dir, f"{dataset_name.lower()}_preparation_report.json"), "w") as f:
         json.dump(report, f, indent=4)
         
     return report
 
-def process_arp(config, mapping):
+def process_arp(config, mapping, force_rebuild=False):
     file_splits = {"train": ["train.csv"], "test": ["test.csv"]}
-    return process_dataset_generic(config, mapping, "ARP_Spoofing", "raw_arp_dir", "processed_arp", file_splits, extract_arp_features, "ARP")
+    return process_dataset_generic(config, mapping, "ARP_Spoofing", "raw_arp_dir", "processed_arp", file_splits, extract_arp_features, "ARP", force_rebuild=force_rebuild)
 
-def process_5g(config, mapping):
+def process_5g(config, mapping, force_rebuild=False):
     file_splits = {"train": ["data/Train_subset_1.csv", "data/Train_subset_2.csv"], "test": ["data/Test_Data.csv"]}
-    return process_dataset_generic(config, mapping, "5G_NIDD", "raw_5g_dir", "processed_5g", file_splits, extract_5g_features, "5G")
+    return process_dataset_generic(config, mapping, "5G_NIDD", "raw_5g_dir", "processed_5g", file_splits, extract_5g_features, "5G", force_rebuild=force_rebuild)
 
-def process_dns(config, mapping):
+def process_dns(config, mapping, force_rebuild=False):
     file_splits = {"train": ["training.csv"], "val": ["validating.csv"]}
-    return process_dataset_generic(config, mapping, "DNS_Tunneling", "raw_dns_dir", "processed_dns", file_splits, extract_dns_features, "DNS")
+    return process_dataset_generic(config, mapping, "DNS_Tunneling", "raw_dns_dir", "processed_dns", file_splits, extract_dns_features, "DNS", force_rebuild=force_rebuild)
 
 
 def main():
@@ -723,16 +732,22 @@ def main():
     
     os.makedirs(resolve_path(config["paths"]["reports_dir"]), exist_ok=True)
     
+    force_all = "--force-rebuild" in sys.argv or "--force-rebuild-all" in sys.argv
     force_ids2018 = (
+        force_all or
         "--force-rebuild-ids2018" in sys.argv or 
-        "--force-rebuild" in sys.argv or 
         os.environ.get("FORCE_REBUILD_IDS2018", "").lower() in ("1", "true", "yes")
     )
+    force_ciciot = force_all or "--force-rebuild-ciciot2023" in sys.argv
+    force_arp = force_all or "--force-rebuild-arp" in sys.argv
+    force_5g = force_all or "--force-rebuild-5g" in sys.argv
+    force_dns = force_all or "--force-rebuild-dns" in sys.argv
+
     ids_report = process_ids2018(config, mapping, force_rebuild=force_ids2018)
-    iot_report = process_ciciot2023(config, mapping)
-    arp_report = process_arp(config, mapping)
-    nidd_report = process_5g(config, mapping)
-    dns_report = process_dns(config, mapping)
+    iot_report = process_ciciot2023(config, mapping, force_rebuild=force_ciciot)
+    arp_report = process_arp(config, mapping, force_rebuild=force_arp)
+    nidd_report = process_5g(config, mapping, force_rebuild=force_5g)
+    dns_report = process_dns(config, mapping, force_rebuild=force_dns)
     
     dist = {}
     if ids_report: dist["IDS2018"] = ids_report["class_counts"]

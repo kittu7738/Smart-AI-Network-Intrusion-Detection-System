@@ -13,7 +13,7 @@
         "Benign": 178665,
         "Recon / Port Scan": 57441,
         "MITM": 50155,
-        "Spoofing": 29344,
+        "DNS Spoofing": 29344,
         "Web Attack": 3425,
         "Brute Force": 2063,
         "Infiltration": 561

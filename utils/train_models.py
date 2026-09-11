@@ -10,11 +10,12 @@ from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, classification_report
 from sklearn.utils.class_weight import compute_class_weight
 
-BASE_DIR = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+from utils.data_preparation import resolve_path, load_config
+
 SEED = 42
 
 def update_checkpoint(dataset, model, status):
-    ckpt_path = os.path.join(BASE_DIR, "checkpoints", "progress.json")
+    ckpt_path = resolve_path("checkpoints/progress.json")
     if os.path.exists(ckpt_path):
         with open(ckpt_path, "r") as f:
             cfg = json.load(f)
@@ -31,7 +32,7 @@ def update_checkpoint(dataset, model, status):
         json.dump(cfg, f, indent=4)
 
 def check_status(dataset, model):
-    ckpt_path = os.path.join(BASE_DIR, "checkpoints", "progress.json")
+    ckpt_path = resolve_path("checkpoints/progress.json")
     if os.path.exists(ckpt_path):
         with open(ckpt_path, "r") as f:
             cfg = json.load(f)
@@ -120,8 +121,8 @@ def train_and_evaluate(dataset_name, data_dir, expected_labels):
         # XGB handles class weights natively via sample_weight during fit
     }
     
-    report_dir = os.path.join(BASE_DIR, "reports", "model_training", dataset_name)
-    model_dir = os.path.join(BASE_DIR, "models", dataset_name)
+    report_dir = resolve_path(os.path.join("reports", "model_training", dataset_name))
+    model_dir = resolve_path(os.path.join("models", dataset_name))
     os.makedirs(report_dir, exist_ok=True)
     os.makedirs(model_dir, exist_ok=True)
     
@@ -231,11 +232,12 @@ def train_and_evaluate(dataset_name, data_dir, expected_labels):
     return comp_df, best_model_name, test_metrics
 
 def main():
-    ids_labels = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
-    ciciot_labels = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack", "Spoofing", "Recon / Port Scan", "MITM"]
+    config = load_config()
+    ids_labels = config["classes"]["ids2018"]
+    ciciot_labels = config["classes"]["ciciot2023"]
     
-    ids_dir = os.path.join(BASE_DIR, "data", "processed", "IDS2018")
-    ciciot_dir = os.path.join(BASE_DIR, "data", "processed", "CICIoT2023")
+    ids_dir = resolve_path(config["paths"]["processed_ids2018"])
+    ciciot_dir = resolve_path(config["paths"]["processed_ciciot2023"])
     
     comp_ids, best_ids, test_ids = train_and_evaluate("IDS2018", ids_dir, ids_labels)
     comp_iot, best_iot, test_iot = train_and_evaluate("CICIoT2023", ciciot_dir, ciciot_labels)

@@ -71,6 +71,20 @@ def check_cross_split_leakage(dataset_name, data_dir):
         tv_overlap, tv_same, tv_conflict = calculate_split_overlap(train, val)
         tt_overlap, tt_same, tt_conflict = calculate_split_overlap(train, test)
         vt_overlap, vt_same, vt_conflict = calculate_split_overlap(val, test)
+
+        # Cryptographic SHA-256 collision verification
+        import hashlib
+        def sha256_hashes(df, cols):
+            arr = np.ascontiguousarray(df[cols].to_numpy(dtype=np.float32, copy=False))
+            return {hashlib.sha256(row.tobytes()).digest() for row in arr}
+
+        sha_train = sha256_hashes(train, f_cols_train)
+        sha_val = sha256_hashes(val, f_cols_val)
+        sha_test = sha256_hashes(test, f_cols_test)
+
+        sha_tv_overlap = len(sha_train.intersection(sha_val))
+        sha_tt_overlap = len(sha_train.intersection(sha_test))
+        sha_vt_overlap = len(sha_val.intersection(sha_test))
         
         return {
             "dataset": dataset_name,
@@ -83,6 +97,9 @@ def check_cross_split_leakage(dataset_name, data_dir):
             "train_val_same_label_rows": tv_same,
             "train_test_same_label_rows": tt_same,
             "val_test_same_label_rows": vt_same,
+            "sha256_train_val_overlap": sha_tv_overlap,
+            "sha256_train_test_overlap": sha_tt_overlap,
+            "sha256_val_test_overlap": sha_vt_overlap,
             "total_conflicting_overlaps": tv_conflict + tt_conflict + vt_conflict,
             "parquet_reopen_status": "Success",
             "final_label_exists": True,

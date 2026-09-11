@@ -2,13 +2,13 @@ import os
 import json
 import time
 
-BASE_DIR = os.environ.get("NIDS_PROJECT_ROOT", os.getcwd())
+from utils.data_preparation import resolve_path, load_config
 
 def mock_training():
     print("Starting MOCK training due to system limitations...")
-    
-    ids_labels = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
-    ciciot_labels = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack", "Spoofing", "Recon / Port Scan", "MITM"]
+    config = load_config()
+    ids_labels = config["classes"]["ids2018"]
+    ciciot_labels = config["classes"]["ciciot2023"]
     
     datasets = {
         "IDS2018": {
@@ -30,8 +30,8 @@ def mock_training():
     models = ["DecisionTree", "RandomForest", "XGBoost"]
     
     for ds_name, ds_info in datasets.items():
-        report_dir = os.path.join(BASE_DIR, "reports", "model_training", ds_name)
-        model_dir = os.path.join(BASE_DIR, "models", ds_name)
+        report_dir = resolve_path(os.path.join("reports", "model_training", ds_name))
+        model_dir = resolve_path(os.path.join("models", ds_name))
         os.makedirs(report_dir, exist_ok=True)
         os.makedirs(model_dir, exist_ok=True)
         

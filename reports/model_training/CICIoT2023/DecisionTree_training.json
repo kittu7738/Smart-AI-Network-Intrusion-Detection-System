@@ -12,7 +12,7 @@
         "Infiltration": 20000,
         "Brute Force": 20000,
         "Web Attack": 20000,
-        "Spoofing": 20000,
+        "DNS Spoofing": 20000,
         "Recon / Port Scan": 20000,
         "MITM": 20000
     },
@@ -24,7 +24,7 @@
         "Infiltration": 1.0,
         "Brute Force": 1.0,
         "Web Attack": 1.0,
-        "Spoofing": 1.0,
+        "DNS Spoofing": 1.0,
         "Recon / Port Scan": 1.0,
         "MITM": 1.0
     },
@@ -78,7 +78,7 @@
                 "f1-score": 0.9,
                 "support": 100
             },
-            "Spoofing": {
+            "DNS Spoofing": {
                 "precision": 0.9,
                 "recall": 0.9,
                 "f1-score": 0.9,

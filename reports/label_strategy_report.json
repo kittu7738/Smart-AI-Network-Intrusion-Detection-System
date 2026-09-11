@@ -35,7 +35,7 @@
             "ids2018": 882,
             "ciciot2023": 3530
         },
-        "Spoofing": {
+        "DNS Spoofing": {
             "total": 30349,
             "ids2018": 0,
             "ciciot2023": 30349
@@ -327,8 +327,8 @@
         {
             "original_dataset": "CICIoT2023",
             "original_label": "DNS_Spoofing",
-            "final_category": "Spoofing",
-            "reasoning": "DNS spoofing mapped cleanly to Spoofing to keep separated from MITM",
+            "final_category": "DNS Spoofing",
+            "reasoning": "DNS spoofing mapped cleanly to DNS Spoofing to keep separated from MITM",
             "confidence": "exact",
             "count": 30349
         },

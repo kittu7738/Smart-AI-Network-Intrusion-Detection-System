@@ -636,5 +636,162 @@ class TestDataPreparation(unittest.TestCase):
             self.assertEqual(len(train_hashes.intersection(test_hashes)), 0)
             self.assertEqual(len(val_hashes.intersection(test_hashes)), 0)
 
+    def test_ids2018_schema_and_77_feature_count_contract(self):
+        """Verify the strict IDS2018 schema contract:
+        - 78 total columns (77 features + 1 target final_label)
+        - Exactly 77 numeric features (no object/string)
+        - final_label is the only target column
+        - raw Label column is removed
+        - No NaN, no Inf
+        - preserve_index=False (no __index_level_0__)
+        - Identical columns and order across train, val, and test
+        """
+        from utils.data_preparation import process_ids2018, resolve_path
+        import pyarrow as pa
+        import pyarrow.parquet as pq
+        import tempfile
+        import os
+        import pandas as pd
+        import numpy as np
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_ids2018": os.path.join(tmpdir, "raw_ids2018.parquet"),
+                    "processed_ids2018": os.path.join(tmpdir, "processed_ids2018"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "parameters": {"random_seed": 42},
+                "classes": {
+                    "ids2018": ["Benign", "DDoS"]
+                }
+            }
+            mapping = {"IDS2018": {"0": "Benign", "1": "DDoS"}}
+
+            # Read the realistic 77-feature sample
+            sample_path = resolve_path("data/samples/ids2018_sample.csv")
+            if os.path.exists(sample_path):
+                df_sample = pd.read_csv(sample_path)
+                df_sample["Label"] = df_sample["final_label"].map({"Benign": "0", "DDoS": "1"}).fillna("0")
+                if "final_label" in df_sample.columns:
+                    df_sample = df_sample.drop(columns=["final_label"])
+            else:
+                feat_dict = {f"feat_{i}": np.random.randn(60).astype(np.float32) for i in range(77)}
+                feat_dict["Label"] = ["0"]*30 + ["1"]*30
+                df_sample = pd.DataFrame(feat_dict)
+
+            table = pa.Table.from_pandas(df_sample, preserve_index=False)
+            pq.write_table(table, config["paths"]["raw_ids2018"])
+
+            import utils.data_preparation
+            old_resolve = utils.data_preparation.resolve_path
+            utils.data_preparation.resolve_path = lambda p: p
+            try:
+                report = process_ids2018(config, mapping, force_rebuild=True)
+            finally:
+                utils.data_preparation.resolve_path = old_resolve
+
+            self.assertIsNotNone(report)
+            self.assertEqual(report["feature_count"], 77)
+
+            train = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "train.parquet"))
+            val = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "val.parquet"))
+            test = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "test.parquet"))
+
+            for split_name, df_split in zip(["train", "val", "test"], [train, val, test]):
+                self.assertEqual(len(df_split.columns), 78, f"{split_name} total columns must be 78")
+                self.assertIn("final_label", df_split.columns)
+                self.assertNotIn("Label", df_split.columns)
+                self.assertNotIn("label", df_split.columns)
+                self.assertNotIn("__index_level_0__", df_split.columns)
+
+                features = [c for c in df_split.columns if c != "final_label"]
+                self.assertEqual(len(features), 77, f"{split_name} feature count must be exactly 77")
+
+                # Verify all features are numeric
+                non_numeric = [c for c in features if not pd.api.types.is_numeric_dtype(df_split[c])]
+                self.assertEqual(len(non_numeric), 0, f"Found non-numeric features in {split_name}: {non_numeric}")
+
+                # Verify no NaN or Inf
+                self.assertEqual(df_split[features].isnull().sum().sum(), 0)
+                self.assertFalse(np.isinf(df_split[features].values).any())
+
+            # Verify identical columns and order across all splits
+            self.assertEqual(list(train.columns), list(val.columns))
+            self.assertEqual(list(train.columns), list(test.columns))
+
+    def test_mixed_numeric_dtypes_contract(self):
+        """Verify that mixed numeric feature columns (float32, int32, int64) are valid
+        and properly preserved, and non-numeric columns are detected."""
+        df = pd.DataFrame({
+            "feat_f32": np.array([1.5, 2.5], dtype=np.float32),
+            "feat_i32": np.array([10, 20], dtype=np.int32),
+            "feat_i64": np.array([1000, 2000], dtype=np.int64),
+            "final_label": ["Benign", "DDoS"]
+        })
+        features = [c for c in df.columns if c != "final_label"]
+        for f in features:
+            self.assertTrue(pd.api.types.is_numeric_dtype(df[f]))
+
+        # Invalid feature test
+        df_invalid = df.copy()
+        df_invalid["bad_feature"] = ["text_a", "text_b"]
+        invalid_features = [c for c in df_invalid.columns if c != "final_label" and not pd.api.types.is_numeric_dtype(df_invalid[c])]
+        self.assertEqual(invalid_features, ["bad_feature"])
+
+    def test_process_dataset_generic_skip_and_force_rebuild(self):
+        """Verify process_dataset_generic correctly skips when expected splits exist
+        and rebuilds when force_rebuild=True."""
+        from utils.data_preparation import process_dataset_generic
+        import tempfile
+        import os
+        import time
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_dummy": os.path.join(tmpdir, "raw"),
+                    "processed_dummy": os.path.join(tmpdir, "processed"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "classes": {"dummy": ["Benign", "DoS"]}
+            }
+            mapping = {"DUMMY": {"0": "Benign", "1": "DoS"}}
+            os.makedirs(config["paths"]["raw_dummy"], exist_ok=True)
+
+            # Raw files for train and test only (no val)
+            df1 = pd.DataFrame({"label": ["0", "1"]*10, "feature": [100, 200]*10})
+            df1.to_csv(os.path.join(config["paths"]["raw_dummy"], "train.csv"), index=False)
+            df1.to_csv(os.path.join(config["paths"]["raw_dummy"], "test.csv"), index=False)
+
+            file_splits = {"train": ["train.csv"], "test": ["test.csv"]}
+            extractor = lambda df: df
+
+            import utils.data_preparation
+            old_resolve = utils.data_preparation.resolve_path
+            utils.data_preparation.resolve_path = lambda p: p
+            try:
+                # 1. Initial build
+                rep1 = process_dataset_generic(config, mapping, "DummySet", "raw_dummy", "processed_dummy", file_splits, extractor, "DUMMY", force_rebuild=False)
+                self.assertIsNotNone(rep1)
+                train_p = os.path.join(config["paths"]["processed_dummy"], "train.parquet")
+                self.assertTrue(os.path.exists(train_p))
+                mtime1 = os.path.getmtime(train_p)
+
+                # 2. Call with force_rebuild=False -> MUST skip!
+                rep2 = process_dataset_generic(config, mapping, "DummySet", "raw_dummy", "processed_dummy", file_splits, extractor, "DUMMY", force_rebuild=False)
+                self.assertIsNotNone(rep2)
+                self.assertEqual(os.path.getmtime(train_p), mtime1)
+
+                # 3. Call with force_rebuild=True -> MUST rebuild!
+                time.sleep(0.05)
+                rep3 = process_dataset_generic(config, mapping, "DummySet", "raw_dummy", "processed_dummy", file_splits, extractor, "DUMMY", force_rebuild=True)
+                self.assertIsNotNone(rep3)
+                self.assertGreaterEqual(os.path.getmtime(train_p), mtime1)
+            finally:
+                utils.data_preparation.resolve_path = old_resolve
+
 if __name__ == '__main__':
     unittest.main()

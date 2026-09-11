@@ -43,5 +43,5 @@
     },
     "class_distribution_before": "Contaminated by cross-split identical flows and conflicting feature mappings.",
     "class_distribution_after": "Perfectly deterministic. Train, Validation, and Test are mutually exclusive feature spaces with 0 identical vectors spanning splits.",
-    "limitations": "The 79-feature space is robustly deduplicated, guaranteeing no actual raw data leakage. If a downstream process attempts to reduce these 79 features to 15 features, new collisions will naturally arise because 15 features are insufficient to uniquely describe distinct flows (e.g. source/dest IPs are dropped). As recommended, the source-specific 79-feature architecture is retained for IDS2018."
+    "limitations": "The 77-feature space is robustly deduplicated, guaranteeing no actual raw data leakage. If a downstream process attempts to reduce these 77 features to 15 features, new collisions will naturally arise because 15 features are insufficient to uniquely describe distinct flows (e.g. source/dest IPs are dropped). As recommended, the source-specific 77-feature architecture is retained for IDS2018."
 }

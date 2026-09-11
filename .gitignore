@@ -35,6 +35,8 @@ venv.bak/
 # Project-specific ignores
 dataset/
 Datasets/
+raw/
+scratch/
 uploads/
 captures/
 models/

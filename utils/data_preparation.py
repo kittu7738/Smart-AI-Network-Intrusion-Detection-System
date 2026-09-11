@@ -158,9 +158,13 @@ def split_stratified(df, label_col, seed):
     return X_train, X_val, X_test
 
 def downcast_dtypes(df):
-    """Downcast float64 to float32 to save RAM."""
-    float_cols = df.select_dtypes(include=['float64']).columns
-    df[float_cols] = df[float_cols].astype('float32')
+    """Downcast float64 to float32 to save RAM and normalize signed zero (-0.0 to 0.0)."""
+    float64_cols = df.select_dtypes(include=['float64']).columns
+    if len(float64_cols) > 0:
+        df[float64_cols] = df[float64_cols].astype('float32')
+    float32_cols = df.select_dtypes(include=['float32']).columns
+    for c in float32_cols:
+        df[c] = np.where(df[c] == 0.0, np.float32(0.0), df[c]).astype(np.float32)
     return df
 
 def process_ids2018(config, mapping, force_rebuild=False):
@@ -180,13 +184,9 @@ def process_ids2018(config, mapping, force_rebuild=False):
     ids_map = mapping["IDS2018"]
     valid_classes = config["classes"]["ids2018"]
     
-    # 1. We will load in batches, map labels, drop invalid, and hash
-    # To keep memory extremely low, we store only the hashes and their labels
-    try:
-        parquet_file = pq.ParquetFile(raw_path)
-    except Exception as e:
-        print(f"Could not open IDS2018 parquet: {e}")
-        return None
+    parquet_file = pq.ParquetFile(raw_path)
+    if "Label" not in parquet_file.schema.names:
+        raise ValueError(f"Label column missing from {raw_path}")
         
     hash_to_labels = defaultdict(set)
     initial_rows = 0
@@ -205,6 +205,10 @@ def process_ids2018(config, mapping, force_rebuild=False):
         df, dropped = handle_invalid_numeric(df)
         dropped_invalid_numeric += dropped
         
+        # Downcast float64 to float32 BEFORE hashing so that precision truncation
+        # matches the exact representation written to parquet
+        df = downcast_dtypes(df)
+            
         feat_cols = [c for c in df.columns if c not in ["Label", "label", "final_label"]]
         df['hash'] = pd.util.hash_pandas_object(df[feat_cols], index=False)
         
@@ -255,6 +259,10 @@ def process_ids2018(config, mapping, force_rebuild=False):
         df = df[df["final_label"].isin(valid_classes)]
         df, _ = handle_invalid_numeric(df)
         
+        # Downcast float64 to float32 BEFORE hashing so that precision truncation
+        # matches the exact representation written to parquet
+        df = downcast_dtypes(df)
+            
         feat_cols = [c for c in df.columns if c not in ["Label", "label", "final_label"]]
         df['hash'] = pd.util.hash_pandas_object(df[feat_cols], index=False)
         
@@ -272,7 +280,6 @@ def process_ids2018(config, mapping, force_rebuild=False):
         seen_hashes.update(df['hash'])
         
         df = df.drop(columns=["hash", "Label"])
-        df = downcast_dtypes(df)
         clean_rows += len(df)
         if len(df.columns) > features_before: features_before = len(df.columns) - 1
         

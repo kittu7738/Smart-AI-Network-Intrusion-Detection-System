@@ -525,5 +525,116 @@ class TestDataPreparation(unittest.TestCase):
             self.assertEqual(len(train_hashes.intersection(test_hashes)), 0)
             self.assertEqual(len(val_hashes.intersection(test_hashes)), 0)
 
+    def test_ids2018_float_downcast_leakage_prevention(self):
+        """Verify that float64 values differing only beyond float32 precision with conflicting labels
+        are purged during preprocessing, preventing cross-split conflicting label leakage."""
+        from utils.data_preparation import process_ids2018
+        import pyarrow as pa
+        import tempfile
+        import os
+        import pandas as pd
+        import pyarrow.parquet as pq
+        import numpy as np
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            config = {
+                "version": "1.0",
+                "paths": {
+                    "raw_ids2018": os.path.join(tmpdir, "raw_ids2018.parquet"),
+                    "processed_ids2018": os.path.join(tmpdir, "processed_ids2018"),
+                    "reports_dir": os.path.join(tmpdir, "reports")
+                },
+                "parameters": {"random_seed": 42},
+                "classes": {
+                    "ids2018": ["Benign", "DDoS"]
+                }
+            }
+            mapping = {"IDS2018": {"0": "Benign", "1": "DDoS"}}
+
+            # Base dataset with 40 benign and 40 DDoS rows
+            base_rows = {
+                "Flow Duration": [float(1000 + i) for i in range(40)] + [float(5000 + i) for i in range(40)],
+                "Flow Packets/s": [float(10 + i) for i in range(40)] + [float(50 + i) for i in range(40)],
+                "Label": ["0"]*40 + ["1"]*40
+            }
+            df_base = pd.DataFrame(base_rows)
+
+            # Pair 1: Conflicting labels with float64 precision differences beyond float32
+            # v1 and v2 differ in float64, but are identical in float32:
+            v1 = np.float64(12345.6789012345)
+            v2 = np.float64(12345.6789012346)
+            self.assertNotEqual(v1, v2)
+            self.assertEqual(np.float32(v1), np.float32(v2))
+
+            df_conflict_prec = pd.DataFrame({
+                "Flow Duration": [v1, v2],
+                "Flow Packets/s": [np.float64(99.0), np.float64(99.0)],
+                "Label": ["0", "1"]  # Conflicting: Benign vs DDoS!
+            })
+
+            # Pair 2: Conflicting labels with signed zero (-0.0 vs 0.0)
+            df_conflict_zero = pd.DataFrame({
+                "Flow Duration": [np.float64(-0.0), np.float64(0.0)],
+                "Flow Packets/s": [np.float64(42.0), np.float64(42.0)],
+                "Label": ["0", "1"]  # Conflicting: Benign vs DDoS!
+            })
+
+            # Pair 3: Same-label duplicates with float64 tail precision differences
+            v3 = np.float64(88888.123456789)
+            v4 = np.float64(88888.123456788)
+            self.assertNotEqual(v3, v4)
+            self.assertEqual(np.float32(v3), np.float32(v4))
+            df_samelabel_prec = pd.DataFrame({
+                "Flow Duration": [v3, v4],
+                "Flow Packets/s": [np.float64(12.0), np.float64(12.0)],
+                "Label": ["0", "0"]  # Same label: Benign
+            })
+
+            df_raw = pd.concat([df_base, df_conflict_prec, df_conflict_zero, df_samelabel_prec], ignore_index=True)
+            table = pa.Table.from_pandas(df_raw)
+            pq.write_table(table, config["paths"]["raw_ids2018"])
+
+            import utils.data_preparation
+            old_resolve = utils.data_preparation.resolve_path
+            utils.data_preparation.resolve_path = lambda p: p
+            try:
+                report = process_ids2018(config, mapping, force_rebuild=True)
+            finally:
+                utils.data_preparation.resolve_path = old_resolve
+
+            self.assertIsNotNone(report)
+            self.assertGreaterEqual(report["conflicting_rows_removed"], 4)
+
+            # Read back processed splits
+            train = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "train.parquet"))
+            val = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "val.parquet"))
+            test = pd.read_parquet(os.path.join(config["paths"]["processed_ids2018"], "test.parquet"))
+            all_processed = pd.concat([train, val, test], ignore_index=True)
+
+            # Assert conflicting float precision pair was PURGED completely
+            conflict_prec_matches = all_processed[np.isclose(all_processed["Flow Duration"], np.float32(v1), atol=1e-6)]
+            self.assertEqual(len(conflict_prec_matches), 0, "Conflicting float precision rows must be purged")
+
+            # Assert conflicting signed-zero pair was PURGED completely
+            conflict_zero_matches = all_processed[
+                (np.isclose(all_processed["Flow Duration"], 0.0, atol=1e-6)) & 
+                (np.isclose(all_processed["Flow Packets/s"], 42.0, atol=1e-6))
+            ]
+            self.assertEqual(len(conflict_zero_matches), 0, "Conflicting signed zero rows must be purged")
+
+            # Assert same-label float precision duplicate was DEDUPLICATED (only 1 survived)
+            samelabel_matches = all_processed[np.isclose(all_processed["Flow Duration"], np.float32(v3), atol=1e-6)]
+            self.assertEqual(len(samelabel_matches), 1, "Same-label float precision duplicates must be deduplicated to 1")
+
+            # Assert exactly 0 cross-split overlaps between all pairs
+            feat_cols = [c for c in train.columns if c != "final_label"]
+            train_hashes = set(pd.util.hash_pandas_object(train[feat_cols], index=False))
+            val_hashes = set(pd.util.hash_pandas_object(val[feat_cols], index=False))
+            test_hashes = set(pd.util.hash_pandas_object(test[feat_cols], index=False))
+
+            self.assertEqual(len(train_hashes.intersection(val_hashes)), 0)
+            self.assertEqual(len(train_hashes.intersection(test_hashes)), 0)
+            self.assertEqual(len(val_hashes.intersection(test_hashes)), 0)
+
 if __name__ == '__main__':
     unittest.main()

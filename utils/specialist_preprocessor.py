@@ -51,7 +51,7 @@ class SpecialistPreprocessor:
         self.local_id_to_canonical_id = {}
         
         if self.expected_classes is not None:
-            self._init_classes(self.expected_classes)
+            self._init_classes(self.expected_classes, preserve_order=True)
         
         self.feature_names_in_ = None
         self.n_features_in_ = None
@@ -60,8 +60,17 @@ class SpecialistPreprocessor:
         self.stds_ = None
         self.is_fitted = False
 
-    def _init_classes(self, classes: list):
-        self.expected_classes = sorted(list(set(classes)))
+    def _init_classes(self, classes: list, preserve_order: bool = False):
+        if preserve_order:
+            seen = set()
+            ordered = []
+            for c in classes:
+                if c not in seen:
+                    seen.add(c)
+                    ordered.append(c)
+            self.expected_classes = ordered
+        else:
+            self.expected_classes = sorted(list(set(classes)))
         for c in self.expected_classes:
             if c not in CLASS_NAMES:
                 raise ValueError(f"Class '{c}' for dataset '{self.dataset_name}' is not in the canonical 13-class taxonomy.")
@@ -100,7 +109,7 @@ class SpecialistPreprocessor:
         """Fit preprocessing statistics strictly on training data using low-memory column-by-column passes."""
         if self.expected_classes is None:
             if "final_label" in train_df.columns:
-                self._init_classes(train_df["final_label"].dropna().unique().tolist())
+                self._init_classes(train_df["final_label"].dropna().unique().tolist(), preserve_order=False)
             else:
                 raise ValueError("Cannot infer classes: expected_classes is None and 'final_label' not in DataFrame.")
                 

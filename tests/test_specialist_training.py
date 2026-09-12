@@ -400,6 +400,176 @@ class TestSpecialistTraining(unittest.TestCase):
         )
         self.assertEqual(list(results_multi.keys()), ["IDS2018", "ARP_Spoofing"])
 
+    def test_evaluation_metrics_and_row_count_exactness(self):
+        """Evaluation metrics must be mathematically consistent and row count must not be inflated."""
+        classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
+        n_classes = len(classes)
+        # Create deterministic synthetic true and pred arrays of 700 samples (100 per class)
+        np.random.seed(42)
+        y_true = np.repeat(np.arange(n_classes), 100)
+        # 80% correct, 20% misclassified to class 0
+        y_pred = y_true.copy()
+        misclass_idx = np.random.choice(len(y_pred), size=140, replace=False)
+        y_pred[misclass_idx] = 0
+
+        metrics = evaluate_predictions(y_true, y_pred, classes)
+
+        # 1. Total samples must equal exact row count (700), NOT 3x inflated
+        self.assertEqual(metrics["total_samples"], 700)
+        class_supports = [metrics["Per Class"][c]["support"] for c in classes]
+        self.assertEqual(sum(class_supports), 700)
+        # Verify that macro avg support (700) + weighted avg support (700) + classes (700) is 2100,
+        # but total_samples correctly stays 700
+        raw_sum_with_averages = sum(
+            c["support"] for c in metrics["Per Class"].values() if isinstance(c, dict) and "support" in c
+        )
+        self.assertEqual(raw_sum_with_averages, 2100)
+        self.assertEqual(metrics["total_samples"], 700)
+
+        # 2. Confusion matrix sum must equal total samples
+        cm = np.array(metrics["Confusion Matrix"])
+        self.assertEqual(cm.shape, (7, 7))
+        self.assertEqual(cm.sum(), 700)
+
+        # 3. Precision and recall must strictly match confusion matrix math
+        for i, cls_name in enumerate(classes):
+            tp = cm[i, i]
+            fp = cm[:, i].sum() - tp
+            fn = cm[i, :].sum() - tp
+            expected_p = tp / (tp + fp) if (tp + fp) > 0 else 0.0
+            expected_r = tp / (tp + fn) if (tp + fn) > 0 else 0.0
+            self.assertAlmostEqual(metrics["Per Class"][cls_name]["precision"], expected_p, places=5)
+            self.assertAlmostEqual(metrics["Per Class"][cls_name]["recall"], expected_r, places=5)
+
+        # 4. Named confusion matrix dictionary must match 2D array
+        cm_dict = metrics["confusion_matrix_dict"]
+        for i, true_name in enumerate(classes):
+            for j, pred_name in enumerate(classes):
+                self.assertEqual(cm_dict[true_name][pred_name], int(cm[i, j]))
+
+    def test_preprocessor_canonical_label_alignment_and_remapping(self):
+        """Verify that streaming evaluation remaps preprocessor local IDs to canonical class ordering."""
+        # Simulated scenario: Preprocessor had alphabetical ordering
+        # [0: Benign, 1: Botnet, 2: Brute Force, 3: DDoS, 4: DoS, 5: Infiltration, 6: Web Attack]
+        alpha_classes = ["Benign", "Botnet", "Brute Force", "DDoS", "DoS", "Infiltration", "Web Attack"]
+        preproc = SpecialistPreprocessor(dataset_name="IDS2018")
+        df_dummy = pd.DataFrame({
+            "f1": [1.0] * 7,
+            "final_label": alpha_classes
+        })
+        preproc.fit(df_dummy)
+        # Force preprocessor local IDs to alphabetical order
+        preproc.expected_classes = alpha_classes
+        preproc.classes_ = alpha_classes
+        preproc.local_label_to_id = {c: i for i, c in enumerate(alpha_classes)}
+        preproc.id_to_local_label = {i: c for i, c in enumerate(alpha_classes)}
+
+        # In alphabetical order: Infiltration is local ID 5
+        # Canonical order for IDS2018:
+        # [0: Benign, 1: DDoS, 2: DoS, 3: Botnet, 4: Infiltration, 5: Brute Force, 6: Web Attack]
+        canonical_classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
+
+        # Create 50 samples of Benign flows
+        df_test = pd.DataFrame({
+            "f1": [1.0] * 50,
+            "final_label": ["Benign"] * 50
+        })
+
+        # Mock model that predicts local ID 5 (which is Infiltration in preprocessor)
+        class MockModel:
+            def predict(self, X):
+                return np.full(len(X), 5, dtype=np.int32)
+
+        # Evaluate with canonical class ordering
+        metrics = evaluate_dataset_streamed(
+            model=MockModel(),
+            data_source=df_test,
+            preprocessor=preproc,
+            expected_classes=canonical_classes,
+            batch_size=20
+        )
+
+        cm_dict = metrics["confusion_matrix_dict"]
+        # In canonical order: index 4 is Infiltration, index 5 is Brute Force
+        # The 50 Benign flows predicted as local ID 5 (Infiltration) must show as:
+        # Benign -> Infiltration = 50, NOT Benign -> Brute Force!
+        self.assertEqual(cm_dict["Benign"]["Infiltration"], 50)
+        self.assertEqual(cm_dict["Benign"]["Brute Force"], 0)
+        # Brute Force false positives must be 0
+        cm = np.array(metrics["Confusion Matrix"])
+        # Brute Force column is index 5
+        self.assertEqual(cm[:, 5].sum(), 0)
+        # Infiltration column is index 4
+        self.assertEqual(cm[:, 4].sum(), 50)
+
+    def test_streamed_evaluation_parity_with_in_memory(self):
+        """Streaming evaluation in small chunks must yield identical results to full in-memory evaluation."""
+        classes = ["Benign", "DDoS", "DoS"]
+        np.random.seed(99)
+        df = pd.DataFrame({
+            "feat1": np.random.randn(90),
+            "feat2": np.random.randn(90),
+            "final_label": ["Benign"] * 30 + ["DDoS"] * 30 + ["DoS"] * 30
+        })
+        preproc = SpecialistPreprocessor(dataset_name="TestSpec", expected_classes=classes)
+        preproc.fit(df)
+
+        model = DecisionTreeClassifier(max_depth=3, random_state=42)
+        X = preproc.transform_features(df)
+        y = preproc.transform_labels(df)
+        model.fit(X, y)
+
+        # Single batch (in-memory equivalent)
+        metrics_full = evaluate_dataset_streamed(model, df, preproc, classes, batch_size=100)
+        # Small chunks (streamed)
+        metrics_streamed = evaluate_dataset_streamed(model, df, preproc, classes, batch_size=15)
+
+        self.assertEqual(metrics_full["total_samples"], metrics_streamed["total_samples"])
+        self.assertEqual(metrics_full["Accuracy"], metrics_streamed["Accuracy"])
+        self.assertEqual(metrics_full["Macro F1"], metrics_streamed["Macro F1"])
+        self.assertEqual(metrics_full["Confusion Matrix"], metrics_streamed["Confusion Matrix"])
+
+    def test_evaluate_only_mode(self):
+        """--evaluate-only flag must re-evaluate existing models without fitting new ones."""
+        from utils.data_preparation import load_config
+        from unittest.mock import patch
+        config = load_config()
+
+        # Step 1: Run standard smoke test to generate initial models and artifacts
+        train_specialist(
+            spec_name="IDS2018",
+            config=config,
+            smoke_test=True,
+            selected_model="dt",
+            force_retrain=True
+        )
+
+        # Step 2: Run in evaluate-only mode with patch ensuring fit() is NEVER called on any model
+        with patch.object(DecisionTreeClassifier, "fit", side_effect=AssertionError("fit() must not be called in evaluate-only mode!")):
+            meta = train_specialist(
+                spec_name="IDS2018",
+                config=config,
+                smoke_test=True,
+                selected_model="dt",
+                evaluate_only=True
+            )
+
+        # Step 3: Verify metadata structure and correct row counts
+        self.assertIn("test_row_count", meta)
+        self.assertIn("validation_row_count", meta)
+        self.assertEqual(meta["test_row_count"], 30) # smoke test test split has 30 rows
+        self.assertEqual(meta["validation_row_count"], 30) # smoke test val split has 30 rows
+        self.assertIn("confusion_matrix_dict", meta["test_metrics"])
+        self.assertIn("total_samples", meta["test_metrics"])
+        self.assertEqual(meta["test_metrics"]["total_samples"], 30)
+
+        # Verify final_model_selection.json report
+        report_path = os.path.join("reports", "model_training", "IDS2018", "final_model_selection.json")
+        with open(report_path, "r") as f:
+            selection_rep = json.load(f)
+        self.assertEqual(selection_rep["test_row_count"], 30)
+        self.assertEqual(selection_rep["test_metrics"]["total_samples"], 30)
+
 
 if __name__ == "__main__":
     unittest.main()

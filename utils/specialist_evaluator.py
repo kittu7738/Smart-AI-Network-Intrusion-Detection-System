@@ -1,14 +1,29 @@
 import os
 import numpy as np
 import pandas as pd
+from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID, ID_TO_CLASS
 
 __all__ = [
+    "SPECIALIST_CLASSES",
     "evaluate_dataset_streamed",
     "evaluate_model",
     "predict_batched",
     "predict_proba_batched",
     "evaluate_predictions",
 ]
+
+SPECIALIST_CLASSES = {
+    "IDS2018": [
+        "Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"
+    ],
+    "CICIoT2023": [
+        "Benign", "DDoS", "DoS", "Botnet", "Infiltration",
+        "Brute Force", "Web Attack", "DNS Spoofing", "Recon / Port Scan", "MITM"
+    ],
+    "ARP_Spoofing": ["Benign", "ARP Spoofing", "DoS"],
+    "IP_Spoofing": ["Benign", "IP Spoofing"],
+    "DNS_Tunneling": ["Benign", "DNS Tunneling"],
+}
 
 def predict_batched(model, X: np.ndarray, batch_size: int = 100000) -> np.ndarray:
     """Perform memory-safe batched model prediction.
@@ -47,7 +62,11 @@ def predict_proba_batched(model, X: np.ndarray, batch_size: int = 100000) -> np.
 def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray, class_names: list) -> dict:
     """Compute comprehensive evaluation metrics for specialist models.
 
-    Uses scikit-learn if available, or equivalent pure NumPy computation.
+    Guarantees:
+    - y_true and y_pred use identical class indices [0 .. len(class_names)-1].
+    - Confusion matrix row i is true class_names[i], column j is pred class_names[j].
+    - Per-class metrics strictly derive from the corresponding row/col of the confusion matrix.
+    - Total support equals exact total samples evaluated.
     """
     y_true = np.asarray(y_true, dtype=np.int64)
     y_pred = np.asarray(y_pred, dtype=np.int64)
@@ -119,6 +138,13 @@ def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray, class_names: li
         "support": tot_support
     }
 
+    # Named confusion matrix dictionary to make indexing unambiguous
+    cm_dict = {}
+    for i, true_name in enumerate(class_names):
+        cm_dict[true_name] = {}
+        for j, pred_name in enumerate(class_names):
+            cm_dict[true_name][pred_name] = int(cm[i, j])
+
     return {
         "Accuracy": acc,
         "Macro Precision": macro_p,
@@ -126,7 +152,11 @@ def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray, class_names: li
         "Macro F1": macro_f1,
         "Weighted F1": weighted_f1,
         "Per Class": per_class,
-        "Confusion Matrix": cm.tolist()
+        "Confusion Matrix": cm.tolist(),
+        "confusion_matrix_dict": cm_dict,
+        "confusion_matrix_labels": list(class_names),
+        "class_order": list(class_names),
+        "total_samples": int(tot_support)
     }
 
 def evaluate_dataset_streamed(
@@ -139,30 +169,39 @@ def evaluate_dataset_streamed(
 ) -> dict:
     """Evaluate a fitted model on a dataset source without materializing all features in memory.
 
-    data_source can be:
-    - Path to a Parquet file (str or PathLike): streams batches directly from disk via PyArrow.
-    - pandas DataFrame: processes in slices without duplicating feature matrices.
-
-    Memory guarantee:
-    At most one batch of transformed features (batch_size rows x n_features x 4 bytes)
-    is materialized in memory at any point in time.
+    Enforces explicit canonical class ordering to prevent label permutation bugs.
     """
     if expected_classes is None:
         expected_classes = kwargs.get("class_names")
 
-    if expected_classes is None:
-        if hasattr(preprocessor, "classes_") and preprocessor.classes_ is not None:
-            expected_classes = preprocessor.classes_
-        elif hasattr(preprocessor, "expected_classes") and preprocessor.expected_classes is not None:
-            expected_classes = preprocessor.expected_classes
-        else:
-            raise ValueError("expected_classes or class_names must be provided to evaluate_dataset_streamed.")
-
-    # Align class names with preprocessor local IDs if available
-    if hasattr(preprocessor, "id_to_local_label") and len(preprocessor.id_to_local_label) == len(expected_classes):
-        class_names = [preprocessor.id_to_local_label[i] for i in range(len(preprocessor.id_to_local_label))]
+    # Resolve target class ordering explicitly
+    if expected_classes is not None:
+        target_class_order = list(expected_classes)
+    elif hasattr(preprocessor, "dataset_name") and preprocessor.dataset_name in SPECIALIST_CLASSES:
+        target_class_order = list(SPECIALIST_CLASSES[preprocessor.dataset_name])
+    elif hasattr(preprocessor, "expected_classes") and preprocessor.expected_classes is not None:
+        target_class_order = list(preprocessor.expected_classes)
+    elif hasattr(preprocessor, "classes_") and preprocessor.classes_ is not None:
+        target_class_order = list(preprocessor.classes_)
     else:
-        class_names = list(expected_classes)
+        raise ValueError("Target class order must be provided to evaluate_dataset_streamed.")
+
+    # Build remap vector: preprocessor local ID -> target_class_order index
+    if hasattr(preprocessor, "id_to_local_label") and preprocessor.id_to_local_label:
+        max_id = max(preprocessor.id_to_local_label.keys())
+        remap_vec = np.zeros(max_id + 1, dtype=np.int64)
+        for local_id, name in preprocessor.id_to_local_label.items():
+            if name in target_class_order:
+                remap_vec[local_id] = target_class_order.index(name)
+            else:
+                remap_vec[local_id] = local_id
+
+        def map_to_target(y_arr):
+            y_arr = np.asarray(y_arr, dtype=np.int64)
+            return remap_vec[y_arr]
+    else:
+        def map_to_target(y_arr):
+            return np.asarray(y_arr, dtype=np.int64)
 
     all_y_true = []
     all_y_pred = []
@@ -180,8 +219,8 @@ def evaluate_dataset_streamed(
                 X_batch = preprocessor.transform_features(batch_df)
                 y_batch = preprocessor.transform_labels(batch_df)
                 y_pred_batch = model.predict(X_batch)
-                all_y_true.append(y_batch)
-                all_y_pred.append(np.asarray(y_pred_batch, dtype=np.int32))
+                all_y_true.append(map_to_target(y_batch))
+                all_y_pred.append(map_to_target(y_pred_batch))
                 del batch_df, X_batch, y_batch, y_pred_batch
         except ImportError:
             # Safe fallback if pyarrow iter_batches is not supported
@@ -190,7 +229,7 @@ def evaluate_dataset_streamed(
                 model=model,
                 data_source=full_df,
                 preprocessor=preprocessor,
-                expected_classes=class_names,
+                expected_classes=target_class_order,
                 batch_size=batch_size
             )
 
@@ -202,27 +241,26 @@ def evaluate_dataset_streamed(
             X_batch = preprocessor.transform_features(chunk)
             y_batch = preprocessor.transform_labels(chunk)
             y_pred_batch = model.predict(X_batch)
-            all_y_true.append(y_batch)
-            all_y_pred.append(np.asarray(y_pred_batch, dtype=np.int32))
+            all_y_true.append(map_to_target(y_batch))
+            all_y_pred.append(map_to_target(y_pred_batch))
             del chunk, X_batch, y_batch, y_pred_batch
 
     else:
         raise TypeError(f"Unsupported data_source type for evaluation: {type(data_source)}")
 
     if not all_y_true:
-        metrics = evaluate_predictions(np.array([], dtype=np.int32), np.array([], dtype=np.int32), class_names)
+        metrics = evaluate_predictions(np.array([], dtype=np.int64), np.array([], dtype=np.int64), target_class_order)
     else:
         y_true = np.concatenate(all_y_true)
         y_pred = np.concatenate(all_y_pred)
-        metrics = evaluate_predictions(y_true, y_pred, class_names)
+        metrics = evaluate_predictions(y_true, y_pred, target_class_order)
 
-    # Expose canonical class taxonomy mapping
-    if hasattr(preprocessor, "local_id_to_canonical_id"):
-        metrics["canonical_mapping"] = {
-            cls_name: int(preprocessor.local_id_to_canonical_id[idx])
-            for idx, cls_name in enumerate(class_names)
-            if idx in preprocessor.local_id_to_canonical_id
-        }
+    # Expose canonical class taxonomy mapping (0 to 12)
+    metrics["canonical_mapping"] = {
+        cls_name: int(CLASS_TO_ID[cls_name])
+        for cls_name in target_class_order
+        if cls_name in CLASS_TO_ID
+    }
 
     return metrics
 

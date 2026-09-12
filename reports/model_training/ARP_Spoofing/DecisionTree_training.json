@@ -1,7 +1,7 @@
 {
     "dataset": "ARP_Spoofing",
     "model_name": "DecisionTree",
-    "fit_duration_seconds": 3.1948089599609375e-05,
+    "fit_duration_seconds": 6.699562072753906e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,
@@ -10,13 +10,13 @@
         "Macro F1": 0.0,
         "Weighted F1": 0.0,
         "Per Class": {
-            "ARP Spoofing": {
+            "Benign": {
                 "precision": 0.0,
                 "recall": 0.0,
                 "f1-score": 0.0,
                 "support": 0
             },
-            "Benign": {
+            "ARP Spoofing": {
                 "precision": 0.0,
                 "recall": 0.0,
                 "f1-score": 0.0,
@@ -59,9 +59,37 @@
                 0
             ]
         ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "ARP Spoofing": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "DoS": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "class_order": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "total_samples": 0,
         "canonical_mapping": {
-            "ARP Spoofing": 9,
             "Benign": 0,
+            "ARP Spoofing": 9,
             "DoS": 2
         }
     },

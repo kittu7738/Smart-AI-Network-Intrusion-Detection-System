@@ -3,25 +3,25 @@
     "best_model": "DecisionTree",
     "selection_metric": "Validation Macro F1",
     "validation_macro_f1": 0.0,
-    "test_row_count": 6,
+    "test_row_count": 2,
     "test_metrics": {
-        "Accuracy": 0.0,
-        "Macro Precision": 0.0,
-        "Macro Recall": 0.0,
-        "Macro F1": 0.0,
-        "Weighted F1": 0.0,
+        "Accuracy": 0.5,
+        "Macro Precision": 0.16666666666666666,
+        "Macro Recall": 0.3333333333333333,
+        "Macro F1": 0.2222222222222222,
+        "Weighted F1": 0.3333333333333333,
         "Per Class": {
+            "Benign": {
+                "precision": 0.5,
+                "recall": 1.0,
+                "f1-score": 0.6666666666666666,
+                "support": 1
+            },
             "ARP Spoofing": {
                 "precision": 0.0,
                 "recall": 0.0,
                 "f1-score": 0.0,
                 "support": 0
-            },
-            "Benign": {
-                "precision": 0.0,
-                "recall": 0.0,
-                "f1-score": 0.0,
-                "support": 1
             },
             "DoS": {
                 "precision": 0.0,
@@ -29,28 +29,28 @@
                 "f1-score": 0.0,
                 "support": 1
             },
-            "accuracy": 0.0,
+            "accuracy": 0.5,
             "macro avg": {
-                "precision": 0.0,
-                "recall": 0.0,
-                "f1-score": 0.0,
+                "precision": 0.16666666666666666,
+                "recall": 0.3333333333333333,
+                "f1-score": 0.2222222222222222,
                 "support": 2
             },
             "weighted avg": {
-                "precision": 0.0,
-                "recall": 0.0,
-                "f1-score": 0.0,
+                "precision": 0.25,
+                "recall": 0.5,
+                "f1-score": 0.3333333333333333,
                 "support": 2
             }
         },
         "Confusion Matrix": [
             [
-                0,
+                1,
                 0,
                 0
             ],
             [
-                1,
+                0,
                 0,
                 0
             ],
@@ -60,16 +60,42 @@
                 0
             ]
         ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 1,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "ARP Spoofing": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "DoS": {
+                "Benign": 1,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "class_order": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "total_samples": 2,
         "canonical_mapping": {
-            "ARP Spoofing": 9,
             "Benign": 0,
+            "ARP Spoofing": 9,
             "DoS": 2
         }
     },
     "comparison": {
-        "DecisionTree": 0.0,
-        "RandomForest": 0.0,
-        "XGBoost": 0.0
+        "DecisionTree": 0.0
     },
     "sampling_details": {
         "sampled": false,

@@ -87,6 +87,7 @@ from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID
 from utils.specialist_preprocessor import SpecialistPreprocessor
 from utils.specialist_evaluator import evaluate_model, evaluate_dataset_streamed, predict_batched
 from utils.model_registry import OPTIMIZATION_CANDIDATE_CONFIGS, get_candidate_model
+from utils.class_weighting import compute_specialist_sample_weights
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -569,7 +570,9 @@ def train_specialist(
     save_artifacts: bool = True,
     force_retrain: bool = False,
     evaluate_only: bool = False,
-    use_optimized: bool = False
+    use_optimized: bool = False,
+    model_dir: str = None,
+    report_dir: str = None
 ):
     """Train, evaluate, and select best model for a specialist dataset with strict memory safety."""
     if config is None:
@@ -584,11 +587,25 @@ def train_specialist(
     print(f"Expected classes ({len(expected_classes)}): {expected_classes}", flush=True)
     print(f"=======================================================", flush=True)
 
-    model_dir = resolve_path(os.path.join("models", spec_name))
-    report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
+    if model_dir is None:
+        model_dir = resolve_path(os.path.join("models", spec_name))
+    else:
+        model_dir = resolve_path(model_dir)
+
+    if report_dir is None:
+        report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
+    else:
+        report_dir = resolve_path(report_dir)
+
     if save_artifacts:
         os.makedirs(model_dir, exist_ok=True)
         os.makedirs(report_dir, exist_ok=True)
+
+    is_default_dirs = (
+        model_dir == resolve_path(os.path.join("models", spec_name)) and
+        report_dir == resolve_path(os.path.join("reports", "model_training", spec_name))
+    )
+    should_update_checkpoints = bool(save_artifacts and is_default_dirs and (not smoke_test))
 
     preproc_path = os.path.join(model_dir, "preprocessor.joblib")
     val_results = {}
@@ -599,11 +616,49 @@ def train_specialist(
     if evaluate_only:
         print(f"\n[Evaluate-Only Mode] Evaluating saved models for {spec_name}...", flush=True)
         # 1. Load Preprocessor
+        preprocessor = None
         if os.path.exists(preproc_path):
-            preprocessor = SpecialistPreprocessor.load(preproc_path)
-            print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features.", flush=True)
-        else:
-            if smoke_test:
+            try:
+                preprocessor = SpecialistPreprocessor.load(preproc_path)
+                # Check if loaded preprocessor has synthetic dummy features (from smoke tests)
+                is_dummy = (
+                    hasattr(preprocessor, "feature_names_in_") and
+                    preprocessor.feature_names_in_ and
+                    all(str(f).startswith("feature_") for f in preprocessor.feature_names_in_)
+                )
+                if is_dummy and not smoke_test:
+                    print(f"[Notice] Loaded preprocessor at {preproc_path} contains synthetic dummy features. Discarding to re-fit from full training split.", flush=True)
+                    preprocessor = None
+                else:
+                    print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features.", flush=True)
+            except Exception as e:
+                print(f"[Warning] Failed to load preprocessor from {preproc_path}: {e}. Will attempt re-fit.", flush=True)
+                preprocessor = None
+
+        if preprocessor is None:
+            # Locate raw training parquet to reconstruct full preprocessor statistics
+            train_parquet_path = None
+            if spec_name in SPECIALIST_SPECS:
+                p_key = SPECIALIST_SPECS[spec_name]["config_path_key"]
+                spec_dir = resolve_path(config["paths"][p_key])
+                cand_path = os.path.join(spec_dir, "train.parquet")
+                if os.path.exists(cand_path):
+                    train_parquet_path = cand_path
+
+            if train_parquet_path and not smoke_test:
+                print(f"[Preprocessor Sync] Fitting clean SpecialistPreprocessor on full training dataset: {train_parquet_path}...", flush=True)
+                full_train_df = pd.read_parquet(train_parquet_path)
+                preprocessor = SpecialistPreprocessor(
+                    dataset_name=spec_name,
+                    expected_classes=expected_classes,
+                    scale_features=True
+                )
+                preprocessor.fit(full_train_df)
+                if save_artifacts:
+                    preprocessor.save(preproc_path)
+                del full_train_df
+                gc.collect()
+            elif smoke_test:
                 print(f"Smoke-test: preprocessor not found at {preproc_path}, generating mock...", flush=True)
                 train_df, _, _ = load_specialist_splits(spec_name, config, smoke_test=True)
                 preprocessor = SpecialistPreprocessor(dataset_name=spec_name, expected_classes=expected_classes, scale_features=True)
@@ -697,12 +752,31 @@ def train_specialist(
                 model_inst = joblib.load(model_file)
 
             print(f"\n--- Evaluating {spec_name} :: {model_name} on validation split ---", flush=True)
-            val_metrics = evaluate_dataset_streamed(
+            # Step 1: Evaluate baseline (uncalibrated)
+            val_metrics_base = evaluate_dataset_streamed(
                 model_inst, val_source, preprocessor, expected_classes, batch_size=100000,
-                threshold_multipliers=threshold_multipliers
+                threshold_multipliers=None
             )
+            print(f"Validation Baseline (Uncalibrated) Macro F1: {val_metrics_base['Macro F1']:.4f} | Accuracy: {val_metrics_base['Accuracy']:.4f}", flush=True)
+
+            if threshold_multipliers:
+                # Step 2: Evaluate with calibrated thresholds
+                val_metrics_cal = evaluate_dataset_streamed(
+                    model_inst, val_source, preprocessor, expected_classes, batch_size=100000,
+                    threshold_multipliers=threshold_multipliers
+                )
+                print(f"Validation Calibrated Macro F1: {val_metrics_cal['Macro F1']:.4f} | Accuracy: {val_metrics_cal['Accuracy']:.4f}", flush=True)
+                val_metrics = val_metrics_cal
+                val_metrics["uncalibrated_baseline"] = {
+                    "Macro F1": float(val_metrics_base.get("Macro F1", 0.0)),
+                    "Accuracy": float(val_metrics_base.get("Accuracy", 0.0)),
+                    "Macro Precision": float(val_metrics_base.get("Macro Precision", 0.0)),
+                    "Macro Recall": float(val_metrics_base.get("Macro Recall", 0.0))
+                }
+            else:
+                val_metrics = val_metrics_base
+
             val_results[model_name] = val_metrics
-            print(f"Validation Macro F1: {val_metrics['Macro F1']:.4f} | Accuracy: {val_metrics['Accuracy']:.4f}", flush=True)
 
             fit_duration = 0.0
             if os.path.exists(report_file):
@@ -730,7 +804,8 @@ def train_specialist(
                     report_data["threshold_multipliers"] = threshold_multipliers
                 with open(report_file, "w") as f:
                     json.dump(report_data, f, indent=4)
-                update_checkpoint(spec_name, model_name, "completed")
+                if should_update_checkpoints:
+                    update_checkpoint(spec_name, model_name, "completed")
 
             if save_artifacts:
                 del model_inst
@@ -784,14 +859,22 @@ def train_specialist(
         print(f"Training matrix materialized in float32: shape={X_train.shape} ({X_train.nbytes / 1e6:.1f} MB).", flush=True)
 
         # Determine candidate models to run
-        candidate_names = ["DecisionTree", "RandomForest", "XGBoost"]
+        standard_candidates = ["DecisionTree", "RandomForest", "XGBoost"]
+        all_candidates = list(standard_candidates)
+        if spec_name == "IDS2018":
+            for opt_c in OPTIMIZATION_CANDIDATE_CONFIGS.keys():
+                if opt_c not in all_candidates:
+                    all_candidates.append(opt_c)
+
         if model_names:
-            candidate_names = [normalize_model_name(m) for m in candidate_names if normalize_model_name(m) in [normalize_model_name(x) for x in model_names]]
+            candidate_names = [normalize_model_name(m) for m in all_candidates if normalize_model_name(m) in [normalize_model_name(x) for x in model_names]]
         elif selected_model:
             norm_model = normalize_model_name(selected_model)
-            if norm_model not in candidate_names:
-                raise ValueError(f"Requested model '{selected_model}' not available. Choose from {candidate_names}")
+            if norm_model not in all_candidates:
+                raise ValueError(f"Requested model '{selected_model}' not available. Choose from {all_candidates}")
             candidate_names = [norm_model]
+        else:
+            candidate_names = list(standard_candidates)
 
         # Compute sample weights once if XGBoost is in candidate list
         xgb_sample_weights = None
@@ -801,7 +884,7 @@ def train_specialist(
         # 4. Sequential Model Training & Validation Evaluation
         for model_name in candidate_names:
             report_file = os.path.join(report_dir, f"{model_name}_training.json")
-            model_file = os.path.join(model_dir, f"{model_name}.joblib")
+            model_file = resolve_model_path(model_dir, model_name)
             status = check_status(spec_name, model_name)
 
             # Checkpoint / resume: skip completed models if valid artifacts already exist (unless force_retrain=True)
@@ -817,16 +900,30 @@ def train_specialist(
                     print(f"Failed to read cached report for {model_name} ({e}). Re-training...", flush=True)
 
             print(f"\n--- Training {spec_name} :: {model_name} ---", flush=True)
-            if save_artifacts:
+            if should_update_checkpoints:
                 update_checkpoint(spec_name, model_name, "running")
 
             # Instantiate ONLY the single model instance
-            model_inst = get_model_instance(model_name, smoke_test=smoke_test)
+            model_inst = get_candidate_model(model_name, smoke_test=smoke_test) if model_name in OPTIMIZATION_CANDIDATE_CONFIGS else get_model_instance(model_name, smoke_test=smoke_test)
+
+            sample_w = None
+            if model_name in OPTIMIZATION_CANDIDATE_CONFIGS:
+                cand_cfg = OPTIMIZATION_CANDIDATE_CONFIGS[model_name]
+                if cand_cfg.get("supports_sample_weight"):
+                    w_strat = cand_cfg.get("default_weighting", "unweighted")
+                    sample_w = compute_specialist_sample_weights(y_train, strategy=w_strat)
+            elif model_name == "XGBoost":
+                sample_w = xgb_sample_weights
 
             t0 = time.time()
             try:
-                if model_name == "XGBoost":
-                    model_inst.fit(X_train, y_train, sample_weight=xgb_sample_weights)
+                if sample_w is not None and model_name != "HistGradientBoosting":
+                    model_inst.fit(X_train, y_train, sample_weight=sample_w)
+                elif sample_w is not None and model_name == "HistGradientBoosting":
+                    try:
+                        model_inst.fit(X_train, y_train, sample_weight=sample_w)
+                    except (TypeError, ValueError):
+                        model_inst.fit(X_train, y_train)
                 else:
                     model_inst.fit(X_train, y_train)
                 fit_duration = time.time() - t0
@@ -856,10 +953,11 @@ def train_specialist(
                     }
                     with open(report_file, "w") as f:
                         json.dump(report_data, f, indent=4)
-                    update_checkpoint(spec_name, model_name, "completed")
+                    if should_update_checkpoints:
+                        update_checkpoint(spec_name, model_name, "completed")
 
             except Exception as e:
-                if save_artifacts:
+                if should_update_checkpoints:
                     update_checkpoint(spec_name, model_name, "failed")
                 print(f"ERROR fitting {model_name}: {e}", flush=True)
                 raise e
@@ -882,6 +980,19 @@ def train_specialist(
     print(f"\n>> Selected Best Model for {spec_name}: {best_model_name} (Val Macro F1 = {best_val_f1:.4f})", flush=True)
 
     # 7. Final Evaluation on Complete Test Set (ONCE)
+    # Strictly enforce validation reproduction before test evaluation for optimized candidates
+    if evaluate_only and not smoke_test and (use_optimized or best_model_name in OPTIMIZATION_CANDIDATE_CONFIGS or "tuned" in best_model_name.lower()):
+        val_acc = val_results[best_model_name].get("Accuracy", 0.0)
+        val_f1 = val_results[best_model_name].get("Macro F1", 0.0)
+        uncal_acc = val_results[best_model_name].get("uncalibrated_baseline", {}).get("Accuracy", val_acc)
+        uncal_f1 = val_results[best_model_name].get("uncalibrated_baseline", {}).get("Macro F1", val_f1)
+        if uncal_acc < 0.95 or uncal_f1 < 0.80:
+            raise RuntimeError(
+                f"[Evaluation Gatekeeper] Validation reproduction check FAILED for {best_model_name}: "
+                f"Validation Accuracy={uncal_acc:.4f} (expected >= 0.95), Macro F1={uncal_f1:.4f} (expected >= 0.80). "
+                f"Held-out test evaluation strictly blocked to prevent test split contamination."
+            )
+
     print(f"Loading best model ({best_model_name}) for final test evaluation...", flush=True)
     best_model_path = resolve_model_path(model_dir, best_model_name)
     if save_artifacts and os.path.exists(best_model_path):
@@ -953,8 +1064,9 @@ def train_specialist(
     if save_artifacts:
         with open(os.path.join(model_dir, "specialist_metadata.json"), "w") as f:
             json.dump(metadata, f, indent=4)
-        update_checkpoint(spec_name, "best_model", best_model_name)
-        update_checkpoint(spec_name, "status", "completed")
+        if should_update_checkpoints:
+            update_checkpoint(spec_name, "best_model", best_model_name)
+            update_checkpoint(spec_name, "status", "completed")
         print(f"Artifacts and metadata saved under models/{spec_name}/ and reports/model_training/{spec_name}/", flush=True)
 
     return metadata
@@ -967,7 +1079,10 @@ def train_all_specialists(
     selected_model: str = None,
     force_retrain: bool = False,
     evaluate_only: bool = False,
-    use_optimized: bool = False
+    use_optimized: bool = False,
+    save_artifacts: bool = True,
+    model_dir: str = None,
+    report_dir: str = None
 ):
     """Run training across all configured specialist models."""
     if target_dataset:
@@ -987,7 +1102,10 @@ def train_all_specialists(
             selected_model=selected_model,
             force_retrain=force_retrain,
             evaluate_only=evaluate_only,
-            use_optimized=use_optimized
+            use_optimized=use_optimized,
+            save_artifacts=save_artifacts,
+            model_dir=model_dir,
+            report_dir=report_dir
         )
         all_metadata[canonical_name] = meta
 

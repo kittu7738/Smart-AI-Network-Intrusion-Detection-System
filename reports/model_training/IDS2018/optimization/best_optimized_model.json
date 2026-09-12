@@ -3,7 +3,7 @@
     "class_weighting": "sqrt_balanced",
     "model_path": "models/IDS2018/candidate_DecisionTree_Tuned.joblib",
     "threshold_multipliers": {
-        "Benign": 1.0,
+        "Benign": 3.0,
         "DDoS": 1.0,
         "DoS": 1.0,
         "Botnet": 1.0,

@@ -4,6 +4,7 @@ import json
 import time
 import argparse
 import gc
+import tempfile
 
 try:
     import joblib
@@ -129,8 +130,14 @@ def run_ids2018_optimization(
     else:
         opt_dir = resolve_path(opt_dir)
 
+    default_prod_opt = resolve_path(os.path.join("reports", "model_training", "IDS2018", "optimization"))
     if models_dir is None:
-        models_dir = resolve_path(os.path.join("models", "IDS2018"))
+        if opt_dir != default_prod_opt:
+            models_dir = os.path.join(opt_dir, "models")
+        elif smoke_test:
+            models_dir = os.path.join(tempfile.gettempdir(), "smoke_ids2018_models")
+        else:
+            models_dir = resolve_path(os.path.join("models", "IDS2018"))
     else:
         models_dir = resolve_path(models_dir)
 

@@ -387,7 +387,8 @@ class TestSpecialistTraining(unittest.TestCase):
             config=config,
             smoke_test=True,
             target_dataset="IDS2018",
-            selected_model="dt"
+            selected_model="dt",
+            save_artifacts=False
         )
         self.assertEqual(list(results_single.keys()), ["IDS2018"])
 
@@ -396,7 +397,8 @@ class TestSpecialistTraining(unittest.TestCase):
             config=config,
             smoke_test=True,
             target_dataset="ids2018, arp",
-            selected_model="dt"
+            selected_model="dt",
+            save_artifacts=False
         )
         self.assertEqual(list(results_multi.keys()), ["IDS2018", "ARP_Spoofing"])
 
@@ -535,40 +537,47 @@ class TestSpecialistTraining(unittest.TestCase):
         from unittest.mock import patch
         config = load_config()
 
-        # Step 1: Run standard smoke test to generate initial models and artifacts
-        train_specialist(
-            spec_name="IDS2018",
-            config=config,
-            smoke_test=True,
-            selected_model="dt",
-            force_retrain=True
-        )
-
-        # Step 2: Run in evaluate-only mode with patch ensuring fit() is NEVER called on any model
-        with patch.object(DecisionTreeClassifier, "fit", side_effect=AssertionError("fit() must not be called in evaluate-only mode!")):
-            meta = train_specialist(
+        with tempfile.TemporaryDirectory() as tmp_model_dir, tempfile.TemporaryDirectory() as tmp_rep_dir:
+            # Step 1: Run standard smoke test to generate initial models and artifacts in isolated temp dirs
+            train_specialist(
                 spec_name="IDS2018",
                 config=config,
                 smoke_test=True,
                 selected_model="dt",
-                evaluate_only=True
+                force_retrain=True,
+                save_artifacts=True,
+                model_dir=tmp_model_dir,
+                report_dir=tmp_rep_dir
             )
 
-        # Step 3: Verify metadata structure and correct row counts
-        self.assertIn("test_row_count", meta)
-        self.assertIn("validation_row_count", meta)
-        self.assertEqual(meta["test_row_count"], 30) # smoke test test split has 30 rows
-        self.assertEqual(meta["validation_row_count"], 30) # smoke test val split has 30 rows
-        self.assertIn("confusion_matrix_dict", meta["test_metrics"])
-        self.assertIn("total_samples", meta["test_metrics"])
-        self.assertEqual(meta["test_metrics"]["total_samples"], 30)
+            # Step 2: Run in evaluate-only mode with patch ensuring fit() is NEVER called on any model
+            with patch.object(DecisionTreeClassifier, "fit", side_effect=AssertionError("fit() must not be called in evaluate-only mode!")):
+                meta = train_specialist(
+                    spec_name="IDS2018",
+                    config=config,
+                    smoke_test=True,
+                    selected_model="dt",
+                    evaluate_only=True,
+                    save_artifacts=True,
+                    model_dir=tmp_model_dir,
+                    report_dir=tmp_rep_dir
+                )
 
-        # Verify final_model_selection.json report
-        report_path = os.path.join("reports", "model_training", "IDS2018", "final_model_selection.json")
-        with open(report_path, "r") as f:
-            selection_rep = json.load(f)
-        self.assertEqual(selection_rep["test_row_count"], 30)
-        self.assertEqual(selection_rep["test_metrics"]["total_samples"], 30)
+            # Step 3: Verify metadata structure and correct row counts
+            self.assertIn("test_row_count", meta)
+            self.assertIn("validation_row_count", meta)
+            self.assertEqual(meta["test_row_count"], 30) # smoke test test split has 30 rows
+            self.assertEqual(meta["validation_row_count"], 30) # smoke test val split has 30 rows
+            self.assertIn("confusion_matrix_dict", meta["test_metrics"])
+            self.assertIn("total_samples", meta["test_metrics"])
+            self.assertEqual(meta["test_metrics"]["total_samples"], 30)
+
+            # Verify final_model_selection.json report in isolated directory
+            report_path = os.path.join(tmp_rep_dir, "final_model_selection.json")
+            with open(report_path, "r") as f:
+                selection_rep = json.load(f)
+            self.assertEqual(selection_rep["test_row_count"], 30)
+            self.assertEqual(selection_rep["test_metrics"]["total_samples"], 30)
 
     def test_optimized_model_evaluation_selection_prefers_candidate_artifact(self):
         """Regression test: evaluate-only on IDS2018 must select candidate_DecisionTree_Tuned rather than DecisionTree.joblib."""
@@ -639,6 +648,92 @@ class TestSpecialistTraining(unittest.TestCase):
         )
         self.assertEqual(meta_arp["best_model"], "DecisionTree")
         self.assertTrue(meta_arp["model_path"].endswith("DecisionTree.joblib"))
+
+    def test_evaluation_gatekeeper_blocks_degraded_optimized_validation(self):
+        """Evaluation gatekeeper must strictly abort test evaluation if validation reproduction fails."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_m_dir, tempfile.TemporaryDirectory() as tmp_r_dir:
+            # Create a model and real-column preprocessor in isolated dir
+            df_synth = pd.DataFrame({
+                "Protocol": [6.0, 17.0],
+                "Flow Duration": [100.0, 200.0],
+                "final_label": ["Benign", "DDoS"]
+            })
+            preproc = SpecialistPreprocessor(dataset_name="IDS2018", expected_classes=config["classes"]["ids2018"], scale_features=True)
+            preproc.fit(df_synth)
+            preproc.save(os.path.join(tmp_m_dir, "preprocessor.joblib"))
+
+            m_inst = DecisionTreeClassifier(max_depth=3, random_state=42)
+            m_inst.fit(preproc.transform_features(df_synth), preproc.transform_labels(df_synth))
+            from utils.train_models import joblib
+            joblib.dump(m_inst, os.path.join(tmp_m_dir, "candidate_DecisionTree_Tuned.joblib"))
+
+            # In evaluate_only with smoke_test=False (simulating full run where validation collapsed to 0.7828),
+            # gatekeeper must trigger if accuracy < 0.95
+            from unittest.mock import patch
+            mock_val_results = {
+                "DecisionTree_Tuned": {
+                    "Accuracy": 0.7828,
+                    "Macro F1": 0.2250,
+                    "Macro Precision": 0.2000,
+                    "Macro Recall": 0.2500,
+                    "Per Class": {"Benign": {"support": 10}},
+                    "uncalibrated_baseline": {"Accuracy": 0.7828, "Macro F1": 0.2250}
+                }
+            }
+            # Test that gatekeeper raises RuntimeError and blocks test evaluation
+            with patch("utils.train_models.load_specialist_splits", return_value=(None, df_synth, df_synth)):
+                with patch("utils.train_models.evaluate_dataset_streamed", return_value=mock_val_results["DecisionTree_Tuned"]):
+                    with self.assertRaises(RuntimeError) as ctx:
+                        train_specialist(
+                            spec_name="IDS2018",
+                            config=config,
+                            smoke_test=False,
+                            selected_model="DecisionTree_Tuned",
+                            evaluate_only=True,
+                            use_optimized=True,
+                            save_artifacts=False,
+                            model_dir=tmp_m_dir,
+                            report_dir=tmp_r_dir
+                        )
+                    self.assertIn("Validation reproduction check FAILED", str(ctx.exception))
+                    self.assertIn("Held-out test evaluation strictly blocked", str(ctx.exception))
+
+    def test_two_stage_validation_uncalibrated_and_calibrated_reporting(self):
+        """evaluate-only must record uncalibrated baseline metrics when threshold calibration is applied."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_m_dir, tempfile.TemporaryDirectory() as tmp_r_dir:
+            train_specialist(
+                spec_name="IDS2018",
+                config=config,
+                smoke_test=True,
+                selected_model="DecisionTree_Tuned",
+                force_retrain=True,
+                save_artifacts=True,
+                model_dir=tmp_m_dir,
+                report_dir=tmp_r_dir
+            )
+
+            meta = train_specialist(
+                spec_name="IDS2018",
+                config=config,
+                smoke_test=True,
+                selected_model="DecisionTree_Tuned",
+                evaluate_only=True,
+                use_optimized=True,
+                save_artifacts=False,
+                model_dir=tmp_m_dir,
+                report_dir=tmp_r_dir
+            )
+
+            val_metrics = meta["validation_metrics"]
+            self.assertIn("uncalibrated_baseline", val_metrics)
+            self.assertIn("Macro F1", val_metrics["uncalibrated_baseline"])
+            self.assertIn("Accuracy", val_metrics["uncalibrated_baseline"])
 
 
 if __name__ == "__main__":

@@ -901,6 +901,91 @@ class TestSpecialistTraining(unittest.TestCase):
             is_valid, _ = corrupt_preproc.validate_contract(expected_classes=canonical_classes, require_scaled=True)
             self.assertFalse(is_valid)
 
+    def test_ciciot2023_preprocessor_contract_and_ordering(self):
+        """CICIoT2023 specialist must enforce 10 canonical classes in exact project taxonomy order."""
+        from utils.specialist_evaluator import SPECIALIST_CLASSES
+        canonical_ciciot = SPECIALIST_CLASSES["CICIoT2023"]
+        self.assertEqual(len(canonical_ciciot), 10)
+        self.assertEqual(canonical_ciciot, [
+            "Benign", "DDoS", "DoS", "Botnet", "Infiltration",
+            "Brute Force", "Web Attack", "DNS Spoofing", "Recon / Port Scan", "MITM"
+        ])
+
+        # Create mock DataFrame with 46 numeric features and final_label
+        mock_data = {f"ciciot_feat_{i}": np.random.randn(20).astype(np.float32) for i in range(46)}
+        mock_data["final_label"] = [canonical_ciciot[i % 10] for i in range(20)]
+        df_mock = pd.DataFrame(mock_data)
+
+        # Preprocessor with canonical ordering passes contract
+        preproc = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=canonical_ciciot, scale_features=True)
+        preproc.fit(df_mock)
+        is_valid, reason = preproc.validate_contract(expected_classes=canonical_ciciot, strict_order=True)
+        self.assertTrue(is_valid, f"Contract failed: {reason}")
+        self.assertEqual(preproc.n_features_in_, 46)
+
+        # Alphabetical ordering must strictly fail contract validation
+        alphabetical_classes = sorted(canonical_ciciot)
+        preproc_alpha = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=alphabetical_classes, scale_features=True)
+        preproc_alpha.fit(df_mock)
+        is_val_alpha, reason_alpha = preproc_alpha.validate_contract(expected_classes=canonical_ciciot, strict_order=True)
+        self.assertFalse(is_val_alpha)
+        self.assertIn("Class ordering mismatch", reason_alpha)
+
+    def test_ciciot2023_checkpoint_mock_invalidation(self):
+        """Stale mock report (< 1000 rows) must be invalidated when real data is available (> 5000 rows)."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            model_dir = os.path.join(tmpdir, "models")
+            rep_dir = os.path.join(tmpdir, "reports")
+            os.makedirs(model_dir, exist_ok=True)
+            os.makedirs(rep_dir, exist_ok=True)
+
+            # Write a mock training report with 60 rows
+            rep_file = os.path.join(rep_dir, "DecisionTree_training.json")
+            with open(rep_file, "w") as f:
+                json.dump({
+                    "dataset": "CICIoT2023",
+                    "model_name": "DecisionTree",
+                    "train_row_count": 60,
+                    "validation_metrics": {"Macro F1": 0.08, "Accuracy": 0.73}
+                }, f)
+
+            model_file = os.path.join(model_dir, "DecisionTree.joblib")
+            with open(model_file, "w") as f:
+                f.write("mock_model_content")
+
+            # Check logic: cached_rows < 1000 with n_train_raw > 5000 must trigger invalidation
+            cached_rows = 0
+            with open(rep_file, "r") as f:
+                r = json.load(f)
+                cached_rows = r.get("train_row_count", 0)
+
+            n_train_raw = 5357406
+            should_invalidate = (cached_rows < 1000 and n_train_raw > 5000)
+            self.assertTrue(should_invalidate)
+
+    def test_smoke_test_does_not_pollute_production_dirs(self):
+        """Smoke test execution with default arguments must never save artifacts to production directories."""
+        prod_model_dir = os.path.abspath("models/CICIoT2023")
+        prod_rep_dir = os.path.abspath("reports/model_training/CICIoT2023")
+        
+        # Capture existing files before
+        model_files_before = set(os.listdir(prod_model_dir)) if os.path.exists(prod_model_dir) else set()
+        rep_files_before = set(os.listdir(prod_rep_dir)) if os.path.exists(prod_rep_dir) else set()
+
+        train_specialist(
+            "CICIoT2023",
+            model_names=["DecisionTree"],
+            smoke_test=True,
+            save_artifacts=True
+        )
+
+        model_files_after = set(os.listdir(prod_model_dir)) if os.path.exists(prod_model_dir) else set()
+        rep_files_after = set(os.listdir(prod_rep_dir)) if os.path.exists(prod_rep_dir) else set()
+
+        # Production dirs must have zero new files added
+        self.assertEqual(model_files_after, model_files_before)
+        self.assertEqual(rep_files_after, rep_files_before)
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -590,12 +590,18 @@ def train_specialist(
     print(f"=======================================================", flush=True)
 
     if model_dir is None:
-        model_dir = resolve_path(os.path.join("models", spec_name))
+        if smoke_test and not evaluate_only:
+            model_dir = resolve_path(os.path.join("scratch", "smoke_test", "models", spec_name))
+        else:
+            model_dir = resolve_path(os.path.join("models", spec_name))
     else:
         model_dir = resolve_path(model_dir)
 
     if report_dir is None:
-        report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
+        if smoke_test and not evaluate_only:
+            report_dir = resolve_path(os.path.join("scratch", "smoke_test", "reports", spec_name))
+        else:
+            report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
     else:
         report_dir = resolve_path(report_dir)
 
@@ -640,7 +646,7 @@ def train_specialist(
                     preprocessor = None
                 else:
                     # Check training row count parity for full-data models
-                    if train_parquet_path and not smoke_test and (use_optimized or spec_name == "IDS2018"):
+                    if train_parquet_path and not smoke_test:
                         n_train_rows = None
                         try:
                             import pyarrow.parquet as pq
@@ -908,15 +914,24 @@ def train_specialist(
 
             # Checkpoint / resume: skip completed models if valid artifacts already exist (unless force_retrain=True)
             if not force_retrain and not smoke_test and save_artifacts and status == "completed" and os.path.exists(report_file) and os.path.exists(model_file):
-                print(f"\n[Checkpoint] Skipping {spec_name} :: {model_name} (already completed).", flush=True)
+                cached_train_rows = 0
                 try:
                     with open(report_file, "r") as f:
                         r = json.load(f)
+                        cached_train_rows = r.get("train_row_count", 0)
+                except Exception:
+                    pass
+
+                if cached_train_rows < 1000 and n_train_raw > 5000:
+                    print(f"\n[Checkpoint] Invalidation: cached report {report_file} has only {cached_train_rows} rows (available: {n_train_raw}). Re-training {model_name}...", flush=True)
+                else:
+                    print(f"\n[Checkpoint] Skipping {spec_name} :: {model_name} (already completed).", flush=True)
+                    try:
                         val_results[model_name] = r["validation_metrics"]
                         training_times[model_name] = r.get("fit_duration_seconds", 0.0)
                         continue
-                except Exception as e:
-                    print(f"Failed to read cached report for {model_name} ({e}). Re-training...", flush=True)
+                    except Exception as e:
+                        print(f"Failed to read cached report for {model_name} ({e}). Re-training...", flush=True)
 
             print(f"\n--- Training {spec_name} :: {model_name} ---", flush=True)
             if should_update_checkpoints:
@@ -1086,7 +1101,7 @@ def train_specialist(
         if should_update_checkpoints:
             update_checkpoint(spec_name, "best_model", best_model_name)
             update_checkpoint(spec_name, "status", "completed")
-        print(f"Artifacts and metadata saved under models/{spec_name}/ and reports/model_training/{spec_name}/", flush=True)
+        print(f"Artifacts and metadata saved under {model_dir}/ and {report_dir}/", flush=True)
 
     return metadata
 

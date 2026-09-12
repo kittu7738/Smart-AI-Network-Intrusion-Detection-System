@@ -10,7 +10,7 @@
         "leakage_check_completed": true,
         "ids2018_model_training_status": "completed",
         "arp_spoofing_model_training_status": "completed",
-        "ciciot2023_model_training_status": "completed",
+        "ciciot2023_model_training_status": "pending",
         "ip_spoofing_model_training_status": "completed",
         "dns_tunneling_model_training_status": "completed"
     },
@@ -29,11 +29,11 @@
             "status": "completed"
         },
         "CICIoT2023": {
-            "DecisionTree": "completed",
-            "RandomForest": "completed",
-            "XGBoost": "completed",
-            "best_model": "DecisionTree",
-            "status": "completed"
+            "DecisionTree": "pending",
+            "RandomForest": "pending",
+            "XGBoost": "pending",
+            "best_model": null,
+            "status": "pending"
         },
         "ARP_Spoofing": {
             "DecisionTree": "completed",

@@ -1,7 +1,7 @@
 {
     "dataset": "IP_Spoofing",
     "model_name": "XGBoost",
-    "fit_duration_seconds": 6.031990051269531e-05,
+    "fit_duration_seconds": 7.796287536621094e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,
@@ -45,7 +45,11 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "Benign": 0,
+            "IP Spoofing": 8
+        }
     },
     "sampling_details": {
         "sampled": false,

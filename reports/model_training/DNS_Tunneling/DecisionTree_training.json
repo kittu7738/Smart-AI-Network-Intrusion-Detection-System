@@ -1,7 +1,7 @@
 {
     "dataset": "DNS_Tunneling",
     "model_name": "DecisionTree",
-    "fit_duration_seconds": 2.7894973754882812e-05,
+    "fit_duration_seconds": 3.910064697265625e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,
@@ -45,7 +45,11 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
     },
     "sampling_details": {
         "sampled": false,

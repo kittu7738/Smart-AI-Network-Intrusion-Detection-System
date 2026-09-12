@@ -46,7 +46,11 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
     },
     "comparison": {
         "DecisionTree": 0.0,

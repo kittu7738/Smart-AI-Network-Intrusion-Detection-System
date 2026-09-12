@@ -11,13 +11,13 @@
         "Macro F1": 0.0,
         "Weighted F1": 0.0,
         "Per Class": {
-            "Benign": {
+            "ARP Spoofing": {
                 "precision": 0.0,
                 "recall": 0.0,
                 "f1-score": 0.0,
                 "support": 0
             },
-            "ARP Spoofing": {
+            "Benign": {
                 "precision": 0.0,
                 "recall": 0.0,
                 "f1-score": 0.0,
@@ -59,7 +59,12 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "ARP Spoofing": 9,
+            "Benign": 0,
+            "DoS": 2
+        }
     },
     "comparison": {
         "DecisionTree": 0.0,

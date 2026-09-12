@@ -40,7 +40,7 @@ class TestSpecialistTraining(unittest.TestCase):
         self.assertEqual(resolve_specialist_name("arp"), "ARP_Spoofing")
         self.assertEqual(resolve_specialist_name("5g"), "IP_Spoofing")
         self.assertEqual(resolve_specialist_name("dns"), "DNS_Tunneling")
-        
+
         with self.assertRaises(ValueError):
             resolve_specialist_name("unknown_specialist")
 
@@ -56,7 +56,7 @@ class TestSpecialistTraining(unittest.TestCase):
         })
         preprocessor = SpecialistPreprocessor(dataset_name="TestSpec")
         X, y = preprocessor.fit_transform(df_train)
-        
+
         self.assertNotIn("final_label", preprocessor.feature_names_in_)
         self.assertNotIn("Label", preprocessor.feature_names_in_)
         self.assertNotIn("src_mac", preprocessor.feature_names_in_)
@@ -78,7 +78,7 @@ class TestSpecialistTraining(unittest.TestCase):
         preprocessor = SpecialistPreprocessor(dataset_name="TestSpec", scale=False)
         X_train, _ = preprocessor.fit_transform(df_train)
         X_test, _ = preprocessor.transform(df_test)
-        
+
         # Median of [10.0, 20.0, 30.0] is 20.0
         # In test set, NaN must be imputed with train median (20.0), NOT influenced by 100.0
         self.assertEqual(X_test[0, 0], 20.0)
@@ -92,12 +92,12 @@ class TestSpecialistTraining(unittest.TestCase):
         })
         preprocessor = SpecialistPreprocessor(dataset_name="ARP_Spoofing")
         preprocessor.fit(df_train)
-        
+
         # Verify local class mapping
         self.assertEqual(preprocessor.classes_, ["ARP Spoofing", "Benign", "DoS"])
         local_ids = np.array([0, 1, 2]) # corresponding to ["ARP Spoofing", "Benign", "DoS"]
         canonical_ids = preprocessor.local_to_canonical_ids(local_ids)
-        
+
         self.assertEqual(canonical_ids[0], CLASS_TO_ID["ARP Spoofing"]) # 9
         self.assertEqual(canonical_ids[1], CLASS_TO_ID["Benign"])       # 0
         self.assertEqual(canonical_ids[2], CLASS_TO_ID["DoS"])          # 2
@@ -116,19 +116,19 @@ class TestSpecialistTraining(unittest.TestCase):
             })
             train_df.to_parquet(os.path.join(tmpdir, "train.parquet"), index=False)
             test_df.to_parquet(os.path.join(tmpdir, "test.parquet"), index=False)
-            
+
             # Load splits
             train, val, test = load_specialist_splits(tmpdir, split_type="train_test", random_seed=42)
-            
+
             # Test split should be completely untouched
             self.assertEqual(len(test), 30)
             self.assertTrue(np.allclose(test["feat1"].values, test_df["feat1"].values))
-            
+
             # Train and Val should be derived from train_df (80/20)
             self.assertEqual(len(train), 80)
             self.assertEqual(len(val), 20)
             self.assertEqual(len(train) + len(val), 100)
-            
+
             # Distribution should be stratified
             self.assertEqual((val["final_label"] == "Benign").sum(), 10)
             self.assertEqual((val["final_label"] == "ARP Spoofing").sum(), 10)
@@ -141,7 +141,7 @@ class TestSpecialistTraining(unittest.TestCase):
             "final_label": ["Benign"] * 950 + ["DoS"] * 40 + ["Botnet"] * 10
         })
         sampled, meta = sample_training_data(df, max_samples=100, random_seed=42)
-        
+
         self.assertLessEqual(len(sampled), 100)
         self.assertTrue(meta["sampled"])
         # Minority class Botnet (10 instances) should be preserved
@@ -152,13 +152,13 @@ class TestSpecialistTraining(unittest.TestCase):
         """predict_batched and evaluate_predictions must correctly evaluate batches."""
         X_test = np.random.randn(250, 4)
         y_test = np.array([0] * 150 + [1] * 100)
-        
+
         model = DecisionTreeClassifier(random_state=42)
         model.fit(X_test, y_test)
-        
+
         preds = predict_batched(model, X_test, batch_size=50)
         self.assertEqual(len(preds), 250)
-        
+
         metrics = evaluate_predictions(y_test, preds, class_names=["Benign", "DoS"])
         self.assertIn("Accuracy", metrics)
         self.assertIn("Macro F1", metrics)
@@ -264,6 +264,58 @@ class TestSpecialistTraining(unittest.TestCase):
             self.assertTrue(os.path.exists(val))
             self.assertTrue(os.path.exists(test))
 
+    def test_streamed_evaluator_direct_import_and_parquet_execution(self):
+        """Regression test: verify direct import and streamed Parquet batch evaluation."""
+        # 1. Direct import verification
+        from utils.specialist_evaluator import evaluate_dataset_streamed as streamed_eval
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            # 2. Create small temporary parquet dataset
+            parquet_path = os.path.join(tmpdir, "test_eval.parquet")
+            df_eval = pd.DataFrame({
+                "feature_a": np.linspace(0.0, 10.0, 120, dtype=np.float32),
+                "feature_b": np.linspace(10.0, 20.0, 120, dtype=np.float32),
+                "final_label": ["Benign"] * 60 + ["DoS"] * 60
+            })
+            df_eval.to_parquet(parquet_path, index=False)
+
+            # 3. Fit preprocessor on training data
+            prep = SpecialistPreprocessor(dataset_name="TestStreamingSpec")
+            prep.fit(df_eval)
+
+            # 4. Train a simple decision tree model
+            X_train, y_train = prep.transform(df_eval)
+            model = DecisionTreeClassifier(random_state=42)
+            model.fit(X_train, y_train)
+
+            # 5. Run streamed evaluation on the Parquet file in batches of 25
+            metrics = streamed_eval(
+                model=model,
+                data_source=parquet_path,
+                preprocessor=prep,
+                expected_classes=["Benign", "DoS"],
+                batch_size=25
+            )
+
+            # 6. Verify returned metrics structure and values
+            expected_keys = [
+                "Accuracy", "Macro Precision", "Macro Recall",
+                "Macro F1", "Weighted F1", "Per Class", "Confusion Matrix"
+            ]
+            for key in expected_keys:
+                self.assertIn(key, metrics)
+
+            self.assertEqual(metrics["Per Class"]["Benign"]["support"], 60)
+            self.assertEqual(metrics["Per Class"]["DoS"]["support"], 60)
+            self.assertEqual(len(metrics["Confusion Matrix"]), 2)
+            self.assertGreaterEqual(metrics["Macro F1"], 0.0)
+            self.assertLessEqual(metrics["Macro F1"], 1.0)
+
+            # 7. Verify canonical taxonomy mapping is present
+            self.assertIn("canonical_mapping", metrics)
+            self.assertEqual(metrics["canonical_mapping"]["Benign"], 0)
+            self.assertEqual(metrics["canonical_mapping"]["DoS"], 2)
+
+
 if __name__ == "__main__":
     unittest.main()
-

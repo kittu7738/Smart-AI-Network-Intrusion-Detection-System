@@ -1,7 +1,7 @@
 {
     "dataset": "DNS_Tunneling",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 5.91278076171875e-05,
+    "fit_duration_seconds": 7.510185241699219e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,
@@ -45,7 +45,11 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
     },
     "sampling_details": {
         "sampled": false,

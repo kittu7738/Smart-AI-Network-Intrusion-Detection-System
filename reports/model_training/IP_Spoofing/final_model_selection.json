@@ -46,7 +46,11 @@
                 0,
                 0
             ]
-        ]
+        ],
+        "canonical_mapping": {
+            "Benign": 0,
+            "IP Spoofing": 8
+        }
     },
     "comparison": {
         "DecisionTree": 0.0,

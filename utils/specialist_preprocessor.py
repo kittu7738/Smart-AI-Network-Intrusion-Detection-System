@@ -105,6 +105,46 @@ class SpecialistPreprocessor:
             features.append(col)
         return features
 
+    def validate_contract(self, expected_classes: list = None, require_scaled: bool = True, strict_order: bool = False) -> tuple:
+        """Validate whether this preprocessor conforms to the required specialist training contract.
+        
+        Returns:
+            (is_valid: bool, reason: str)
+        """
+        if not getattr(self, "is_fitted", False):
+            return False, "Preprocessor is not fitted."
+            
+        if self.feature_names_in_ is None or len(self.feature_names_in_) == 0:
+            return False, "Feature list is empty."
+            
+        # Check for mock/dummy features from smoke tests
+        if all(str(f).startswith("feature_") for f in self.feature_names_in_):
+            return False, "Preprocessor contains synthetic dummy features (e.g. feature_0)."
+            
+        if expected_classes is not None:
+            expected_list = list(expected_classes)
+            if set(getattr(self, "expected_classes", []) or []) != set(expected_list):
+                return False, f"Class set mismatch: preprocessor classes {getattr(self, 'expected_classes', None)} != expected {expected_list}."
+            if strict_order:
+                if getattr(self, "expected_classes", None) != expected_list:
+                    return False, f"Class ordering mismatch: preprocessor has {getattr(self, 'expected_classes', None)}, expected {expected_list}."
+                if getattr(self, "classes_", None) != expected_list:
+                    return False, f"Classes_ attribute mismatch: {getattr(self, 'classes_', None)} vs expected {expected_list}."
+                for idx, cls_name in enumerate(expected_list):
+                    if self.local_label_to_id.get(cls_name) != idx:
+                        return False, f"Local label ID mismatch for '{cls_name}': expected {idx}, got {self.local_label_to_id.get(cls_name)}."
+                    
+        if require_scaled:
+            if not getattr(self, "scale_features", False):
+                return False, "Preprocessor was fitted with scale_features=False but scaled features are required."
+            if getattr(self, "means_", None) is None or getattr(self, "stds_", None) is None:
+                return False, "Preprocessor is missing means_ or stds_ scaling vectors."
+                
+        if getattr(self, "medians_", None) is None:
+            return False, "Preprocessor is missing medians_ imputation vector."
+            
+        return True, "Contract valid."
+
     def fit(self, train_df: pd.DataFrame):
         """Fit preprocessing statistics strictly on training data using low-memory column-by-column passes."""
         if self.expected_classes is None:
@@ -115,6 +155,7 @@ class SpecialistPreprocessor:
                 
         self.feature_names_in_ = self.identify_feature_columns(train_df)
         self.n_features_in_ = len(self.feature_names_in_)
+        self.training_row_count_ = int(len(train_df))
         
         if self.n_features_in_ == 0:
             raise ValueError(f"No valid numeric feature columns identified for {self.dataset_name}.")

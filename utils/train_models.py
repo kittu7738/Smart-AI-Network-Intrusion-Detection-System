@@ -51,6 +51,7 @@ except ImportError:
             self.classes_ = np.unique(y)
             counts = [np.sum(y == c) for c in self.classes_]
             self.majority_ = self.classes_[np.argmax(counts)] if len(self.classes_) > 0 else 0
+            self.n_features_in_ = X.shape[1] if hasattr(X, "shape") and len(X.shape) > 1 else None
             return self
 
         def predict(self, X):
@@ -571,6 +572,7 @@ def train_specialist(
     force_retrain: bool = False,
     evaluate_only: bool = False,
     use_optimized: bool = False,
+    sync_preprocessor: bool = False,
     model_dir: str = None,
     report_dir: str = None
 ):
@@ -615,36 +617,52 @@ def train_specialist(
 
     if evaluate_only:
         print(f"\n[Evaluate-Only Mode] Evaluating saved models for {spec_name}...", flush=True)
-        # 1. Load Preprocessor
+
+        # Locate raw training parquet to verify / sync preprocessor statistics
+        train_parquet_path = None
+        if spec_name in SPECIALIST_SPECS:
+            p_key = SPECIALIST_SPECS[spec_name]["config_path_key"]
+            spec_dir = resolve_path(config["paths"][p_key])
+            cand_path = os.path.join(spec_dir, "train.parquet")
+            if os.path.exists(cand_path):
+                train_parquet_path = cand_path
+
+        # 1. Load / Validate Preprocessor
         preprocessor = None
-        if os.path.exists(preproc_path):
+        if os.path.exists(preproc_path) and not sync_preprocessor:
             try:
                 preprocessor = SpecialistPreprocessor.load(preproc_path)
-                # Check if loaded preprocessor has synthetic dummy features (from smoke tests)
-                is_dummy = (
-                    hasattr(preprocessor, "feature_names_in_") and
-                    preprocessor.feature_names_in_ and
-                    all(str(f).startswith("feature_") for f in preprocessor.feature_names_in_)
+                valid_contract, contract_reason = preprocessor.validate_contract(
+                    expected_classes=expected_classes, require_scaled=True, strict_order=True
                 )
-                if is_dummy and not smoke_test:
-                    print(f"[Notice] Loaded preprocessor at {preproc_path} contains synthetic dummy features. Discarding to re-fit from full training split.", flush=True)
+                if not valid_contract and not smoke_test:
+                    print(f"[Notice] Loaded preprocessor at {preproc_path} failed contract validation ({contract_reason}). Discarding to re-fit from training data.", flush=True)
                     preprocessor = None
                 else:
-                    print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features.", flush=True)
+                    # Check training row count parity for full-data models
+                    if train_parquet_path and not smoke_test and (use_optimized or spec_name == "IDS2018"):
+                        n_train_rows = None
+                        try:
+                            import pyarrow.parquet as pq
+                            n_train_rows = pq.read_metadata(train_parquet_path).num_rows
+                        except Exception:
+                            pass
+                        prep_rows = getattr(preprocessor, "training_row_count_", 0)
+                        if n_train_rows is not None and prep_rows != n_train_rows:
+                            print(f"[Preprocessor Sync] Loaded preprocessor was fitted on {prep_rows} rows, but train.parquet contains {n_train_rows} rows. Re-fitting to eliminate scaling/median contract drift...", flush=True)
+                            preprocessor = None
+                        else:
+                            print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features ({prep_rows} train rows).", flush=True)
+                    else:
+                        print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features.", flush=True)
             except Exception as e:
                 print(f"[Warning] Failed to load preprocessor from {preproc_path}: {e}. Will attempt re-fit.", flush=True)
                 preprocessor = None
+        elif sync_preprocessor:
+            print(f"[Preprocessor Sync] --sync-preprocessor requested. Forcing re-fit from training data...", flush=True)
+            preprocessor = None
 
         if preprocessor is None:
-            # Locate raw training parquet to reconstruct full preprocessor statistics
-            train_parquet_path = None
-            if spec_name in SPECIALIST_SPECS:
-                p_key = SPECIALIST_SPECS[spec_name]["config_path_key"]
-                spec_dir = resolve_path(config["paths"][p_key])
-                cand_path = os.path.join(spec_dir, "train.parquet")
-                if os.path.exists(cand_path):
-                    train_parquet_path = cand_path
-
             if train_parquet_path and not smoke_test:
                 print(f"[Preprocessor Sync] Fitting clean SpecialistPreprocessor on full training dataset: {train_parquet_path}...", flush=True)
                 full_train_df = pd.read_parquet(train_parquet_path)
@@ -658,6 +676,7 @@ def train_specialist(
                     preprocessor.save(preproc_path)
                 del full_train_df
                 gc.collect()
+                print(f"[Preprocessor Sync] Saved full-dataset preprocessor to {preproc_path} ({preprocessor.n_features_in_} features, {preprocessor.training_row_count_} rows).", flush=True)
             elif smoke_test:
                 print(f"Smoke-test: preprocessor not found at {preproc_path}, generating mock...", flush=True)
                 train_df, _, _ = load_specialist_splits(spec_name, config, smoke_test=True)
@@ -1080,6 +1099,7 @@ def train_all_specialists(
     force_retrain: bool = False,
     evaluate_only: bool = False,
     use_optimized: bool = False,
+    sync_preprocessor: bool = False,
     save_artifacts: bool = True,
     model_dir: str = None,
     report_dir: str = None
@@ -1103,6 +1123,7 @@ def train_all_specialists(
             force_retrain=force_retrain,
             evaluate_only=evaluate_only,
             use_optimized=use_optimized,
+            sync_preprocessor=sync_preprocessor,
             save_artifacts=save_artifacts,
             model_dir=model_dir,
             report_dir=report_dir
@@ -1131,6 +1152,8 @@ def parse_args():
                         help="Evaluate existing trained models and regenerate reports without retraining.")
     parser.add_argument("--optimized", action="store_true", dest="use_optimized",
                         help="Evaluate the progressive optimizer's saved finalist model for IDS2018.")
+    parser.add_argument("--sync-preprocessor", action="store_true", dest="sync_preprocessor",
+                        help="Force re-fitting SpecialistPreprocessor on full train.parquet to guarantee exact preprocessing contract.")
     parser.add_argument("--optimize", action="store_true", dest="optimize",
                         help="Run validation-only optimization suite for IDS2018 specialist.")
     parser.add_argument("--screening-samples", type=int, default=None,
@@ -1173,7 +1196,8 @@ def main():
         selected_model=args.model,
         force_retrain=args.force_retrain,
         evaluate_only=args.evaluate_only,
-        use_optimized=args.use_optimized
+        use_optimized=args.use_optimized,
+        sync_preprocessor=args.sync_preprocessor
     )
 
 if __name__ == "__main__":

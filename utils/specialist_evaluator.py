@@ -188,6 +188,23 @@ def evaluate_dataset_streamed(
     else:
         raise ValueError("Target class order must be provided to evaluate_dataset_streamed.")
 
+    # Contract validation: ensure preprocessor matches target classes and scale requirements
+    if hasattr(preprocessor, "validate_contract"):
+        smoke_eval = kwargs.get("smoke_test", False) or any(str(f).startswith("feature_") for f in getattr(preprocessor, "feature_names_in_", []) or [])
+        if not smoke_eval:
+            is_valid, reason = preprocessor.validate_contract(expected_classes=target_class_order, require_scaled=True)
+            if not is_valid:
+                raise ValueError(f"[Evaluator Contract Violation] {reason}")
+
+    # Feature dimension contract check
+    if hasattr(model, "n_features_in_") and model.n_features_in_ is not None:
+        if hasattr(preprocessor, "n_features_in_") and preprocessor.n_features_in_ is not None:
+            if model.n_features_in_ != preprocessor.n_features_in_:
+                raise ValueError(
+                    f"[Evaluator Contract Violation] Model expects {model.n_features_in_} features, "
+                    f"but preprocessor produces {preprocessor.n_features_in_} features."
+                )
+
     # Build remap vector: preprocessor local ID -> target_class_order index
     if hasattr(preprocessor, "id_to_local_label") and preprocessor.id_to_local_label:
         max_id = max(preprocessor.id_to_local_label.keys())

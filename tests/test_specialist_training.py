@@ -735,6 +735,172 @@ class TestSpecialistTraining(unittest.TestCase):
             self.assertIn("Macro F1", val_metrics["uncalibrated_baseline"])
             self.assertIn("Accuracy", val_metrics["uncalibrated_baseline"])
 
+    def test_preprocessor_validate_contract_detects_mismatches(self):
+        """validate_contract must detect class ordering mismatch, unscaled features, and dummy features."""
+        canonical_classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
+        df = pd.DataFrame({
+            "flow_duration": [10.0, 20.0, 30.0],
+            "total_fwd_pkts": [1.0, 2.0, 3.0],
+            "final_label": ["Benign", "DDoS", "DoS"]
+        })
+
+        # 1. Valid preprocessor
+        p_valid = SpecialistPreprocessor(dataset_name="IDS2018", expected_classes=canonical_classes, scale_features=True)
+        p_valid.fit(df)
+        is_val, reason = p_valid.validate_contract(expected_classes=canonical_classes)
+        self.assertTrue(is_val)
+
+        # 2. Class ordering mismatch (alphabetical order)
+        p_alpha = SpecialistPreprocessor(dataset_name="IDS2018", scale_features=True)
+        # Manually simulate alphabetical classes
+        alpha_classes = sorted(canonical_classes)
+        p_alpha._init_classes(alpha_classes, preserve_order=False)
+        p_alpha.fit(df)
+        is_val, reason = p_alpha.validate_contract(expected_classes=canonical_classes, strict_order=True)
+        self.assertFalse(is_val)
+        self.assertIn("Class ordering mismatch", reason)
+
+        # 3. Dummy features
+        df_dummy = pd.DataFrame({
+            f"feature_{i}": [1.0, 2.0, 3.0] for i in range(5)
+        })
+        df_dummy["final_label"] = ["Benign", "DDoS", "DoS"]
+        p_dummy = SpecialistPreprocessor(dataset_name="IDS2018", expected_classes=canonical_classes, scale_features=True)
+        p_dummy.fit(df_dummy)
+        is_val, reason = p_dummy.validate_contract(expected_classes=canonical_classes)
+        self.assertFalse(is_val)
+        self.assertIn("synthetic dummy features", reason)
+
+        # 4. Unscaled features when scaled required
+        p_unscaled = SpecialistPreprocessor(dataset_name="IDS2018", expected_classes=canonical_classes, scale_features=False)
+        p_unscaled.fit(df)
+        is_val, reason = p_unscaled.validate_contract(expected_classes=canonical_classes, require_scaled=True)
+        self.assertFalse(is_val)
+        self.assertIn("scale_features=False", reason)
+
+    def test_evaluator_rejects_preprocessor_contract_mismatch(self):
+        """evaluate_dataset_streamed must strictly abort if preprocessor fails contract validation."""
+        canonical_classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
+        df_val_2class = pd.DataFrame({
+            "flow_duration": [10.0, 20.0],
+            "total_fwd_pkts": [1.0, 2.0],
+            "final_label": ["Benign", "DoS"]
+        })
+
+        # Scenario 1: Preprocessor class set mismatch
+        p_wrong_classes = SpecialistPreprocessor(dataset_name="IDS2018", scale_features=True)
+        p_wrong_classes._init_classes(["Benign", "DoS"], preserve_order=False)
+        p_wrong_classes.fit(df_val_2class)
+
+        clf = DecisionTreeClassifier()
+        clf.fit(p_wrong_classes.transform_features(df_val_2class), p_wrong_classes.transform_labels(df_val_2class))
+
+        with self.assertRaises(ValueError) as ctx:
+            evaluate_dataset_streamed(
+                model=clf,
+                data_source=df_val_2class,
+                preprocessor=p_wrong_classes,
+                expected_classes=canonical_classes
+            )
+        self.assertIn("Evaluator Contract Violation", str(ctx.exception))
+        self.assertIn("Class set mismatch", str(ctx.exception))
+
+        # Scenario 2: Feature count mismatch
+        df_val_7class = pd.DataFrame({
+            "flow_duration": [10.0, 20.0],
+            "total_fwd_pkts": [1.0, 2.0],
+            "final_label": ["Benign", "DoS"]
+        })
+        p_wrong_feats = SpecialistPreprocessor(dataset_name="IDS2018", expected_classes=canonical_classes, scale_features=True)
+        p_wrong_feats.fit(df_val_7class)
+
+        clf_3_feats = DecisionTreeClassifier()
+        X_dummy_3 = np.zeros((2, 3), dtype=np.float32)
+        y_dummy = np.array([0, 1])
+        clf_3_feats.fit(X_dummy_3, y_dummy)
+
+        with self.assertRaises(ValueError) as ctx:
+            evaluate_dataset_streamed(
+                model=clf_3_feats,
+                data_source=df_val_7class,
+                preprocessor=p_wrong_feats,
+                expected_classes=canonical_classes
+            )
+        self.assertIn("Evaluator Contract Violation", str(ctx.exception))
+        self.assertIn("Model expects 3 features, but preprocessor produces 2 features", str(ctx.exception))
+
+    def test_deterministic_validation_reproduction(self):
+        """Prove that saved candidate model + exact persisted preprocessing contract faithfully reproduces validation metrics using ONLY train/val data."""
+        canonical_classes = ["Benign", "DDoS", "DoS", "Botnet", "Infiltration", "Brute Force", "Web Attack"]
+
+        # Build deterministic train and val data (zero test data)
+        np.random.seed(42)
+        n_train = 700
+        n_val = 210
+
+        def make_df(n_samples):
+            data = {}
+            for i in range(10):
+                data[f"numeric_metric_{i}"] = np.random.randn(n_samples).astype(np.float32)
+            # 7 balanced classes
+            labels = [canonical_classes[i % 7] for i in range(n_samples)]
+            data["final_label"] = labels
+            return pd.DataFrame(data)
+
+        df_train = make_df(n_train)
+        df_val = make_df(n_val)
+
+        # 1. Fit exact preprocessor on training data
+        preproc_exact = SpecialistPreprocessor(
+            dataset_name="IDS2018",
+            expected_classes=canonical_classes,
+            scale_features=True
+        )
+        preproc_exact.fit(df_train)
+        X_train = preproc_exact.transform_features(df_train)
+        y_train = preproc_exact.transform_labels(df_train)
+
+        # 2. Fit candidate DecisionTree model
+        cand_model = DecisionTreeClassifier(max_depth=5, min_samples_leaf=2, random_state=42)
+        cand_model.fit(X_train, y_train)
+
+        # 3. Known Stage-B validation metrics
+        stage_b_val_metrics = evaluate_dataset_streamed(
+            cand_model, df_val, preproc_exact, canonical_classes
+        )
+        expected_acc = stage_b_val_metrics["Accuracy"]
+        expected_f1 = stage_b_val_metrics["Macro F1"]
+
+        # 4. Save artifacts to temporary directory (persisted contract)
+        with tempfile.TemporaryDirectory() as tmpdir:
+            m_path = os.path.join(tmpdir, "candidate_DecisionTree_Tuned.joblib")
+            p_path = os.path.join(tmpdir, "preprocessor.joblib")
+            from utils.train_models import joblib
+            joblib.dump(cand_model, m_path)
+            preproc_exact.save(p_path)
+
+            # 5. Reload artifacts and evaluate-only
+            reloaded_model = joblib.load(m_path)
+            reloaded_preproc = SpecialistPreprocessor.load(p_path)
+
+            eval_only_metrics = evaluate_dataset_streamed(
+                reloaded_model, df_val, reloaded_preproc, canonical_classes
+            )
+
+            # Reproduction must match to exact precision
+            self.assertAlmostEqual(eval_only_metrics["Accuracy"], expected_acc, places=5)
+            self.assertAlmostEqual(eval_only_metrics["Macro F1"], expected_f1, places=5)
+
+            # 6. If preprocessor is corrupted with unscaled features, reproduction fails contract
+            corrupt_preproc = SpecialistPreprocessor(
+                dataset_name="IDS2018",
+                expected_classes=canonical_classes,
+                scale_features=False
+            )
+            corrupt_preproc.fit(df_train)
+            is_valid, _ = corrupt_preproc.validate_contract(expected_classes=canonical_classes, require_scaled=True)
+            self.assertFalse(is_valid)
+
 
 if __name__ == "__main__":
     unittest.main()

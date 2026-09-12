@@ -1,0 +1,88 @@
+{
+    "total_features": 77,
+    "constant_features": [],
+    "quasi_constant_features": [],
+    "high_correlation_pairs": [],
+    "feature_variance_ranks": [
+        {
+            "feature": "feature_24",
+            "variance": 1.3253698348999023
+        },
+        {
+            "feature": "feature_33",
+            "variance": 1.312385082244873
+        },
+        {
+            "feature": "feature_41",
+            "variance": 1.3104726076126099
+        },
+        {
+            "feature": "feature_8",
+            "variance": 1.251708745956421
+        },
+        {
+            "feature": "feature_30",
+            "variance": 1.2268019914627075
+        },
+        {
+            "feature": "feature_38",
+            "variance": 1.2077902555465698
+        },
+        {
+            "feature": "feature_74",
+            "variance": 1.2066824436187744
+        },
+        {
+            "feature": "feature_76",
+            "variance": 1.194024920463562
+        },
+        {
+            "feature": "feature_13",
+            "variance": 1.1832913160324097
+        },
+        {
+            "feature": "feature_17",
+            "variance": 1.1819638013839722
+        },
+        {
+            "feature": "feature_32",
+            "variance": 1.169913649559021
+        },
+        {
+            "feature": "feature_21",
+            "variance": 1.1614692211151123
+        },
+        {
+            "feature": "feature_34",
+            "variance": 1.1602303981781006
+        },
+        {
+            "feature": "feature_56",
+            "variance": 1.1551554203033447
+        },
+        {
+            "feature": "feature_15",
+            "variance": 1.148208498954773
+        },
+        {
+            "feature": "feature_65",
+            "variance": 1.1274076700210571
+        },
+        {
+            "feature": "feature_59",
+            "variance": 1.1075190305709839
+        },
+        {
+            "feature": "feature_16",
+            "variance": 1.1039808988571167
+        },
+        {
+            "feature": "feature_3",
+            "variance": 1.0915119647979736
+        },
+        {
+            "feature": "feature_18",
+            "variance": 1.091462254524231
+        }
+    ]
+}

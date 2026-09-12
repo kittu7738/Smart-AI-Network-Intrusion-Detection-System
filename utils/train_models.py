@@ -30,7 +30,7 @@ import numpy as np
 
 try:
     from sklearn.tree import DecisionTreeClassifier
-    from sklearn.ensemble import RandomForestClassifier
+    from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, HistGradientBoostingClassifier
     from xgboost import XGBClassifier
     from sklearn.utils.class_weight import compute_class_weight, compute_sample_weight
     SKLEARN_AVAILABLE = True
@@ -63,6 +63,12 @@ except ImportError:
             return p
 
     class RandomForestClassifier(DecisionTreeClassifier):
+        pass
+
+    class ExtraTreesClassifier(DecisionTreeClassifier):
+        pass
+
+    class HistGradientBoostingClassifier(DecisionTreeClassifier):
         pass
 
     class XGBClassifier(DecisionTreeClassifier):
@@ -138,6 +144,12 @@ MODEL_ALIASES = {
     "forest": "RandomForest",
     "xgboost": "XGBoost",
     "xgb": "XGBoost",
+    "histgradientboosting": "HistGradientBoosting",
+    "hist_gradient_boosting": "HistGradientBoosting",
+    "hgb": "HistGradientBoosting",
+    "extratrees": "ExtraTrees",
+    "extra_trees": "ExtraTrees",
+    "et": "ExtraTrees",
 }
 
 def normalize_model_name(model_name: str) -> str:
@@ -400,6 +412,10 @@ def get_model_instance(model_name: str, smoke_test: bool = False):
             return RandomForestClassifier(n_estimators=2, max_depth=3, random_state=SEED, n_jobs=1)
         elif model_name == "XGBoost":
             return XGBClassifier(n_estimators=2, max_depth=3, random_state=SEED, eval_metric="mlogloss", n_jobs=1)
+        elif model_name == "HistGradientBoosting":
+            return HistGradientBoostingClassifier(max_iter=3, max_leaf_nodes=7, random_state=SEED)
+        elif model_name == "ExtraTrees":
+            return ExtraTreesClassifier(n_estimators=2, max_depth=3, random_state=SEED, n_jobs=1)
         else:
             raise ValueError(f"Unknown model name: {model_name}")
 
@@ -437,6 +453,27 @@ def get_model_instance(model_name: str, smoke_test: bool = False):
             random_state=SEED,
             eval_metric="mlogloss",
             n_jobs=2
+        )
+    elif model_name == "HistGradientBoosting":
+        return HistGradientBoostingClassifier(
+            max_iter=150,
+            max_leaf_nodes=63,
+            min_samples_leaf=20,
+            learning_rate=0.08,
+            early_stopping=True,
+            validation_fraction=0.1,
+            n_iter_no_change=10,
+            random_state=SEED
+        )
+    elif model_name == "ExtraTrees":
+        return ExtraTreesClassifier(
+            n_estimators=60,
+            max_depth=20,
+            min_samples_leaf=3,
+            max_features="sqrt",
+            class_weight="balanced",
+            n_jobs=2,
+            random_state=SEED
         )
     else:
         raise ValueError(f"Unknown model name: {model_name}")
@@ -845,13 +882,15 @@ def parse_args():
     parser.add_argument("--dataset", type=str, default=None,
                         help="Train specific specialist dataset(s), comma-separated (e.g. IDS2018, CICIoT2023, ARP, 5G, DNS).")
     parser.add_argument("--model", type=str, default=None,
-                        help="Train a specific model only (DecisionTree, RandomForest, XGBoost, dt, rf, xgb).")
+                        help="Train a specific model only (DecisionTree, RandomForest, XGBoost, HistGradientBoosting, ExtraTrees, dt, rf, xgb, hgb, et).")
     parser.add_argument("--max-train-samples", type=int, default=None,
                         help="Maximum training rows (uses stratified minority-preserving sampling if exceeded).")
     parser.add_argument("--force", "--force-retrain", action="store_true", dest="force_retrain",
                         help="Force retraining models even if checkpoints indicate completion.")
     parser.add_argument("--evaluate-only", "--eval-only", action="store_true", dest="evaluate_only",
                         help="Evaluate existing trained models and regenerate reports without retraining.")
+    parser.add_argument("--optimize", action="store_true", dest="optimize",
+                        help="Run validation-only optimization suite for IDS2018 specialist.")
     return parser.parse_args()
 
 def main():
@@ -865,6 +904,15 @@ def main():
             max_samples = int(os.environ["NIDS_MAX_TRAIN_SAMPLES"])
         except ValueError:
             pass
+
+    if args.optimize:
+        from utils.optimize_ids2018 import run_ids2018_optimization
+        run_ids2018_optimization(
+            config=config,
+            smoke_test=args.smoke_test,
+            max_train_samples=max_samples
+        )
+        return
 
     train_all_specialists(
         config=config,

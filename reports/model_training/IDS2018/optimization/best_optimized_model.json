@@ -1,0 +1,6 @@
+{
+    "model": "HistGradientBoosting",
+    "feature_representation": "all_77",
+    "class_weighting": "sqrt_balanced",
+    "training_command": "python3 -m utils.train_models --dataset IDS2018 --model histgradientboosting --force"
+}

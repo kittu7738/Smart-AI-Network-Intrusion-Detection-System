@@ -1,0 +1,1327 @@
+{
+    "dataset": "IDS2018",
+    "primary_metric": "Validation Macro F1",
+    "selected_best_model": "HistGradientBoosting",
+    "selected_best_feature_representation": "all_77",
+    "best_validation_metrics": {
+        "Accuracy": 0.16666666666666666,
+        "Macro F1": 0.04081632653061224,
+        "Macro Precision": 0.023809523809523808,
+        "Macro Recall": 0.14285714285714285,
+        "Weighted F1": 0.04761904761904761
+    },
+    "all_candidates_comparison": {
+        "HistGradientBoosting": {
+            "candidate_name": "HistGradientBoosting",
+            "description": "Scikit-Learn native 256-bin histogram gradient boosting with early stopping",
+            "weighting_strategy": "sqrt_balanced",
+            "fit_time_seconds": 5.316734313964844e-05,
+            "eval_time_seconds": 0.0019142627716064453,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "XGBoost_Tuned": {
+            "candidate_name": "XGBoost_Tuned",
+            "description": "Deep histogram XGBoost (depth=8, 120 trees) with feature and row subsampling",
+            "weighting_strategy": "sqrt_balanced",
+            "fit_time_seconds": 9.489059448242188e-05,
+            "eval_time_seconds": 0.0020101070404052734,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "XGBoost_Unweighted": {
+            "candidate_name": "XGBoost_Unweighted",
+            "description": "XGBoost on empirical traffic frequencies to prevent Benign false positives",
+            "weighting_strategy": "unweighted",
+            "fit_time_seconds": 7.987022399902344e-05,
+            "eval_time_seconds": 0.0020029544830322266,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "ExtraTrees": {
+            "candidate_name": "ExtraTrees",
+            "description": "Extremely Randomized Trees with randomized thresholds to reduce variance",
+            "weighting_strategy": "sqrt_balanced",
+            "fit_time_seconds": 9.870529174804688e-05,
+            "eval_time_seconds": 0.002165079116821289,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "RandomForest_Tuned": {
+            "candidate_name": "RandomForest_Tuned",
+            "description": "Deeper Random Forest (depth=20, 60 trees, 50% subsampling) with moderate weights",
+            "weighting_strategy": "sqrt_balanced",
+            "fit_time_seconds": 9.799003601074219e-05,
+            "eval_time_seconds": 0.0021359920501708984,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "DecisionTree_Tuned": {
+            "candidate_name": "DecisionTree_Tuned",
+            "description": "Deeper single Decision Tree (depth=22) with sqrt class balancing",
+            "weighting_strategy": "sqrt_balanced",
+            "fit_time_seconds": 9.107589721679688e-05,
+            "eval_time_seconds": 0.001950979232788086,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "DecisionTree_Baseline": {
+            "candidate_name": "DecisionTree_Baseline",
+            "description": "Current production baseline: DecisionTree (depth=15, balanced weights)",
+            "weighting_strategy": "none",
+            "fit_time_seconds": 0.0001010894775390625,
+            "eval_time_seconds": 0.002073049545288086,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "RandomForest_Baseline": {
+            "candidate_name": "RandomForest_Baseline",
+            "description": "Current production baseline: RandomForest (depth=12, 30 trees, balanced weights)",
+            "weighting_strategy": "none",
+            "fit_time_seconds": 8.487701416015625e-05,
+            "eval_time_seconds": 0.002032041549682617,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        },
+        "XGBoost_Baseline": {
+            "candidate_name": "XGBoost_Baseline",
+            "description": "Current production baseline: XGBoost (depth=6, 50 trees, balanced weights)",
+            "weighting_strategy": "balanced",
+            "fit_time_seconds": 9.083747863769531e-05,
+            "eval_time_seconds": 0.0019538402557373047,
+            "val_accuracy": 0.16666666666666666,
+            "val_macro_f1": 0.04081632653061224,
+            "val_macro_precision": 0.023809523809523808,
+            "val_macro_recall": 0.14285714285714285,
+            "val_weighted_f1": 0.04761904761904761,
+            "per_class_metrics": {
+                "Benign": {
+                    "precision": 0.16666666666666666,
+                    "recall": 1.0,
+                    "f1-score": 0.2857142857142857,
+                    "support": 5
+                },
+                "DDoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 5
+                },
+                "DoS": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Botnet": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Infiltration": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Brute Force": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "Web Attack": {
+                    "precision": 0.0,
+                    "recall": 0.0,
+                    "f1-score": 0.0,
+                    "support": 4
+                },
+                "accuracy": 0.16666666666666666,
+                "macro avg": {
+                    "precision": 0.023809523809523808,
+                    "recall": 0.14285714285714285,
+                    "f1-score": 0.04081632653061224,
+                    "support": 30
+                },
+                "weighted avg": {
+                    "precision": 0.027777777777777776,
+                    "recall": 0.16666666666666666,
+                    "f1-score": 0.04761904761904761,
+                    "support": 30
+                }
+            },
+            "confusion_matrix_dict": {
+                "Benign": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DDoS": {
+                    "Benign": 5,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "DoS": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Botnet": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Infiltration": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Brute Force": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                },
+                "Web Attack": {
+                    "Benign": 4,
+                    "DDoS": 0,
+                    "DoS": 0,
+                    "Botnet": 0,
+                    "Infiltration": 0,
+                    "Brute Force": 0,
+                    "Web Attack": 0
+                }
+            }
+        }
+    },
+    "feature_representation_comparison": {
+        "all_77": {
+            "representation": "all_77",
+            "feature_count": 77,
+            "val_macro_f1": 0.04081632653061224,
+            "val_accuracy": 0.16666666666666666,
+            "fit_time_seconds": 3.695487976074219e-05
+        },
+        "curated_subset": {
+            "representation": "curated_subset",
+            "feature_count": 77,
+            "val_macro_f1": 0.04081632653061224,
+            "val_accuracy": 0.16666666666666666,
+            "fit_time_seconds": 3.814697265625e-05
+        },
+        "engineered": {
+            "representation": "engineered",
+            "feature_count": 77,
+            "val_macro_f1": 0.04081632653061224,
+            "val_accuracy": 0.16666666666666666,
+            "fit_time_seconds": 3.695487976074219e-05
+        }
+    },
+    "threshold_tuning": {
+        "baseline": {
+            "accuracy": 0.16666666666666666,
+            "macro_f1": 0.04081632653061224,
+            "benign_fpr": 0.0
+        },
+        "optimized": {
+            "accuracy": 0.16666666666666666,
+            "macro_f1": 0.04081632653061224,
+            "multipliers": {
+                "Benign": 1.0,
+                "DDoS": 1.0,
+                "DoS": 1.0,
+                "Botnet": 1.0,
+                "Infiltration": 1.0,
+                "Brute Force": 1.0,
+                "Web Attack": 1.0
+            },
+            "benign_fpr": 0.0
+        },
+        "profiles_evaluated": [
+            {
+                "benign_multiplier": 1.0,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 1.1,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 1.25,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 1.5,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 1.75,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 2.0,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 2.5,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 3.0,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            },
+            {
+                "benign_multiplier": 4.0,
+                "macro_f1": 0.04081632653061224,
+                "accuracy": 0.16666666666666666,
+                "benign_fpr": 0.0
+            }
+        ]
+    },
+    "recommendations": {
+        "model": "HistGradientBoosting",
+        "feature_representation": "all_77",
+        "class_weighting": "sqrt_balanced",
+        "training_command": "python3 -m utils.train_models --dataset IDS2018 --model histgradientboosting --force"
+    }
+}

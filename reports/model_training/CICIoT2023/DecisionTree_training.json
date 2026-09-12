@@ -1,7 +1,7 @@
 {
     "dataset": "CICIoT2023",
     "model_name": "DecisionTree",
-    "fit_duration_seconds": 4.57763671875e-05,
+    "fit_duration_seconds": 4.482269287109375e-05,
     "train_row_count": 60,
     "validation_metrics": {
         "Accuracy": 0.8,

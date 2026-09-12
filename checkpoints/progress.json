@@ -7,7 +7,12 @@
         "data_preparation_started": true,
         "ids2018_preparation_status": "Success",
         "ciciot2023_preparation_status": "Success",
-        "leakage_check_completed": true
+        "leakage_check_completed": true,
+        "ids2018_model_training_status": "completed",
+        "arp_spoofing_model_training_status": "completed",
+        "ciciot2023_model_training_status": "completed",
+        "ip_spoofing_model_training_status": "completed",
+        "dns_tunneling_model_training_status": "completed"
     },
     "preparation_metadata": {
         "timestamp": 1788588562.533073,

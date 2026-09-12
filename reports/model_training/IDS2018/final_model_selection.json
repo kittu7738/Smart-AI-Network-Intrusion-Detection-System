@@ -143,9 +143,7 @@
         }
     },
     "comparison": {
-        "DecisionTree": 0.04081632653061224,
-        "RandomForest": 0.04081632653061224,
-        "XGBoost": 0.04081632653061224
+        "DecisionTree": 0.04081632653061224
     },
     "sampling_details": {
         "sampled": false,

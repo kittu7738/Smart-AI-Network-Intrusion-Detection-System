@@ -1,7 +1,7 @@
 {
     "dataset": "IP_Spoofing",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 0.00010609626770019531,
+    "fit_duration_seconds": 7.510185241699219e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,

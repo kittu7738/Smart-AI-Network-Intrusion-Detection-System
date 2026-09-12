@@ -1,7 +1,7 @@
 {
     "dataset": "CICIoT2023",
     "model_name": "XGBoost",
-    "fit_duration_seconds": 8.487701416015625e-05,
+    "fit_duration_seconds": 7.295608520507812e-05,
     "train_row_count": 60,
     "validation_metrics": {
         "Accuracy": 0.8,

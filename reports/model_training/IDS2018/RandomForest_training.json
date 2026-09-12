@@ -1,7 +1,7 @@
 {
     "dataset": "IDS2018",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 9.083747863769531e-05,
+    "fit_duration_seconds": 7.605552673339844e-05,
     "train_row_count": 60,
     "validation_metrics": {
         "Accuracy": 0.16666666666666666,

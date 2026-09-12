@@ -1,7 +1,7 @@
 {
     "dataset": "ARP_Spoofing",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 9.083747863769531e-05,
+    "fit_duration_seconds": 8.130073547363281e-05,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,

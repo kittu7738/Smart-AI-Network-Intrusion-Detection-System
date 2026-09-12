@@ -16,7 +16,11 @@ from utils.train_models import (
     load_specialist_splits,
     sample_training_data,
     train_specialist,
+    train_all_specialists,
     get_model_instance,
+    update_checkpoint,
+    check_status,
+    normalize_model_name,
     DecisionTreeClassifier
 )
 
@@ -315,6 +319,86 @@ class TestSpecialistTraining(unittest.TestCase):
             self.assertIn("canonical_mapping", metrics)
             self.assertEqual(metrics["canonical_mapping"]["Benign"], 0)
             self.assertEqual(metrics["canonical_mapping"]["DoS"], 2)
+
+    def test_checkpoint_resilience_to_boolean_and_corrupted_schema(self):
+        """Checkpoint update and check must survive boolean, string, or corrupted schemas in progress.json."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            ckpt_file = os.path.join(tmpdir, "checkpoints", "progress.json")
+            os.makedirs(os.path.dirname(ckpt_file), exist_ok=True)
+
+            # Scenario 1: Exact Colab error - "model_training" is a boolean True
+            with open(ckpt_file, "w") as f:
+                json.dump({"checkpoints": {}, "model_training": True}, f)
+
+            from unittest.mock import patch
+            with patch("utils.train_models.resolve_path", return_value=ckpt_file):
+                # Must NOT raise TypeError: argument of type 'bool' is not iterable
+                update_checkpoint("IDS2018", "DecisionTree", "running")
+                self.assertEqual(check_status("IDS2018", "DecisionTree"), "running")
+
+                update_checkpoint("IDS2018", "DecisionTree", "completed")
+                self.assertEqual(check_status("IDS2018", "DecisionTree"), "completed")
+
+                # Verify all 5 specialists and all statuses
+                for spec in ["IDS2018", "CICIoT2023", "ARP_Spoofing", "IP_Spoofing", "DNS_Tunneling"]:
+                    for st in ["pending", "running", "completed", "failed"]:
+                        update_checkpoint(spec, "RandomForest", st)
+                        self.assertEqual(check_status(spec, "RandomForest"), st)
+
+            # Scenario 2: "model_training" is a string
+            with open(ckpt_file, "w") as f:
+                json.dump({"model_training": "corrupted_string_value"}, f)
+
+            with patch("utils.train_models.resolve_path", return_value=ckpt_file):
+                update_checkpoint("CICIoT2023", "XGBoost", "running")
+                self.assertEqual(check_status("CICIoT2023", "XGBoost"), "running")
+
+            # Scenario 3: progress.json has invalid JSON syntax
+            with open(ckpt_file, "w") as f:
+                f.write("{invalid_json: true, broken...")
+
+            with patch("utils.train_models.resolve_path", return_value=ckpt_file):
+                update_checkpoint("DNS_Tunneling", "DecisionTree", "completed")
+                self.assertEqual(check_status("DNS_Tunneling", "DecisionTree"), "completed")
+
+    def test_model_alias_normalization(self):
+        """Model aliases (dt, rf, xgb, decision_tree, etc.) must normalize correctly."""
+        self.assertEqual(normalize_model_name("dt"), "DecisionTree")
+        self.assertEqual(normalize_model_name("decision_tree"), "DecisionTree")
+        self.assertEqual(normalize_model_name("decisiontree"), "DecisionTree")
+        self.assertEqual(normalize_model_name("DecisionTree"), "DecisionTree")
+
+        self.assertEqual(normalize_model_name("rf"), "RandomForest")
+        self.assertEqual(normalize_model_name("random_forest"), "RandomForest")
+        self.assertEqual(normalize_model_name("randomforest"), "RandomForest")
+        self.assertEqual(normalize_model_name("RandomForest"), "RandomForest")
+
+        self.assertEqual(normalize_model_name("xgb"), "XGBoost")
+        self.assertEqual(normalize_model_name("xgboost"), "XGBoost")
+        self.assertEqual(normalize_model_name("XGBoost"), "XGBoost")
+
+    def test_cli_dataset_selection(self):
+        """train_all_specialists must support single specialist and comma-separated specialist lists."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        # Single specialist selection
+        results_single = train_all_specialists(
+            config=config,
+            smoke_test=True,
+            target_dataset="IDS2018",
+            selected_model="dt"
+        )
+        self.assertEqual(list(results_single.keys()), ["IDS2018"])
+
+        # Comma-separated specialist selection
+        results_multi = train_all_specialists(
+            config=config,
+            smoke_test=True,
+            target_dataset="ids2018, arp",
+            selected_model="dt"
+        )
+        self.assertEqual(list(results_multi.keys()), ["IDS2018", "ARP_Spoofing"])
 
 
 if __name__ == "__main__":

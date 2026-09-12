@@ -1,7 +1,7 @@
 {
     "dataset": "CICIoT2023",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 7.867813110351562e-05,
+    "fit_duration_seconds": 8.821487426757812e-05,
     "train_row_count": 60,
     "validation_metrics": {
         "Accuracy": 0.8,

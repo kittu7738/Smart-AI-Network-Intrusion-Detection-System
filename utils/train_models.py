@@ -40,6 +40,10 @@ except ImportError:
     class DecisionTreeClassifier:
         def __init__(self, random_state=42, max_depth=None, class_weight=None, **kwargs):
             self.random_state = random_state
+            self.max_depth = max_depth
+            self.class_weight = class_weight
+            for k, v in kwargs.items():
+                setattr(self, k, v)
             self.classes_ = None
             self.majority_ = 0
             
@@ -71,10 +75,17 @@ except ImportError:
         w_dict = {c: float(n_samples / (n_classes * np.sum(y == c))) for c in classes}
         return np.array([w_dict[c] for c in y], dtype=np.float32)
 
+import gc
 from utils.data_preparation import resolve_path, load_config
 from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID
 from utils.specialist_preprocessor import SpecialistPreprocessor
-from utils.specialist_evaluator import evaluate_model, predict_batched
+from utils.specialist_evaluator import evaluate_model, evaluate_dataset_streamed, predict_batched
+
+if hasattr(sys.stdout, "reconfigure"):
+    try:
+        sys.stdout.reconfigure(line_buffering=True)
+    except Exception:
+        pass
 
 SEED = 42
 
@@ -208,17 +219,17 @@ def sample_training_data(
     n_classes = len(class_counts)
     target_per_class = max(1, max_samples // n_classes)
     
-    sampled_chunks = []
+    sampled_indices = []
     for cls_name, count in class_counts.items():
-        cls_df = train_df[train_df[target_col] == cls_name]
+        cls_idx = train_df.index[train_df[target_col] == cls_name]
         if count <= target_per_class:
             # Preserve 100% of minority class
-            sampled_chunks.append(cls_df)
+            sampled_indices.extend(cls_idx)
         else:
             # Downsample majority class deterministically
-            sampled_chunks.append(cls_df.sample(n=target_per_class, random_state=seed))
+            sampled_indices.extend(cls_idx.to_series().sample(n=target_per_class, random_state=seed))
             
-    sampled_df = pd.concat(sampled_chunks).sample(frac=1, random_state=seed).reset_index(drop=True)
+    sampled_df = train_df.loc[sampled_indices].sample(frac=1, random_state=seed).reset_index(drop=True)
     return sampled_df, {
         "sampled": True,
         "original_train_rows": n_rows,
@@ -233,9 +244,14 @@ def load_specialist_splits(
     split_type: str = None,
     smoke_test: bool = False,
     random_seed: int = None,
-    seed: int = 42
+    seed: int = 42,
+    lazy_val_test: bool = False
 ):
-    """Load train, validation, and test splits for a specialist model."""
+    """Load train, validation, and test splits for a specialist model.
+    
+    If lazy_val_test is True, validation and test sets are returned as Parquet file paths
+    (or derived DataFrames if calculated in-memory) to avoid loading 1.8M unused rows into RAM.
+    """
     if random_seed is not None:
         seed = random_seed
         
@@ -267,34 +283,52 @@ def load_specialist_splits(
         
     if split_type == "train_val_test":
         train_df = pd.read_parquet(train_path)
+        if smoke_test:
+            val_df = pd.read_parquet(val_path).head(30) if os.path.exists(val_path) else None
+            test_df = pd.read_parquet(test_path).head(30) if os.path.exists(test_path) else None
+            return train_df.head(60), val_df, test_df
+        if lazy_val_test:
+            return train_df, val_path, test_path
+            
         val_df = pd.read_parquet(val_path) if os.path.exists(val_path) else None
         test_df = pd.read_parquet(test_path) if os.path.exists(test_path) else None
-        
         if val_df is None or test_df is None:
             raise FileNotFoundError(f"Expected train, val, and test parquets for {spec_name}.")
+        return train_df, val_df, test_df
             
     elif split_type == "train_test":
         train_full = pd.read_parquet(train_path)
-        test_df = pd.read_parquet(test_path)
         # Deterministically derive validation split strictly from training data
         train_df, val_df = split_stratified_train_val(train_full, "final_label", val_ratio=0.2, seed=seed)
+        del train_full
+        
+        if smoke_test:
+            test_df = pd.read_parquet(test_path).head(30) if os.path.exists(test_path) else None
+            return train_df.head(60), val_df.head(30), test_df
+        if lazy_val_test:
+            return train_df, val_df, test_path
+            
+        test_df = pd.read_parquet(test_path)
+        return train_df, val_df, test_df
         
     elif split_type == "train_val_as_test":
         train_full = pd.read_parquet(train_path)
-        # val.parquet acts as the independent held-out final test set
-        test_df = pd.read_parquet(val_path)
         # Deterministically derive validation split strictly from training data
         train_df, val_df = split_stratified_train_val(train_full, "final_label", val_ratio=0.2, seed=seed)
+        del train_full
+        
+        if smoke_test:
+            test_df = pd.read_parquet(val_path).head(30) if os.path.exists(val_path) else None
+            return train_df.head(60), val_df.head(30), test_df
+        if lazy_val_test:
+            # val.parquet acts as the independent held-out final test set
+            return train_df, val_df, val_path
+            
+        test_df = pd.read_parquet(val_path)
+        return train_df, val_df, test_df
         
     else:
         raise ValueError(f"Unknown split type '{split_type}' for specialist {spec_name}.")
-        
-    if smoke_test:
-        train_df = train_df.head(60)
-        val_df = val_df.head(30)
-        test_df = test_df.head(30)
-        
-    return train_df, val_df, test_df
 
 def generate_smoke_test_splits(spec_name: str, config: dict):
     """Generate minimal synthetic splits for smoke testing without dataset files."""
@@ -310,19 +344,61 @@ def generate_smoke_test_splits(spec_name: str, config: dict):
         
     return make_df(60), make_df(30), make_df(30)
 
+def get_model_instance(model_name: str, smoke_test: bool = False):
+    """Instantiate a single candidate model with memory-safe conservative configuration for Colab CPU/RAM."""
+    if smoke_test:
+        if model_name == "DecisionTree":
+            return DecisionTreeClassifier(max_depth=3, random_state=SEED)
+        elif model_name == "RandomForest":
+            return RandomForestClassifier(n_estimators=2, max_depth=3, random_state=SEED, n_jobs=1)
+        elif model_name == "XGBoost":
+            return XGBClassifier(n_estimators=2, max_depth=3, random_state=SEED, eval_metric="mlogloss", n_jobs=1)
+        else:
+            raise ValueError(f"Unknown model name: {model_name}")
+
+    if model_name == "DecisionTree":
+        # Lightweight baseline: max_depth=15 prevents uncontrolled combinatorial leaf growth
+        return DecisionTreeClassifier(
+            max_depth=15, 
+            min_samples_leaf=5, 
+            random_state=SEED, 
+            class_weight="balanced"
+        )
+    elif model_name == "RandomForest":
+        # Conservative RF configuration for Colab CPU/RAM:
+        # 30 trees with max_depth=12, max_samples=0.25 (bootstrap subsample fraction), n_jobs=1 to avoid process duplication
+        return RandomForestClassifier(
+            n_estimators=30, 
+            max_depth=12, 
+            min_samples_leaf=10,
+            max_samples=0.25,
+            random_state=SEED, 
+            class_weight="balanced", 
+            n_jobs=1
+        )
+    elif model_name == "XGBoost":
+        # Conservative XGBoost configuration for Colab CPU/RAM:
+        # tree_method="hist" uses fast, low-memory histogram binning (256 bins) instead of greedy exact splitting.
+        # n_jobs=2 utilizes Colab's 2 vCPUs safely without oversubscribing.
+        return XGBClassifier(
+            n_estimators=50, 
+            max_depth=6, 
+            learning_rate=0.1, 
+            tree_method="hist",
+            subsample=0.8,
+            colsample_bytree=0.8,
+            random_state=SEED, 
+            eval_metric="mlogloss", 
+            n_jobs=2
+        )
+    else:
+        raise ValueError(f"Unknown model name: {model_name}")
+
 def build_model_instances(smoke_test: bool = False):
     """Build standard model architectures with deterministic seed."""
-    if smoke_test:
-        return {
-            "DecisionTree": DecisionTreeClassifier(max_depth=3, random_state=SEED),
-            "RandomForest": RandomForestClassifier(n_estimators=2, max_depth=3, random_state=SEED, n_jobs=-1),
-            "XGBoost": XGBClassifier(n_estimators=2, max_depth=3, random_state=SEED, eval_metric="mlogloss", n_jobs=-1)
-        }
-        
     return {
-        "DecisionTree": DecisionTreeClassifier(random_state=SEED, class_weight="balanced"),
-        "RandomForest": RandomForestClassifier(n_estimators=100, max_depth=20, random_state=SEED, class_weight="balanced", n_jobs=-1),
-        "XGBoost": XGBClassifier(n_estimators=100, max_depth=6, learning_rate=0.1, random_state=SEED, eval_metric="mlogloss", n_jobs=-1)
+        m: get_model_instance(m, smoke_test=smoke_test)
+        for m in ["DecisionTree", "RandomForest", "XGBoost"]
     }
 
 def train_specialist(
@@ -334,139 +410,194 @@ def train_specialist(
     model_names: list = None,
     save_artifacts: bool = True
 ):
-    """Train, evaluate, and select best model for a specialist dataset."""
+    """Train, evaluate, and select best model for a specialist dataset with strict memory safety."""
     if config is None:
         config = load_config()
         
     spec_info = SPECIALIST_SPECS[spec_name]
     expected_classes = config["classes"][spec_info["config_class_key"]]
     
-    print(f"\n=======================================================")
-    print(f"SPECIALIST PIPELINE: {spec_name}")
-    print(f"Description: {spec_info['description']}")
-    print(f"Expected classes ({len(expected_classes)}): {expected_classes}")
-    print(f"=======================================================")
+    print(f"\n=======================================================", flush=True)
+    print(f"SPECIALIST PIPELINE: {spec_name}", flush=True)
+    print(f"Description: {spec_info['description']}", flush=True)
+    print(f"Expected classes ({len(expected_classes)}): {expected_classes}", flush=True)
+    print(f"=======================================================", flush=True)
     
-    # 1. Load Data Splits
-    train_df, val_df, test_df = load_specialist_splits(spec_name, config, smoke_test=smoke_test)
-    print(f"Raw splits loaded: Train={len(train_df)} | Val={len(val_df)} | Test={len(test_df)}")
+    model_dir = resolve_path(os.path.join("models", spec_name))
+    report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
+    if save_artifacts:
+        os.makedirs(model_dir, exist_ok=True)
+        os.makedirs(report_dir, exist_ok=True)
+
+    # 1. Load Data Splits (lazy validation and test references avoid loading 1.8M unused rows into RAM)
+    train_df, val_source, test_source = load_specialist_splits(
+        spec_name, config, smoke_test=smoke_test, lazy_val_test=True
+    )
+    n_train_raw = len(train_df)
+    val_repr = len(val_source) if isinstance(val_source, pd.DataFrame) else "disk (streamed)"
+    test_repr = len(test_source) if isinstance(test_source, pd.DataFrame) else "disk (streamed)"
+    print(f"Raw splits initialized: Train={n_train_raw} | Val={val_repr} | Test={test_repr}", flush=True)
     
     # 2. Memory-Safe Training Sampling (if needed)
     train_sampled, sampling_meta = sample_training_data(
         train_df, target_col="final_label", max_samples=max_train_samples, seed=SEED
     )
+    del train_df
+    gc.collect()
+    
     if sampling_meta["sampled"]:
-        print(f"Training downsampled for memory safety: {sampling_meta['original_train_rows']} -> {sampling_meta['used_train_rows']} rows.")
+        print(f"Training downsampled for memory safety: {sampling_meta['original_train_rows']} -> {sampling_meta['used_train_rows']} rows.", flush=True)
     else:
-        print(f"Training on 100% of available training data ({len(train_sampled)} rows).")
+        print(f"Training on 100% of available training data ({len(train_sampled)} rows).", flush=True)
         
-    # 3. Fit Preprocessing ONLY on training data
+    # 3. Fit Preprocessor strictly on training data
     preprocessor = SpecialistPreprocessor(
         dataset_name=spec_name, 
         expected_classes=expected_classes,
         scale_features=True
     )
     preprocessor.fit(train_sampled)
-    print(f"Preprocessor fitted on {preprocessor.n_features_in_} numeric features.")
+    print(f"Preprocessor fitted on {preprocessor.n_features_in_} numeric features.", flush=True)
     
-    # Transform features and labels
+    preproc_path = os.path.join(model_dir, "preprocessor.joblib")
+    if save_artifacts:
+        preprocessor.save(preproc_path)
+
+    # Materialize ONLY the training matrix in float32
     X_train = preprocessor.transform_features(train_sampled)
     y_train = preprocessor.transform_labels(train_sampled)
+    train_row_count = len(X_train)
     
-    X_val = preprocessor.transform_features(val_df)
-    y_val = preprocessor.transform_labels(val_df)
+    # Free raw sampled training dataframe immediately
+    del train_sampled
+    gc.collect()
+    print(f"Training matrix materialized in float32: shape={X_train.shape} ({X_train.nbytes / 1e6:.1f} MB).", flush=True)
     
-    X_test = preprocessor.transform_features(test_df)
-    y_test = preprocessor.transform_labels(test_df)
-    
-    # Setup output directories
-    model_dir = resolve_path(os.path.join("models", spec_name))
-    report_dir = resolve_path(os.path.join("reports", "model_training", spec_name))
-    os.makedirs(model_dir, exist_ok=True)
-    os.makedirs(report_dir, exist_ok=True)
-    
-    preproc_path = None
-    if save_artifacts:
-        # Save preprocessor artifact
-        preproc_path = preprocessor.save(os.path.join(model_dir, "preprocessor.joblib"))
-    
-    # 4. Model Training and Validation Evaluation
-    models = build_model_instances(smoke_test=smoke_test)
+    # Determine candidate models to run
+    candidate_names = ["DecisionTree", "RandomForest", "XGBoost"]
     if model_names:
-        models = {k: v for k, v in models.items() if k in model_names}
+        candidate_names = [m for m in candidate_names if m in model_names]
     elif selected_model:
-        if selected_model not in models:
-            raise ValueError(f"Requested model '{selected_model}' not available. Choose from {list(models.keys())}")
-        models = {selected_model: models[selected_model]}
+        if selected_model not in candidate_names:
+            raise ValueError(f"Requested model '{selected_model}' not available. Choose from {candidate_names}")
+        candidate_names = [selected_model]
         
     val_results = {}
-    fitted_models = {}
     training_times = {}
+    in_memory_models = {}
     
-    for model_name, model_inst in models.items():
-        status = check_status(spec_name, model_name)
+    # Compute sample weights once if XGBoost is in candidate list
+    xgb_sample_weights = None
+    if "XGBoost" in candidate_names:
+        xgb_sample_weights = compute_sample_weight("balanced", y_train)
+        
+    # 4. Sequential Model Training & Validation Evaluation
+    for model_name in candidate_names:
         report_file = os.path.join(report_dir, f"{model_name}_training.json")
         model_file = os.path.join(model_dir, f"{model_name}.joblib")
+        status = check_status(spec_name, model_name)
         
-        print(f"\n--- Training {spec_name} :: {model_name} ---")
-        t0 = time.time()
-        
-        # Apply class weights
-        classes_present = np.unique(y_train)
-        if model_name == "XGBoost":
-            sample_weights = compute_sample_weight("balanced", y_train)
-            model_inst.fit(X_train, y_train, sample_weight=sample_weights)
-        else:
-            model_inst.fit(X_train, y_train)
-            
-        fit_duration = time.time() - t0
-        training_times[model_name] = fit_duration
-        print(f"Fit completed in {fit_duration:.2f}s.")
-        
-        if save_artifacts:
-            # Save model weights
-            joblib.dump(model_inst, model_file)
-        fitted_models[model_name] = model_inst
-        
-        # Evaluate on FULL validation set (batched)
-        val_metrics = evaluate_model(model_inst, X_val, y_val, expected_classes)
-        val_results[model_name] = val_metrics
-        print(f"Validation Macro F1: {val_metrics['Macro F1']:.4f} | Accuracy: {val_metrics['Accuracy']:.4f}")
-        
-        if save_artifacts:
-            # Save individual model report
-            report_data = {
-                "dataset": spec_name,
-                "model_name": model_name,
-                "fit_duration_seconds": fit_duration,
-                "train_row_count": len(X_train),
-                "val_row_count": len(X_val),
-                "validation_metrics": val_metrics,
-                "sampling_details": sampling_meta
-            }
-            with open(report_file, "w") as f:
-                json.dump(report_data, f, indent=4)
+        # Checkpoint / resume: skip completed models if valid artifacts already exist
+        if not smoke_test and save_artifacts and status == "completed" and os.path.exists(report_file) and os.path.exists(model_file):
+            print(f"\n[Checkpoint] Skipping {spec_name} :: {model_name} (already completed).", flush=True)
+            try:
+                with open(report_file, "r") as f:
+                    r = json.load(f)
+                    val_results[model_name] = r["validation_metrics"]
+                    training_times[model_name] = r.get("fit_duration_seconds", 0.0)
+                    continue
+            except Exception as e:
+                print(f"Failed to read cached report for {model_name} ({e}). Re-training...", flush=True)
                 
-            update_checkpoint(spec_name, model_name, "completed")
+        print(f"\n--- Training {spec_name} :: {model_name} ---", flush=True)
+        if save_artifacts:
+            update_checkpoint(spec_name, model_name, "running")
         
-    # 5. Model Selection (Strictly based on Validation Macro F1)
+        # Instantiate ONLY the single model instance
+        model_inst = get_model_instance(model_name, smoke_test=smoke_test)
+        
+        t0 = time.time()
+        try:
+            if model_name == "XGBoost":
+                model_inst.fit(X_train, y_train, sample_weight=xgb_sample_weights)
+            else:
+                model_inst.fit(X_train, y_train)
+            fit_duration = time.time() - t0
+            training_times[model_name] = fit_duration
+            print(f"Fit completed in {fit_duration:.2f}s.", flush=True)
+            
+            if save_artifacts:
+                joblib.dump(model_inst, model_file)
+            else:
+                in_memory_models[model_name] = model_inst
+                
+            # Batched validation evaluation (streams chunks, memory-safe)
+            val_metrics = evaluate_dataset_streamed(
+                model_inst, val_source, preprocessor, expected_classes, batch_size=100000
+            )
+            val_results[model_name] = val_metrics
+            print(f"Validation Macro F1: {val_metrics['Macro F1']:.4f} | Accuracy: {val_metrics['Accuracy']:.4f}", flush=True)
+            
+            if save_artifacts:
+                report_data = {
+                    "dataset": spec_name,
+                    "model_name": model_name,
+                    "fit_duration_seconds": fit_duration,
+                    "train_row_count": train_row_count,
+                    "validation_metrics": val_metrics,
+                    "sampling_details": sampling_meta
+                }
+                with open(report_file, "w") as f:
+                    json.dump(report_data, f, indent=4)
+                update_checkpoint(spec_name, model_name, "completed")
+            
+        except Exception as e:
+            if save_artifacts:
+                update_checkpoint(spec_name, model_name, "failed")
+            print(f"ERROR fitting {model_name}: {e}", flush=True)
+            raise e
+            
+        finally:
+            if save_artifacts:
+                del model_inst
+                gc.collect()
+            
+    # 5. Free training data completely before test evaluation phase
+    del X_train, y_train, xgb_sample_weights
+    gc.collect()
+    
+    # 6. Model Selection (Strictly based on Validation Macro F1)
     best_model_name = max(val_results.keys(), key=lambda m: val_results[m]["Macro F1"])
-    best_model = fitted_models[best_model_name]
     best_val_f1 = val_results[best_model_name]["Macro F1"]
-    print(f"\n>> Selected Best Model for {spec_name}: {best_model_name} (Val Macro F1 = {best_val_f1:.4f})")
+    print(f"\n>> Selected Best Model for {spec_name}: {best_model_name} (Val Macro F1 = {best_val_f1:.4f})", flush=True)
     
-    # 6. Final Evaluation on complete Test Set (ONCE)
-    print(f"Evaluating best model ({best_model_name}) on FULL test set ({len(X_test)} rows)...")
-    test_metrics = evaluate_model(best_model, X_test, y_test, expected_classes)
-    print(f"Final Test Macro F1: {test_metrics['Macro F1']:.4f} | Test Accuracy: {test_metrics['Accuracy']:.4f}")
+    # 7. Final Evaluation on Complete Test Set (ONCE)
+    print(f"Loading best model ({best_model_name}) for final test evaluation...", flush=True)
+    if save_artifacts:
+        best_model_path = os.path.join(model_dir, f"{best_model_name}.joblib")
+        best_model = joblib.load(best_model_path)
+    else:
+        best_model = in_memory_models[best_model_name]
+        best_model_path = os.path.join(model_dir, f"{best_model_name}.joblib")
     
-    # 7. Generate Metadata & Final Selection Report
+    test_metrics = evaluate_dataset_streamed(
+        best_model, test_source, preprocessor, expected_classes, batch_size=100000
+    )
+    test_row_count = sum(c["support"] for c in test_metrics["Per Class"].values() if isinstance(c, dict) and "support" in c)
+    print(f"Final Test Evaluation ({test_row_count} rows): Macro F1: {test_metrics['Macro F1']:.4f} | Accuracy: {test_metrics['Accuracy']:.4f}", flush=True)
+    
+    # Free best model
+    del best_model
+    in_memory_models.clear()
+    gc.collect()
+    
+    # 8. Generate Metadata & Final Selection Report
     final_selection_report = {
         "dataset": spec_name,
         "best_model": best_model_name,
         "selection_metric": "Validation Macro F1",
         "validation_macro_f1": best_val_f1,
-        "test_row_count": len(X_test),
+        "test_row_count": test_row_count,
         "test_metrics": test_metrics,
         "comparison": {m: val_results[m]["Macro F1"] for m in val_results},
         "sampling_details": sampling_meta
@@ -474,7 +605,8 @@ def train_specialist(
     if save_artifacts:
         with open(os.path.join(report_dir, "final_model_selection.json"), "w") as f:
             json.dump(final_selection_report, f, indent=4)
-        
+            
+    val_row_count = sum(c["support"] for c in val_results[best_model_name]["Per Class"].values() if isinstance(c, dict) and "support" in c)
     metadata = {
         "dataset": spec_name,
         "model_name": best_model_name,
@@ -484,11 +616,11 @@ def train_specialist(
         "canonical_label_list": expected_classes,
         "local_label_to_id": preprocessor.local_label_to_id,
         "local_id_to_canonical_id": preprocessor.local_id_to_canonical_id,
-        "training_row_count": len(X_train),
-        "validation_row_count": len(X_val),
-        "test_row_count": len(X_test),
+        "training_row_count": train_row_count,
+        "validation_row_count": val_row_count,
+        "test_row_count": test_row_count,
         "preprocessing_artifact_path": preproc_path,
-        "model_path": os.path.join(model_dir, f"{best_model_name}.joblib"),
+        "model_path": best_model_path,
         "random_seed": SEED,
         "training_duration_seconds": training_times.get(best_model_name, 0.0),
         "validation_metrics": val_results[best_model_name],
@@ -496,12 +628,12 @@ def train_specialist(
         "test_metrics": test_metrics,
         "sampling_details": sampling_meta
     }
-    
     if save_artifacts:
         with open(os.path.join(model_dir, "specialist_metadata.json"), "w") as f:
             json.dump(metadata, f, indent=4)
         update_checkpoint(spec_name, "best_model", best_model_name)
-        print(f"Artifacts and metadata saved under models/{spec_name}/ and reports/model_training/{spec_name}/")
+        update_checkpoint(spec_name, "status", "completed")
+        print(f"Artifacts and metadata saved under models/{spec_name}/ and reports/model_training/{spec_name}/", flush=True)
         
     return metadata
 

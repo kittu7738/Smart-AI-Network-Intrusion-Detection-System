@@ -7,13 +7,16 @@ import numpy as np
 import pandas as pd
 from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID
 from utils.specialist_preprocessor import SpecialistPreprocessor
-from utils.specialist_evaluator import evaluate_predictions, evaluate_model, predict_batched
+from utils.specialist_evaluator import (
+    evaluate_predictions, evaluate_model, evaluate_dataset_streamed, predict_batched
+)
 from utils.train_models import (
     SPECIALIST_SPECS,
     resolve_specialist_name,
     load_specialist_splits,
     sample_training_data,
     train_specialist,
+    get_model_instance,
     DecisionTreeClassifier
 )
 
@@ -178,5 +181,89 @@ class TestSpecialistTraining(unittest.TestCase):
             self.assertIn("test_metrics", results)
             self.assertIn("Macro F1", results["test_metrics"])
 
+    def test_conservative_model_configurations(self):
+        """Model configurations must be conservative to prevent OS kill on Colab CPU/RAM."""
+        dt = get_model_instance("DecisionTree", smoke_test=False)
+        rf = get_model_instance("RandomForest", smoke_test=False)
+        xgb = get_model_instance("XGBoost", smoke_test=False)
+
+        # DecisionTree max_depth bounded
+        self.assertTrue(hasattr(dt, "max_depth"))
+        self.assertLessEqual(getattr(dt, "max_depth", 15), 15)
+
+        # RandomForest conservative estimators and subsampling
+        self.assertLessEqual(getattr(rf, "n_estimators", 30), 50)
+        self.assertLessEqual(getattr(rf, "max_depth", 12), 15)
+        self.assertLessEqual(getattr(rf, "n_jobs", 1), 2)
+        if hasattr(rf, "max_samples"):
+            self.assertIsNotNone(rf.max_samples)
+            self.assertLessEqual(rf.max_samples, 0.5)
+
+        # XGBoost conservative histogram method and jobs
+        self.assertLessEqual(getattr(xgb, "n_estimators", 50), 60)
+        self.assertLessEqual(getattr(xgb, "max_depth", 6), 8)
+        self.assertLessEqual(getattr(xgb, "n_jobs", 2), 2)
+        if hasattr(xgb, "tree_method"):
+            self.assertEqual(xgb.tree_method, "hist")
+
+    def test_preprocessor_float32_output(self):
+        """Preprocessor must produce float32 feature matrices and int32 labels to halve memory."""
+        df = pd.DataFrame({
+            "f1": [1.0, 2.0, 3.0, 4.0],
+            "f2": [10.0, 20.0, np.nan, 40.0],
+            "final_label": ["Benign", "DDoS", "Benign", "DDoS"]
+        })
+        prep = SpecialistPreprocessor(dataset_name="TestSpec")
+        X, y = prep.fit_transform(df)
+
+        self.assertEqual(X.dtype, np.float32)
+        self.assertEqual(y.dtype, np.int32)
+        self.assertFalse(np.isnan(X).any())
+
+    def test_streamed_dataset_evaluation(self):
+        """evaluate_dataset_streamed must evaluate data in memory-safe batches without full duplication."""
+        df = pd.DataFrame({
+            "f1": np.random.randn(100).astype(np.float32),
+            "final_label": ["Benign"] * 50 + ["DDoS"] * 50
+        })
+        prep = SpecialistPreprocessor(dataset_name="TestSpec")
+        prep.fit(df)
+
+        model = DecisionTreeClassifier(random_state=42)
+        X, y = prep.transform(df)
+        model.fit(X, y)
+
+        metrics = evaluate_dataset_streamed(
+            model=model,
+            data_source=df,
+            preprocessor=prep,
+            class_names=["Benign", "DDoS"],
+            batch_size=25
+        )
+        self.assertIn("Accuracy", metrics)
+        self.assertIn("Macro F1", metrics)
+        self.assertEqual(metrics["Per Class"]["Benign"]["support"], 50)
+        self.assertEqual(metrics["Per Class"]["DDoS"]["support"], 50)
+
+    def test_lazy_splits_loading(self):
+        """load_specialist_splits with lazy_val_test=True must return file paths for 3-way splits."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            df = pd.DataFrame({"f": [1.0, 2.0], "final_label": ["Benign", "DoS"]})
+            df.to_parquet(os.path.join(tmpdir, "train.parquet"), index=False)
+            df.to_parquet(os.path.join(tmpdir, "val.parquet"), index=False)
+            df.to_parquet(os.path.join(tmpdir, "test.parquet"), index=False)
+
+            train, val, test = load_specialist_splits(
+                tmpdir, split_type="train_val_test", lazy_val_test=True
+            )
+            # Train is loaded as DataFrame
+            self.assertIsInstance(train, pd.DataFrame)
+            # Val and Test are returned as string file paths
+            self.assertIsInstance(val, str)
+            self.assertIsInstance(test, str)
+            self.assertTrue(os.path.exists(val))
+            self.assertTrue(os.path.exists(test))
+
 if __name__ == "__main__":
     unittest.main()
+

@@ -1,50 +1,56 @@
 {
     "dataset": "IP_Spoofing",
-    "model": "RandomForest",
-    "feature_count": 8,
-    "training_row_count": 5000,
-    "validation_row_count": 1000,
-    "class_distribution": {
-        "Benign": 1000,
-        "IP Spoofing": 1000
-    },
-    "class_weights": {
-        "Benign": 1.0,
-        "IP Spoofing": 1.0
-    },
-    "training_duration": 1.5,
+    "model_name": "RandomForest",
+    "fit_duration_seconds": 5.817413330078125e-05,
+    "train_row_count": 2,
     "validation_metrics": {
-        "Accuracy": 0.96,
-        "Macro Precision": 0.95,
-        "Macro Recall": 0.9299999999999999,
-        "Macro F1": 0.94,
-        "Weighted F1": 0.95,
+        "Accuracy": 0.0,
+        "Macro Precision": 0.0,
+        "Macro Recall": 0.0,
+        "Macro F1": 0.0,
+        "Weighted F1": 0.0,
         "Per Class": {
             "Benign": {
-                "precision": 0.9,
-                "recall": 0.9,
-                "f1-score": 0.9,
-                "support": 100
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
             },
             "IP Spoofing": {
-                "precision": 0.9,
-                "recall": 0.9,
-                "f1-score": 0.9,
-                "support": 100
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
             }
         },
         "Confusion Matrix": [
             [
-                100,
-                5
+                0,
+                0
             ],
             [
-                5,
-                100
+                0,
+                0
             ]
         ]
     },
-    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/IP_Spoofing/RandomForest.joblib",
-    "random_seed": 42,
-    "completion_status": "Success"
+    "sampling_details": {
+        "sampled": false,
+        "original_train_rows": 2,
+        "used_train_rows": 2,
+        "sampling_method": "none"
+    }
 }

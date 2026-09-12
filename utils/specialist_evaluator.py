@@ -119,7 +119,69 @@ def evaluate_predictions(y_true: np.ndarray, y_pred: np.ndarray, class_names: li
         "Confusion Matrix": cm.tolist()
     }
 
-def evaluate_model(model, X: np.ndarray, y_true: np.ndarray, class_names: list, batch_size: int = 100000) -> dict:
-    """Evaluate a fitted model on given features and true labels using batched inference."""
+def evaluate_dataset_streamed(
+    model, 
+    data_source, 
+    preprocessor, 
+    class_names: list, 
+    batch_size: int = 100000
+) -> dict:
+    """Evaluate a fitted model on a dataset source without materializing all features in memory.
+    
+    data_source can be:
+    - Path to a Parquet file (str): streams batches directly from disk via PyArrow.
+    - pandas DataFrame: processes in slices without duplicating feature matrices.
+    
+    Memory guarantee:
+    At most one batch of transformed features (batch_size rows x n_features x 4 bytes)
+    is materialized in memory at any point in time.
+    """
+    import pandas as pd
+    all_y_true = []
+    all_y_pred = []
+    
+    if isinstance(data_source, str):
+        import pyarrow.parquet as pq
+        parquet_file = pq.ParquetFile(data_source)
+        for batch in parquet_file.iter_batches(batch_size=batch_size):
+            batch_df = batch.to_pandas()
+            X_batch = preprocessor.transform_features(batch_df)
+            y_batch = preprocessor.transform_labels(batch_df)
+            y_pred_batch = model.predict(X_batch)
+            all_y_true.append(y_batch)
+            all_y_pred.append(np.asarray(y_pred_batch, dtype=np.int32))
+            del batch_df, X_batch, y_batch, y_pred_batch
+            
+    elif isinstance(data_source, pd.DataFrame):
+        n_rows = len(data_source)
+        for start_idx in range(0, n_rows, batch_size):
+            end_idx = min(start_idx + batch_size, n_rows)
+            chunk = data_source.iloc[start_idx:end_idx]
+            X_batch = preprocessor.transform_features(chunk)
+            y_batch = preprocessor.transform_labels(chunk)
+            y_pred_batch = model.predict(X_batch)
+            all_y_true.append(y_batch)
+            all_y_pred.append(np.asarray(y_pred_batch, dtype=np.int32))
+            del chunk, X_batch, y_batch, y_pred_batch
+            
+    else:
+        raise TypeError(f"Unsupported data_source type for evaluation: {type(data_source)}")
+        
+    if not all_y_true:
+        return evaluate_predictions(np.array([], dtype=np.int32), np.array([], dtype=np.int32), class_names)
+        
+    y_true = np.concatenate(all_y_true)
+    y_pred = np.concatenate(all_y_pred)
+    return evaluate_predictions(y_true, y_pred, class_names)
+
+def evaluate_model(model, X, y_true, class_names: list, batch_size: int = 100000) -> dict:
+    """Evaluate a fitted model on given features and true labels using batched inference.
+    
+    Supports both:
+    1. Pre-transformed arrays (X: np.ndarray, y_true: np.ndarray)
+    2. Streamed data sources (X: str or DataFrame, y_true: SpecialistPreprocessor)
+    """
+    if isinstance(X, (str, object)) and hasattr(y_true, "transform_features"):
+        return evaluate_dataset_streamed(model, X, y_true, class_names, batch_size=batch_size)
     y_pred = predict_batched(model, X, batch_size=batch_size)
     return evaluate_predictions(y_true, y_pred, class_names)

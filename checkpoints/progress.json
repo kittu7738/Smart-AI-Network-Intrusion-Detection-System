@@ -20,31 +20,36 @@
             "DecisionTree": "completed",
             "RandomForest": "completed",
             "XGBoost": "completed",
-            "best_model": "DecisionTree"
+            "best_model": "DecisionTree",
+            "status": "completed"
         },
         "CICIoT2023": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
             "XGBoost": "completed",
-            "best_model": "DecisionTree"
+            "best_model": "DecisionTree",
+            "status": "completed"
         },
         "ARP_Spoofing": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
             "XGBoost": "completed",
-            "best_model": "DecisionTree"
+            "best_model": "DecisionTree",
+            "status": "completed"
         },
         "IP_Spoofing": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
             "XGBoost": "completed",
-            "best_model": "DecisionTree"
+            "best_model": "DecisionTree",
+            "status": "completed"
         },
         "DNS_Tunneling": {
             "DecisionTree": "completed",
             "RandomForest": "completed",
             "XGBoost": "completed",
-            "best_model": "DecisionTree"
+            "best_model": "DecisionTree",
+            "status": "completed"
         }
     }
 }

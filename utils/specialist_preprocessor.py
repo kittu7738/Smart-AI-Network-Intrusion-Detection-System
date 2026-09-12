@@ -97,7 +97,7 @@ class SpecialistPreprocessor:
         return features
 
     def fit(self, train_df: pd.DataFrame):
-        """Fit preprocessing transformers strictly on training data."""
+        """Fit preprocessing statistics strictly on training data using low-memory column-by-column passes."""
         if self.expected_classes is None:
             if "final_label" in train_df.columns:
                 self._init_classes(train_df["final_label"].dropna().unique().tolist())
@@ -110,32 +110,40 @@ class SpecialistPreprocessor:
         if self.n_features_in_ == 0:
             raise ValueError(f"No valid numeric feature columns identified for {self.dataset_name}.")
             
-        X = train_df[self.feature_names_in_].to_numpy(dtype=np.float64, copy=True)
-        # Replace Inf with NaN
-        X[np.isinf(X)] = np.nan
-        
-        # Median imputation (computed solely on train data)
-        self.medians_ = np.nanmedian(X, axis=0)
-        self.medians_ = np.nan_to_num(self.medians_, nan=0.0)
-        
-        # Impute
-        nan_mask = np.isnan(X)
-        X_imp = np.where(nan_mask, self.medians_, X)
-        
+        # Compute medians and standard scaler parameters column-by-column to avoid large duplicate 2D arrays
+        self.medians_ = np.zeros(self.n_features_in_, dtype=np.float32)
         if self.scale_features:
-            self.means_ = np.mean(X_imp, axis=0)
-            self.stds_ = np.std(X_imp, axis=0)
-            self.stds_[self.stds_ == 0.0] = 1.0
-            self.stds_ = np.nan_to_num(self.stds_, nan=1.0)
+            self.means_ = np.zeros(self.n_features_in_, dtype=np.float32)
+            self.stds_ = np.ones(self.n_features_in_, dtype=np.float32)
         else:
             self.means_ = None
             self.stds_ = None
             
+        for idx, col in enumerate(self.feature_names_in_):
+            col_arr = train_df[col].to_numpy(dtype=np.float32, copy=True)
+            col_arr[np.isinf(col_arr)] = np.nan
+            
+            med = np.nanmedian(col_arr)
+            if np.isnan(med):
+                med = 0.0
+            self.medians_[idx] = med
+            
+            if self.scale_features:
+                nan_mask = np.isnan(col_arr)
+                if np.any(nan_mask):
+                    col_arr[nan_mask] = med
+                mean_val = float(np.mean(col_arr))
+                std_val = float(np.std(col_arr))
+                if std_val == 0.0 or np.isnan(std_val):
+                    std_val = 1.0
+                self.means_[idx] = mean_val
+                self.stds_[idx] = std_val
+                
         self.is_fitted = True
         return self
 
     def transform_features(self, df: pd.DataFrame) -> np.ndarray:
-        """Apply fitted preprocessing to features of train, validation, or test sets."""
+        """Apply fitted preprocessing to features, materializing only a single float32 matrix."""
         if not self.is_fitted:
             raise RuntimeError("SpecialistPreprocessor must be fitted before transforming features.")
             
@@ -143,20 +151,27 @@ class SpecialistPreprocessor:
         if missing_features:
             raise ValueError(f"DataFrame is missing features learned during fit: {missing_features}")
             
-        X = df[self.feature_names_in_].to_numpy(dtype=np.float64, copy=True)
-        X[np.isinf(X)] = np.nan
+        n_rows = len(df)
+        n_cols = len(self.feature_names_in_)
+        # Preallocate single float32 output buffer
+        X = np.empty((n_rows, n_cols), dtype=np.float32)
         
-        # Apply train medians
-        nan_mask = np.isnan(X)
-        X_imp = np.where(nan_mask, self.medians_, X)
-        
-        if self.scale_features and self.means_ is not None:
-            X_scaled = (X_imp - self.means_) / self.stds_
-            return X_scaled.astype(np.float32)
-        return X_imp.astype(np.float32)
+        for idx, col in enumerate(self.feature_names_in_):
+            col_arr = df[col].to_numpy(dtype=np.float32, copy=True)
+            col_arr[np.isinf(col_arr)] = np.nan
+            med = self.medians_[idx]
+            nan_mask = np.isnan(col_arr)
+            if np.any(nan_mask):
+                col_arr[nan_mask] = med
+            if self.scale_features and self.means_ is not None:
+                col_arr -= self.means_[idx]
+                col_arr /= self.stds_[idx]
+            X[:, idx] = col_arr
+            
+        return X
 
     def transform_labels(self, df_or_series) -> np.ndarray:
-        """Convert string target labels to local integer IDs."""
+        """Convert string target labels to local integer IDs (int32)."""
         if isinstance(df_or_series, pd.DataFrame):
             if "final_label" not in df_or_series.columns:
                 raise ValueError("DataFrame missing target column 'final_label'.")
@@ -168,7 +183,7 @@ class SpecialistPreprocessor:
         if unknown_labels:
             raise ValueError(f"Found unknown labels for {self.dataset_name}: {unknown_labels}")
             
-        y = labels.map(self.local_label_to_id).to_numpy(dtype=np.int64)
+        y = labels.map(self.local_label_to_id).to_numpy(dtype=np.int32)
         return y
 
     def fit_transform(self, train_df: pd.DataFrame):

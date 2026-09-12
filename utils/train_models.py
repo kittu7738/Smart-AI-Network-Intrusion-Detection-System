@@ -891,6 +891,12 @@ def parse_args():
                         help="Evaluate existing trained models and regenerate reports without retraining.")
     parser.add_argument("--optimize", action="store_true", dest="optimize",
                         help="Run validation-only optimization suite for IDS2018 specialist.")
+    parser.add_argument("--screening-samples", type=int, default=None,
+                        help="Stage A screening sample size for optimization (default 500,000).")
+    parser.add_argument("--top-k", type=int, default=2,
+                        help="Number of Stage A finalists to train on full dataset in Stage B.")
+    parser.add_argument("--stage-a-only", "--skip-stage-b", action="store_true", dest="stage_a_only",
+                        help="Run Stage A screening only.")
     return parser.parse_args()
 
 def main():
@@ -910,7 +916,10 @@ def main():
         run_ids2018_optimization(
             config=config,
             smoke_test=args.smoke_test,
-            max_train_samples=max_samples
+            screening_samples=args.screening_samples or max_samples,
+            top_k=args.top_k,
+            stage_a_only=args.stage_a_only,
+            force=args.force_retrain
         )
         return
 

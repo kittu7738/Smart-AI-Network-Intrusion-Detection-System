@@ -48,17 +48,17 @@ except ImportError:
 SEED = 42
 
 OPTIMIZATION_CANDIDATE_CONFIGS = {
-    # 1. Advanced Histogram Gradient Boosting (Low RAM, fast, high capacity)
+    # 1. Advanced Histogram Gradient Boosting (Fast, 256-bin histogram, early stopping)
     "HistGradientBoosting": {
         "class": HistGradientBoostingClassifier,
         "params": {
-            "max_iter": 150,
-            "max_leaf_nodes": 63,
-            "min_samples_leaf": 20,
-            "learning_rate": 0.08,
+            "max_iter": 60,
+            "max_leaf_nodes": 31,
+            "min_samples_leaf": 50,
+            "learning_rate": 0.1,
             "early_stopping": True,
             "validation_fraction": 0.1,
-            "n_iter_no_change": 10,
+            "n_iter_no_change": 5,
             "random_state": SEED
         },
         "smoke_params": {
@@ -69,16 +69,16 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
         },
         "supports_sample_weight": True,
         "default_weighting": "sqrt_balanced",
-        "description": "Scikit-Learn native 256-bin histogram gradient boosting with early stopping"
+        "description": "Scikit-Learn native 256-bin histogram gradient boosting with early stopping (max_iter=60)"
     },
     
     # 2. Tuned XGBoost with histogram binning
     "XGBoost_Tuned": {
         "class": XGBClassifier,
         "params": {
-            "n_estimators": 120,
-            "max_depth": 8,
-            "learning_rate": 0.08,
+            "n_estimators": 80,
+            "max_depth": 7,
+            "learning_rate": 0.1,
             "subsample": 0.8,
             "colsample_bytree": 0.8,
             "tree_method": "hist",
@@ -95,16 +95,16 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
         },
         "supports_sample_weight": True,
         "default_weighting": "sqrt_balanced",
-        "description": "Deep histogram XGBoost (depth=8, 120 trees) with feature and row subsampling"
+        "description": "Fast histogram XGBoost (depth=7, 80 trees) with feature and row subsampling"
     },
 
     # 3. Tuned XGBoost Unweighted (Natural Prior)
     "XGBoost_Unweighted": {
         "class": XGBClassifier,
         "params": {
-            "n_estimators": 120,
-            "max_depth": 8,
-            "learning_rate": 0.08,
+            "n_estimators": 80,
+            "max_depth": 7,
+            "learning_rate": 0.1,
             "subsample": 0.8,
             "colsample_bytree": 0.8,
             "tree_method": "hist",
@@ -128,9 +128,9 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
     "ExtraTrees": {
         "class": ExtraTreesClassifier,
         "params": {
-            "n_estimators": 60,
-            "max_depth": 20,
-            "min_samples_leaf": 3,
+            "n_estimators": 40,
+            "max_depth": 18,
+            "min_samples_leaf": 5,
             "max_features": "sqrt",
             "n_jobs": 2,
             "random_state": SEED
@@ -143,17 +143,17 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
         },
         "supports_sample_weight": True,
         "default_weighting": "sqrt_balanced",
-        "description": "Extremely Randomized Trees with randomized thresholds to reduce variance"
+        "description": "Extremely Randomized Trees with randomized thresholds (40 trees, depth=18)"
     },
     
     # 5. Tuned Random Forest
     "RandomForest_Tuned": {
         "class": RandomForestClassifier,
         "params": {
-            "n_estimators": 60,
-            "max_depth": 20,
-            "min_samples_leaf": 3,
-            "max_samples": 0.5,
+            "n_estimators": 40,
+            "max_depth": 18,
+            "min_samples_leaf": 5,
+            "max_samples": 0.4,
             "max_features": "sqrt",
             "n_jobs": 2,
             "random_state": SEED
@@ -166,15 +166,15 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
         },
         "supports_sample_weight": True,
         "default_weighting": "sqrt_balanced",
-        "description": "Deeper Random Forest (depth=20, 60 trees, 50% subsampling) with moderate weights"
+        "description": "Tuned Random Forest (depth=18, 40 trees, 40% subsampling) with moderate weights"
     },
 
     # 6. Tuned Decision Tree
     "DecisionTree_Tuned": {
         "class": DecisionTreeClassifier,
         "params": {
-            "max_depth": 22,
-            "min_samples_leaf": 3,
+            "max_depth": 18,
+            "min_samples_leaf": 5,
             "random_state": SEED
         },
         "smoke_params": {
@@ -183,7 +183,7 @@ OPTIMIZATION_CANDIDATE_CONFIGS = {
         },
         "supports_sample_weight": True,
         "default_weighting": "sqrt_balanced",
-        "description": "Deeper single Decision Tree (depth=22) with sqrt class balancing"
+        "description": "Tuned single Decision Tree (depth=18) with sqrt class balancing"
     },
 
     # Baselines for direct comparison

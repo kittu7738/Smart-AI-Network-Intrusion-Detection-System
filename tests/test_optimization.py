@@ -151,36 +151,134 @@ class TestIDS2018Optimization(unittest.TestCase):
         self.assertLess(opt_fp, base_fp)
         self.assertGreaterEqual(summary["optimized"]["macro_f1"], summary["baseline"]["macro_f1"])
 
-    def test_smoke_optimization_pipeline(self):
-        """End-to-end smoke test of IDS2018 optimization orchestrator."""
-        from utils.data_preparation import load_config
-        config = load_config()
+    def test_stratified_screening_subset_and_rare_class_preservation(self):
+        """Screening subset must preserve 100% of rare minority classes deterministically."""
+        # Synthetic imbalanced dataset
+        class_counts = {
+            "Benign": 8000,
+            "DDoS": 1000,
+            "DoS": 500,
+            "Botnet": 300,
+            "Brute Force": 150,
+            "Infiltration": 45,
+            "Web Attack": 5
+        }
+        labels = []
+        for cls, count in class_counts.items():
+            labels.extend([cls] * count)
+        df_imbalanced = pd.DataFrame({
+            "feat1": np.random.randn(len(labels)),
+            "final_label": labels
+        })
 
-        # Run smoke optimization with small candidate subset for fast execution
-        summary = run_ids2018_optimization(
-            config=config,
-            smoke_test=True,
-            candidate_list=["DecisionTree_Tuned", "DecisionTree_Baseline"],
-            feature_representations=["all_77", "curated_subset"],
-            tune_thresholds_flag=True,
-            save_artifacts=True
+        # Request subset of 1000 samples
+        from utils.train_models import sample_training_data
+        df_sampled, meta = sample_training_data(
+            df_imbalanced, target_col="final_label", max_samples=1000, seed=42
         )
 
-        self.assertIn("selected_best_model", summary)
-        self.assertIn("best_validation_metrics", summary)
-        self.assertIn("all_candidates_comparison", summary)
-        self.assertIn("recommendations", summary)
+        sampled_counts = df_sampled["final_label"].value_counts()
+        # 1. Minority classes must be 100% preserved
+        self.assertEqual(sampled_counts["Web Attack"], 5)
+        self.assertEqual(sampled_counts["Infiltration"], 45)
+        self.assertLessEqual(len(df_sampled), 1000 + 50) # within bounded target
+        self.assertTrue(meta["sampled"])
 
-        # Verify reports exist and are valid JSON
-        opt_report_path = "reports/model_training/IDS2018/optimization/validation_candidates_comparison.json"
-        self.assertTrue(os.path.exists(opt_report_path))
-        with open(opt_report_path, "r") as f:
-            data = json.load(f)
-        self.assertEqual(data["dataset"], "IDS2018")
+        # 2. Deterministic sampling test
+        df_sampled_2, _ = sample_training_data(
+            df_imbalanced, target_col="final_label", max_samples=1000, seed=42
+        )
+        pd.testing.assert_frame_equal(df_sampled, df_sampled_2)
 
-        # Verify no MAC Spoofing in any output
-        data_str = json.dumps(data).lower()
-        self.assertNotIn("mac spoofing", data_str)
+    def test_checkpointing_and_resume_after_interruption(self):
+        """Candidate-by-candidate checkpointing must persist and resume without re-fitting completed models."""
+        from utils.data_preparation import load_config
+        from unittest.mock import patch
+        from utils.model_registry import DecisionTreeClassifier
+        import tempfile
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_opt_dir:
+            # Step 1: Run Stage A screening for 1 candidate
+            run_ids2018_optimization(
+                config=config,
+                smoke_test=True,
+                screening_samples=60,
+                candidate_list=["DecisionTree_Baseline"],
+                stage_a_only=True,
+                force=True,
+                save_artifacts=True,
+                opt_dir=tmp_opt_dir
+            )
+
+            ckpt_file = os.path.join(tmp_opt_dir, "stage_a_screening_progress.json")
+            self.assertTrue(os.path.exists(ckpt_file))
+            with open(ckpt_file, "r") as f:
+                ckpt_data = json.load(f)
+            self.assertIn("DecisionTree_Baseline", ckpt_data)
+
+            # Step 2: Now run with 2 candidates, ensuring DecisionTree_Baseline is NOT re-fit
+            fit_call_counts = {"count": 0}
+            orig_fit = DecisionTreeClassifier.fit
+            def counting_fit(self, X, y, *args, **kwargs):
+                fit_call_counts["count"] += 1
+                return orig_fit(self, X, y, *args, **kwargs)
+
+            with patch.object(DecisionTreeClassifier, "fit", counting_fit):
+                run_ids2018_optimization(
+                    config=config,
+                    smoke_test=True,
+                    screening_samples=60,
+                    candidate_list=["DecisionTree_Baseline", "DecisionTree_Tuned"],
+                    stage_a_only=True,
+                    force=False, # resume from checkpoint!
+                    save_artifacts=True,
+                    opt_dir=tmp_opt_dir
+                )
+
+            # fit() should only have been called for DecisionTree_Tuned, NOT for the cached DecisionTree_Baseline!
+            self.assertEqual(fit_call_counts["count"], 1)
+
+            with open(ckpt_file, "r") as f:
+                resumed_data = json.load(f)
+            self.assertIn("DecisionTree_Baseline", resumed_data)
+            self.assertIn("DecisionTree_Tuned", resumed_data)
+
+    def test_smoke_optimization_pipeline(self):
+        """End-to-end smoke test of progressive two-stage IDS2018 optimization orchestrator."""
+        from utils.data_preparation import load_config
+        import tempfile
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_opt_dir:
+            summary = run_ids2018_optimization(
+                config=config,
+                smoke_test=True,
+                screening_samples=60,
+                top_k=1,
+                candidate_list=["DecisionTree_Tuned", "DecisionTree_Baseline"],
+                stage_a_only=False,
+                tune_thresholds_flag=True,
+                force=True,
+                save_artifacts=True,
+                opt_dir=tmp_opt_dir
+            )
+
+            self.assertIn("selected_best_model", summary)
+            self.assertIn("best_validation_metrics", summary)
+            self.assertIn("stage_a_screening", summary)
+            self.assertIn("stage_b_full_training", summary)
+            self.assertIn("recommendations", summary)
+
+            # Verify Stage A and Stage B reports
+            stage_a_path = os.path.join(tmp_opt_dir, "stage_a_screening.json")
+            stage_b_path = os.path.join(tmp_opt_dir, "stage_b_full_training.json")
+            self.assertTrue(os.path.exists(stage_a_path))
+            self.assertTrue(os.path.exists(stage_b_path))
+
+            # Verify no MAC Spoofing in any output
+            data_str = json.dumps(summary).lower()
+            self.assertNotIn("mac spoofing", data_str)
 
 if __name__ == "__main__":
     unittest.main()

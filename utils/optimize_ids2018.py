@@ -346,6 +346,8 @@ def run_ids2018_optimization(
             dataset_name=spec_name, expected_classes=expected_classes, scale_features=True
         )
         preproc_full.fit(train_df)
+        if save_artifacts:
+            preproc_full.save(os.path.join(models_dir, "preprocessor.joblib"))
         X_train_full = preproc_full.transform_features(train_df)
         y_train_full = preproc_full.transform_labels(train_df)
 
@@ -507,6 +509,8 @@ def run_ids2018_optimization(
         "recommendations": {
             "model": best_overall_cand,
             "class_weighting": best_results["weighting_strategy"],
+            "model_path": os.path.join(models_dir, f"candidate_{best_overall_cand}.joblib"),
+            "threshold_multipliers": threshold_tuning_report.get("optimized", {}).get("multipliers", None),
             "training_command": f"python3 -m utils.train_models --dataset IDS2018 --model {final_model_name_for_cli} --force"
         }
     }

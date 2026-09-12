@@ -86,6 +86,7 @@ from utils.data_preparation import resolve_path, load_config
 from utils.taxonomy import CLASS_NAMES, CLASS_TO_ID
 from utils.specialist_preprocessor import SpecialistPreprocessor
 from utils.specialist_evaluator import evaluate_model, evaluate_dataset_streamed, predict_batched
+from utils.model_registry import OPTIMIZATION_CANDIDATE_CONFIGS, get_candidate_model
 
 if hasattr(sys.stdout, "reconfigure"):
     try:
@@ -150,6 +151,22 @@ MODEL_ALIASES = {
     "extratrees": "ExtraTrees",
     "extra_trees": "ExtraTrees",
     "et": "ExtraTrees",
+    # Progressive optimizer candidate aliases
+    "decisiontree_tuned": "DecisionTree_Tuned",
+    "decision_tree_tuned": "DecisionTree_Tuned",
+    "dt_tuned": "DecisionTree_Tuned",
+    "candidate_decisiontree_tuned": "DecisionTree_Tuned",
+    "candidate_decision_tree_tuned": "DecisionTree_Tuned",
+    "decisiontree_baseline": "DecisionTree_Baseline",
+    "candidate_decisiontree_baseline": "DecisionTree_Baseline",
+    "randomforest_tuned": "RandomForest_Tuned",
+    "rf_tuned": "RandomForest_Tuned",
+    "candidate_randomforest_tuned": "RandomForest_Tuned",
+    "xgboost_tuned": "XGBoost_Tuned",
+    "xgb_tuned": "XGBoost_Tuned",
+    "candidate_xgboost_tuned": "XGBoost_Tuned",
+    "candidate_histgradientboosting": "HistGradientBoosting",
+    "candidate_extratrees": "ExtraTrees",
 }
 
 def normalize_model_name(model_name: str) -> str:
@@ -157,7 +174,64 @@ def normalize_model_name(model_name: str) -> str:
     if not model_name:
         return model_name
     query = model_name.strip().lower()
-    return MODEL_ALIASES.get(query, model_name)
+    if query in MODEL_ALIASES:
+        return MODEL_ALIASES[query]
+    if query.startswith("candidate_"):
+        sub_query = query[len("candidate_"):]
+        if sub_query in MODEL_ALIASES:
+            return MODEL_ALIASES[sub_query]
+    for cand in OPTIMIZATION_CANDIDATE_CONFIGS.keys():
+        if query == cand.lower() or query == f"candidate_{cand}".lower():
+            return cand
+    return model_name.strip()
+
+def resolve_model_path(model_dir: str, model_name: str) -> str:
+    """Resolve model artifact path, checking exact match and candidate_ prefixes."""
+    # 1. Exact match: {model_name}.joblib
+    p = os.path.join(model_dir, f"{model_name}.joblib")
+    if os.path.exists(p):
+        return p
+    # 2. Candidate prefix: candidate_{model_name}.joblib
+    p = os.path.join(model_dir, f"candidate_{model_name}.joblib")
+    if os.path.exists(p):
+        return p
+    # 3. Strip candidate_ prefix if passed: {model_name[10:]}.joblib
+    if model_name.startswith("candidate_"):
+        stripped = model_name[len("candidate_"):]
+        p = os.path.join(model_dir, f"{stripped}.joblib")
+        if os.path.exists(p):
+            return p
+    # Default fallback to standard path
+    return os.path.join(model_dir, f"{model_name}.joblib")
+
+def load_stored_threshold_multipliers(spec_name: str, opt_dir: str = None) -> dict:
+    """Load reproducible validation threshold multipliers if stored by optimizer."""
+    if opt_dir is None:
+        opt_dir = resolve_path(os.path.join("reports", "model_training", spec_name, "optimization"))
+
+    # 1. Check best_optimized_model.json
+    best_file = os.path.join(opt_dir, "best_optimized_model.json")
+    if os.path.exists(best_file):
+        try:
+            with open(best_file, "r") as f:
+                data = json.load(f)
+            if "threshold_multipliers" in data and isinstance(data["threshold_multipliers"], dict):
+                return data["threshold_multipliers"]
+        except Exception:
+            pass
+
+    # 2. Check threshold_tuning.json
+    thresh_file = os.path.join(opt_dir, "threshold_tuning.json")
+    if os.path.exists(thresh_file):
+        try:
+            with open(thresh_file, "r") as f:
+                data = json.load(f)
+            if "optimized" in data and "multipliers" in data["optimized"]:
+                return data["optimized"]["multipliers"]
+        except Exception:
+            pass
+
+    return None
 
 def resolve_specialist_name(name_query: str) -> str:
     """Resolve user/CLI specialist query to canonical specialist key."""
@@ -494,7 +568,8 @@ def train_specialist(
     model_names: list = None,
     save_artifacts: bool = True,
     force_retrain: bool = False,
-    evaluate_only: bool = False
+    evaluate_only: bool = False,
+    use_optimized: bool = False
 ):
     """Train, evaluate, and select best model for a specialist dataset with strict memory safety."""
     if config is None:
@@ -519,6 +594,7 @@ def train_specialist(
     val_results = {}
     training_times = {}
     in_memory_models = {}
+    threshold_multipliers = None
 
     if evaluate_only:
         print(f"\n[Evaluate-Only Mode] Evaluating saved models for {spec_name}...", flush=True)
@@ -545,7 +621,13 @@ def train_specialist(
         )
 
         # 3. Determine candidate models
-        all_candidates = ["DecisionTree", "RandomForest", "XGBoost"]
+        standard_candidates = ["DecisionTree", "RandomForest", "XGBoost"]
+        all_candidates = list(standard_candidates)
+        if spec_name == "IDS2018":
+            for opt_c in OPTIMIZATION_CANDIDATE_CONFIGS.keys():
+                if opt_c not in all_candidates:
+                    all_candidates.append(opt_c)
+
         if model_names:
             candidate_names = [normalize_model_name(m) for m in all_candidates if normalize_model_name(m) in [normalize_model_name(x) for x in model_names]]
         elif selected_model:
@@ -553,25 +635,51 @@ def train_specialist(
             if norm_model not in all_candidates:
                 raise ValueError(f"Requested model '{selected_model}' not available. Choose from {all_candidates}")
             candidate_names = [norm_model]
+            if spec_name == "IDS2018" and (norm_model in OPTIMIZATION_CANDIDATE_CONFIGS or use_optimized):
+                threshold_multipliers = load_stored_threshold_multipliers(spec_name)
         else:
-            candidate_names = [m for m in all_candidates if os.path.exists(os.path.join(model_dir, f"{m}.joblib"))]
-            if not candidate_names:
-                if smoke_test:
-                    candidate_names = ["DecisionTree"]
-                else:
-                    raise FileNotFoundError(f"No saved models found in {model_dir} for evaluation.")
+            # For IDS2018, check if progressive optimizer finalist model is recorded
+            optimized_finalist = None
+            if spec_name == "IDS2018":
+                opt_best_path = resolve_path(os.path.join("reports", "model_training", "IDS2018", "optimization", "best_optimized_model.json"))
+                if os.path.exists(opt_best_path):
+                    try:
+                        with open(opt_best_path, "r") as f:
+                            opt_best_data = json.load(f)
+                        cand_m = opt_best_data.get("model")
+                        if cand_m:
+                            norm_cand_m = normalize_model_name(cand_m)
+                            cand_path = resolve_model_path(model_dir, norm_cand_m)
+                            if os.path.exists(cand_path):
+                                optimized_finalist = norm_cand_m
+                    except Exception:
+                        pass
+
+            if optimized_finalist:
+                candidate_names = [optimized_finalist]
+                threshold_multipliers = load_stored_threshold_multipliers(spec_name)
+                print(f"[Optimized Evaluation] Loading progressive optimizer finalist model: {optimized_finalist} from {resolve_model_path(model_dir, optimized_finalist)}", flush=True)
+                if threshold_multipliers:
+                    print(f"[Threshold Calibration] Applying validation-tuned probability multipliers: {threshold_multipliers}", flush=True)
+            else:
+                candidate_names = [m for m in standard_candidates if os.path.exists(resolve_model_path(model_dir, m))]
+                if not candidate_names:
+                    if smoke_test:
+                        candidate_names = ["DecisionTree"]
+                    else:
+                        raise FileNotFoundError(f"No saved models found in {model_dir} for evaluation.")
 
         train_row_count = 0
         sampling_meta = {"sampled": False, "original_train_rows": 0, "used_train_rows": 0, "sampling_method": "none"}
 
         for model_name in candidate_names:
             report_file = os.path.join(report_dir, f"{model_name}_training.json")
-            model_file = os.path.join(model_dir, f"{model_name}.joblib")
+            model_file = resolve_model_path(model_dir, model_name)
 
             if not os.path.exists(model_file):
                 if smoke_test:
                     print(f"Smoke-test: fitting mock {model_name} for evaluation test...", flush=True)
-                    model_inst = get_model_instance(model_name, smoke_test=True)
+                    model_inst = get_candidate_model(model_name, smoke_test=True) if model_name in OPTIMIZATION_CANDIDATE_CONFIGS else get_model_instance(model_name, smoke_test=True)
                     train_df, _, _ = load_specialist_splits(spec_name, config, smoke_test=True)
                     X_tr = preprocessor.transform_features(train_df)
                     y_tr = preprocessor.transform_labels(train_df)
@@ -590,7 +698,8 @@ def train_specialist(
 
             print(f"\n--- Evaluating {spec_name} :: {model_name} on validation split ---", flush=True)
             val_metrics = evaluate_dataset_streamed(
-                model_inst, val_source, preprocessor, expected_classes, batch_size=100000
+                model_inst, val_source, preprocessor, expected_classes, batch_size=100000,
+                threshold_multipliers=threshold_multipliers
             )
             val_results[model_name] = val_metrics
             print(f"Validation Macro F1: {val_metrics['Macro F1']:.4f} | Accuracy: {val_metrics['Accuracy']:.4f}", flush=True)
@@ -611,11 +720,14 @@ def train_specialist(
                 report_data = {
                     "dataset": spec_name,
                     "model_name": model_name,
+                    "model_path": model_file,
                     "fit_duration_seconds": fit_duration,
                     "train_row_count": train_row_count,
                     "validation_metrics": val_metrics,
                     "sampling_details": sampling_meta
                 }
+                if threshold_multipliers:
+                    report_data["threshold_multipliers"] = threshold_multipliers
                 with open(report_file, "w") as f:
                     json.dump(report_data, f, indent=4)
                 update_checkpoint(spec_name, model_name, "completed")
@@ -771,7 +883,7 @@ def train_specialist(
 
     # 7. Final Evaluation on Complete Test Set (ONCE)
     print(f"Loading best model ({best_model_name}) for final test evaluation...", flush=True)
-    best_model_path = os.path.join(model_dir, f"{best_model_name}.joblib")
+    best_model_path = resolve_model_path(model_dir, best_model_name)
     if save_artifacts and os.path.exists(best_model_path):
         best_model = joblib.load(best_model_path)
     elif best_model_name in in_memory_models:
@@ -780,7 +892,8 @@ def train_specialist(
         best_model = joblib.load(best_model_path)
 
     test_metrics = evaluate_dataset_streamed(
-        best_model, test_source, preprocessor, expected_classes, batch_size=100000
+        best_model, test_source, preprocessor, expected_classes, batch_size=100000,
+        threshold_multipliers=threshold_multipliers
     )
     # Fix: derive exact test_row_count from total evaluated samples, not summing averages
     test_row_count = int(test_metrics.get("total_samples", sum(test_metrics["Per Class"][c]["support"] for c in expected_classes if c in test_metrics["Per Class"])))
@@ -798,6 +911,7 @@ def train_specialist(
     final_selection_report = {
         "dataset": spec_name,
         "best_model": best_model_name,
+        "model_path": best_model_path,
         "selection_metric": "Validation Macro F1",
         "validation_macro_f1": best_val_f1,
         "test_row_count": test_row_count,
@@ -805,6 +919,9 @@ def train_specialist(
         "comparison": {m: val_results[m]["Macro F1"] for m in val_results},
         "sampling_details": sampling_meta
     }
+    if threshold_multipliers:
+        final_selection_report["threshold_multipliers"] = threshold_multipliers
+
     if save_artifacts:
         with open(os.path.join(report_dir, "final_model_selection.json"), "w") as f:
             json.dump(final_selection_report, f, indent=4)
@@ -830,6 +947,9 @@ def train_specialist(
         "test_metrics": test_metrics,
         "sampling_details": sampling_meta
     }
+    if threshold_multipliers:
+        metadata["threshold_multipliers"] = threshold_multipliers
+
     if save_artifacts:
         with open(os.path.join(model_dir, "specialist_metadata.json"), "w") as f:
             json.dump(metadata, f, indent=4)
@@ -846,7 +966,8 @@ def train_all_specialists(
     target_dataset: str = None,
     selected_model: str = None,
     force_retrain: bool = False,
-    evaluate_only: bool = False
+    evaluate_only: bool = False,
+    use_optimized: bool = False
 ):
     """Run training across all configured specialist models."""
     if target_dataset:
@@ -865,7 +986,8 @@ def train_all_specialists(
             smoke_test=smoke_test,
             selected_model=selected_model,
             force_retrain=force_retrain,
-            evaluate_only=evaluate_only
+            evaluate_only=evaluate_only,
+            use_optimized=use_optimized
         )
         all_metadata[canonical_name] = meta
 
@@ -889,6 +1011,8 @@ def parse_args():
                         help="Force retraining models even if checkpoints indicate completion.")
     parser.add_argument("--evaluate-only", "--eval-only", action="store_true", dest="evaluate_only",
                         help="Evaluate existing trained models and regenerate reports without retraining.")
+    parser.add_argument("--optimized", action="store_true", dest="use_optimized",
+                        help="Evaluate the progressive optimizer's saved finalist model for IDS2018.")
     parser.add_argument("--optimize", action="store_true", dest="optimize",
                         help="Run validation-only optimization suite for IDS2018 specialist.")
     parser.add_argument("--screening-samples", type=int, default=None,
@@ -930,7 +1054,8 @@ def main():
         target_dataset=args.dataset,
         selected_model=args.model,
         force_retrain=args.force_retrain,
-        evaluate_only=args.evaluate_only
+        evaluate_only=args.evaluate_only,
+        use_optimized=args.use_optimized
     )
 
 if __name__ == "__main__":

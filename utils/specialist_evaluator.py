@@ -165,11 +165,13 @@ def evaluate_dataset_streamed(
     preprocessor,
     expected_classes: list = None,
     batch_size: int = 100000,
+    threshold_multipliers: dict = None,
     **kwargs
 ) -> dict:
     """Evaluate a fitted model on a dataset source without materializing all features in memory.
 
     Enforces explicit canonical class ordering to prevent label permutation bugs.
+    Optionally applies reproducible validation threshold multipliers to posterior probabilities.
     """
     if expected_classes is None:
         expected_classes = kwargs.get("class_names")
@@ -203,6 +205,29 @@ def evaluate_dataset_streamed(
         def map_to_target(y_arr):
             return np.asarray(y_arr, dtype=np.int64)
 
+    # Configure prediction function (with threshold multipliers if available and model supports predict_proba)
+    if threshold_multipliers is not None and hasattr(model, "predict_proba"):
+        n_classes_model = len(model.classes_) if hasattr(model, "classes_") else len(target_class_order)
+        classes_arr = model.classes_ if hasattr(model, "classes_") else np.arange(n_classes_model)
+        mult_vec = np.ones(n_classes_model, dtype=np.float32)
+        for idx, cls_id in enumerate(classes_arr):
+            cls_name = None
+            if hasattr(preprocessor, "id_to_local_label") and cls_id in preprocessor.id_to_local_label:
+                cls_name = preprocessor.id_to_local_label[cls_id]
+            elif int(cls_id) < len(target_class_order):
+                cls_name = target_class_order[int(cls_id)]
+            if cls_name and cls_name in threshold_multipliers:
+                mult_vec[idx] = float(threshold_multipliers[cls_name])
+
+        def _predict_batch(X):
+            y_prob = model.predict_proba(X)
+            scaled_prob = y_prob * mult_vec
+            best_indices = np.argmax(scaled_prob, axis=1)
+            return classes_arr[best_indices]
+    else:
+        def _predict_batch(X):
+            return model.predict(X)
+
     all_y_true = []
     all_y_pred = []
 
@@ -218,7 +243,7 @@ def evaluate_dataset_streamed(
                 batch_df = batch.to_pandas()
                 X_batch = preprocessor.transform_features(batch_df)
                 y_batch = preprocessor.transform_labels(batch_df)
-                y_pred_batch = model.predict(X_batch)
+                y_pred_batch = _predict_batch(X_batch)
                 all_y_true.append(map_to_target(y_batch))
                 all_y_pred.append(map_to_target(y_pred_batch))
                 del batch_df, X_batch, y_batch, y_pred_batch
@@ -230,7 +255,8 @@ def evaluate_dataset_streamed(
                 data_source=full_df,
                 preprocessor=preprocessor,
                 expected_classes=target_class_order,
-                batch_size=batch_size
+                batch_size=batch_size,
+                threshold_multipliers=threshold_multipliers
             )
 
     elif isinstance(data_source, pd.DataFrame):
@@ -240,7 +266,7 @@ def evaluate_dataset_streamed(
             chunk = data_source.iloc[start_idx:end_idx]
             X_batch = preprocessor.transform_features(chunk)
             y_batch = preprocessor.transform_labels(chunk)
-            y_pred_batch = model.predict(X_batch)
+            y_pred_batch = _predict_batch(X_batch)
             all_y_true.append(map_to_target(y_batch))
             all_y_pred.append(map_to_target(y_pred_batch))
             del chunk, X_batch, y_batch, y_pred_batch

@@ -570,6 +570,76 @@ class TestSpecialistTraining(unittest.TestCase):
         self.assertEqual(selection_rep["test_row_count"], 30)
         self.assertEqual(selection_rep["test_metrics"]["total_samples"], 30)
 
+    def test_optimized_model_evaluation_selection_prefers_candidate_artifact(self):
+        """Regression test: evaluate-only on IDS2018 must select candidate_DecisionTree_Tuned rather than DecisionTree.joblib."""
+        from utils.data_preparation import load_config, resolve_path
+        from utils.train_models import resolve_model_path
+        config = load_config()
+
+        # Verify resolve_model_path resolves candidate_ prefix for DecisionTree_Tuned
+        model_dir = resolve_path("models/IDS2018")
+        resolved = resolve_model_path(model_dir, "DecisionTree_Tuned")
+        self.assertTrue(resolved.endswith("candidate_DecisionTree_Tuned.joblib"))
+
+        # Verify evaluate-only mode selects DecisionTree_Tuned when best_optimized_model.json exists
+        meta = train_specialist(
+            spec_name="IDS2018",
+            config=config,
+            smoke_test=True,
+            evaluate_only=True,
+            save_artifacts=False
+        )
+
+        self.assertEqual(meta["best_model"], "DecisionTree_Tuned")
+        self.assertEqual(meta["model_name"], "DecisionTree_Tuned")
+        self.assertTrue(meta["model_path"].endswith("candidate_DecisionTree_Tuned.joblib"))
+        self.assertFalse(meta["model_path"].endswith("/DecisionTree.joblib"))
+
+    def test_optimized_evaluation_explicit_model_selection(self):
+        """Specifying --model DecisionTree_Tuned loads candidate, while --model DecisionTree loads baseline."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        # 1. Explicit DecisionTree_Tuned
+        meta_tuned = train_specialist(
+            spec_name="IDS2018",
+            config=config,
+            smoke_test=True,
+            selected_model="DecisionTree_Tuned",
+            evaluate_only=True,
+            save_artifacts=False
+        )
+        self.assertEqual(meta_tuned["best_model"], "DecisionTree_Tuned")
+        self.assertTrue(meta_tuned["model_path"].endswith("candidate_DecisionTree_Tuned.joblib"))
+
+        # 2. Explicit baseline DecisionTree
+        meta_baseline = train_specialist(
+            spec_name="IDS2018",
+            config=config,
+            smoke_test=True,
+            selected_model="DecisionTree",
+            evaluate_only=True,
+            save_artifacts=False
+        )
+        self.assertEqual(meta_baseline["best_model"], "DecisionTree")
+        self.assertTrue(meta_baseline["model_path"].endswith("DecisionTree.joblib"))
+
+    def test_other_specialists_unaffected_by_ids2018_optimization(self):
+        """Non-IDS2018 specialists must preserve standard evaluation behavior."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        meta_arp = train_specialist(
+            spec_name="ARP_Spoofing",
+            config=config,
+            smoke_test=True,
+            selected_model="DecisionTree",
+            evaluate_only=True,
+            save_artifacts=False
+        )
+        self.assertEqual(meta_arp["best_model"], "DecisionTree")
+        self.assertTrue(meta_arp["model_path"].endswith("DecisionTree.joblib"))
+
 
 if __name__ == "__main__":
     unittest.main()

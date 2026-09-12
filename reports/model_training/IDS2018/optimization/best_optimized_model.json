@@ -1,6 +1,15 @@
 {
-    "model": "HistGradientBoosting",
-    "feature_representation": "all_77",
+    "model": "DecisionTree_Tuned",
     "class_weighting": "sqrt_balanced",
-    "training_command": "python3 -m utils.train_models --dataset IDS2018 --model histgradientboosting --force"
+    "model_path": "models/IDS2018/candidate_DecisionTree_Tuned.joblib",
+    "threshold_multipliers": {
+        "Benign": 1.0,
+        "DDoS": 1.0,
+        "DoS": 1.0,
+        "Botnet": 1.0,
+        "Infiltration": 1.0,
+        "Brute Force": 1.0,
+        "Web Attack": 1.0
+    },
+    "training_command": "python3 -m utils.train_models --dataset IDS2018 --model decisiontree_tuned --force"
 }

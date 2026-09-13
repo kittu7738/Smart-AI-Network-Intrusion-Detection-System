@@ -13,11 +13,23 @@ except ImportError:
                 pickle.dump(obj, filename)
         @staticmethod
         def load(filename):
+            class CompatUnpickler(pickle.Unpickler):
+                def find_class(self, module, name):
+                    if module == "__main__":
+                        try:
+                            import utils.train_models as tm
+                            cls = getattr(tm, name, None)
+                            if cls is not None:
+                                return cls
+                        except Exception:
+                            pass
+                    return super().find_class(module, name)
+
             if isinstance(filename, str):
                 with open(filename, "rb") as f:
-                    return pickle.load(f)
+                    return CompatUnpickler(f).load()
             else:
-                return pickle.load(filename)
+                return CompatUnpickler(filename).load()
     joblib = JoblibCompat()
 import numpy as np
 import pandas as pd

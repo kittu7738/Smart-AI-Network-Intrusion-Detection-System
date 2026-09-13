@@ -186,6 +186,45 @@ class TestUnifiedNIDSInference(unittest.TestCase):
         self.assertEqual(batch_out["probabilities"].shape, (2, 13))
         np.testing.assert_allclose(np.sum(batch_out["probabilities"], axis=1), [1.0, 1.0], rtol=1e-4)
 
+    def test_dns_production_model_identity_random_forest(self):
+        """DNS specialist must load the verified production RandomForest model."""
+        dns_info = self.engine.load_specialist("DNS_Tunneling", force_reload=True)
+        self.assertEqual(dns_info["model_name"], "RandomForest")
+        self.assertTrue(dns_info["model_path"].endswith("RandomForest.joblib"))
+
+    def test_model_preprocessor_dimension_agreement(self):
+        """Model input dimension must match preprocessor output feature dimension for all specialists."""
+        for spec in UnifiedNIDS.SPECIALIST_NAMES:
+            if not self.engine.is_specialist_loaded(spec):
+                self.engine.load_specialist(spec)
+            bundle = self.engine._specialists[spec]
+            prep = bundle["preprocessor"]
+            model = bundle["model"]
+
+            # Dummy DataFrame matching prep feature names
+            df_sample = pd.DataFrame([{f: 0.5 for f in prep.feature_names_in_}])
+            X = prep.transform_features(df_sample)
+
+            self.assertEqual(X.shape[1], len(prep.feature_names_in_))
+            if hasattr(model, "n_features_in_") and model.n_features_in_ is not None:
+                self.assertEqual(X.shape[1], model.n_features_in_)
+
+    def test_raw_dns_query_automatic_feature_extraction(self):
+        """Passing a raw DNS query string must trigger automatic feature extraction and predict."""
+        dns_query_payload = {"query": "tunneling-exfiltration-data.test.internal.corp"}
+        result = self.engine.predict(dns_query_payload, specialist="DNS_Tunneling")
+        self.assertIn(result["class_name"], ["Benign", "DNS Tunneling"])
+        self.assertIn(result["canonical_id"], [0, 12])
+        self.assertEqual(len(result["probabilities"]), 13)
+
+    def test_missing_features_raises_value_error(self):
+        """Missing features required by the specialist preprocessor must raise a clear ValueError."""
+        incomplete_payload = {"Flow Duration": 100.0}
+        with self.assertRaises(ValueError) as ctx:
+            self.engine.predict(incomplete_payload, specialist="IDS2018")
+        self.assertIn("missing features", str(ctx.exception).lower())
+
 
 if __name__ == '__main__':
     unittest.main()
+

@@ -558,8 +558,15 @@ def calculate_entropy(text):
 
 def extract_dns_features(df):
     """Extract statistical features from raw DNS query strings."""
-    # query is at column 1 (0 is label)
-    queries = df.iloc[:, 1].fillna("").astype(str)
+    if "query" in df.columns:
+        queries = df["query"].fillna("").astype(str)
+        col_to_drop = "query"
+    elif len(df.columns) > 1:
+        queries = df.iloc[:, 1].fillna("").astype(str)
+        col_to_drop = df.columns[1]
+    else:
+        queries = df.iloc[:, 0].fillna("").astype(str)
+        col_to_drop = df.columns[0]
 
     df["query_length"] = queries.str.len()
     df["num_dots"] = queries.str.count(r"\.")
@@ -579,7 +586,7 @@ def extract_dns_features(df):
     df["entropy"] = queries.apply(calculate_entropy)
 
     # Drop the raw query
-    df = df.drop(columns=[df.columns[1]])
+    df = df.drop(columns=[col_to_drop])
     return df
 
 def extract_arp_features(df):

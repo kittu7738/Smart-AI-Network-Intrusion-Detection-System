@@ -151,6 +151,8 @@ class UnifiedNIDS:
                 best_model_name = "candidate_DecisionTree_Tuned" if os.path.exists(os.path.join(spec_dir, "candidate_DecisionTree_Tuned.joblib")) else "DecisionTree"
             elif norm_name == "CICIoT2023":
                 best_model_name = "candidate_XGBoost_Tuned" if os.path.exists(os.path.join(spec_dir, "candidate_XGBoost_Tuned.joblib")) else "XGBoost"
+            elif norm_name == "DNS_Tunneling":
+                best_model_name = "RandomForest" if os.path.exists(os.path.join(spec_dir, "RandomForest.joblib")) else "DecisionTree"
             else:
                 best_model_name = "DecisionTree"
 

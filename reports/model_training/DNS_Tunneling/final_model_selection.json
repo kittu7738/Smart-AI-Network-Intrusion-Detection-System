@@ -1,6 +1,6 @@
 {
     "dataset": "DNS_Tunneling",
-    "best_model": "DecisionTree",
+    "best_model": "RandomForest",
     "selection_metric": "Validation Macro F1",
     "validation_macro_f1": 0.0,
     "test_row_count": 3,

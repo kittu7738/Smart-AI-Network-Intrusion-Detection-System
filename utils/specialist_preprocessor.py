@@ -261,6 +261,33 @@ class SpecialistPreprocessor:
         """Map local IDs back to canonical class name strings."""
         return [self.id_to_local_label[int(val)] for val in y_local]
 
+    def project_probabilities_to_canonical(self, y_proba: np.ndarray, num_canonical_classes: int = 13) -> np.ndarray:
+        """Project specialist local posterior probabilities into the canonical 13-class probability space.
+        
+        Guarantees:
+        1. Output array has shape (N, num_canonical_classes) where each column corresponds to canonical ID 0-12.
+        2. Classes not supported by this specialist strictly receive 0.0 probability.
+        3. Row sums are preserved (equal to 1.0 for valid probability distributions).
+        4. Supports both 1D and 2D arrays.
+        """
+        y_proba = np.asarray(y_proba, dtype=np.float32)
+        single_sample = False
+        if y_proba.ndim == 1:
+            single_sample = True
+            y_proba = y_proba.reshape(1, -1)
+
+        n_samples, n_local = y_proba.shape
+        canonical_proba = np.zeros((n_samples, num_canonical_classes), dtype=np.float32)
+
+        for local_idx, canon_idx in self.local_id_to_canonical_id.items():
+            if int(local_idx) < n_local and int(canon_idx) < num_canonical_classes:
+                canonical_proba[:, int(canon_idx)] = y_proba[:, int(local_idx)]
+
+        if single_sample:
+            return canonical_proba[0]
+        return canonical_proba
+
+
     def save(self, filepath: str) -> str:
         """Save fitted preprocessor artifact."""
         os.makedirs(os.path.dirname(os.path.abspath(filepath)), exist_ok=True)

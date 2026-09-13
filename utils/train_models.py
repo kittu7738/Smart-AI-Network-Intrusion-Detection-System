@@ -18,11 +18,25 @@ except ImportError:
                 pickle.dump(obj, filename)
         @staticmethod
         def load(filename):
+            class CompatUnpickler(pickle.Unpickler):
+                def find_class(self, module, name):
+                    if module == "__main__":
+                        cls_map = {
+                            "DecisionTreeClassifier": globals().get("DecisionTreeClassifier"),
+                            "RandomForestClassifier": globals().get("RandomForestClassifier"),
+                            "ExtraTreesClassifier": globals().get("ExtraTreesClassifier"),
+                            "HistGradientBoostingClassifier": globals().get("HistGradientBoostingClassifier"),
+                            "XGBClassifier": globals().get("XGBClassifier"),
+                        }
+                        if name in cls_map and cls_map[name] is not None:
+                            return cls_map[name]
+                    return super().find_class(module, name)
+
             if isinstance(filename, str):
                 with open(filename, "rb") as f:
-                    return pickle.load(f)
+                    return CompatUnpickler(f).load()
             else:
-                return pickle.load(filename)
+                return CompatUnpickler(filename).load()
     joblib = JoblibCompat()
 
 import pandas as pd
@@ -302,6 +316,25 @@ def check_status(dataset: str, model: str) -> str:
         except Exception:
             return "not_started"
     return "not_started"
+
+def should_invalidate_checkpoint(cached_train_rows: int, n_train_raw: int) -> bool:
+    """Determine whether a cached training report / preprocessor is stale and must be invalidated.
+
+    Invalidates if:
+    1. Cached rows are from a micro-stub (<= 10 rows) and available data is larger (> 10 rows).
+    2. Cached rows are from a subsample (< 1000 rows) and available data has >= 1000 rows.
+    3. Cached rows are significantly smaller (< 50% of available data) for datasets > 100 rows.
+    4. Legacy condition: cached_train_rows < 1000 and n_train_raw > 5000.
+    """
+    if n_train_raw is None or n_train_raw <= 0:
+        return False
+    if cached_train_rows <= 10 and n_train_raw > 10:
+        return True
+    if cached_train_rows < 1000 and (n_train_raw >= 1000 or n_train_raw > 5000):
+        return True
+    if n_train_raw > 100 and cached_train_rows < (n_train_raw * 0.5):
+        return True
+    return False
 
 def split_stratified_train_val(df: pd.DataFrame, label_col: str = "final_label", val_ratio: float = 0.2, seed: int = 42):
     """Deterministically derive a validation split strictly from training data.
@@ -613,6 +646,8 @@ def train_specialist(
         model_dir == resolve_path(os.path.join("models", spec_name)) and
         report_dir == resolve_path(os.path.join("reports", "model_training", spec_name))
     )
+    if smoke_test and is_default_dirs:
+        save_artifacts = False
     should_update_checkpoints = bool(save_artifacts and is_default_dirs and (not smoke_test))
 
     cand_preproc_file = os.path.join(model_dir, "candidate_preprocessor.joblib")
@@ -659,8 +694,8 @@ def train_specialist(
                         except Exception:
                             pass
                         prep_rows = getattr(preprocessor, "training_row_count_", 0)
-                        if prep_rows < 1000 and n_train_rows is not None and n_train_rows > 5000:
-                            print(f"[Preprocessor Sync] Loaded preprocessor was fitted on mock/smoke rows ({prep_rows}), but train.parquet contains {n_train_rows} rows. Re-fitting from training data...", flush=True)
+                        if should_invalidate_checkpoint(prep_rows, n_train_rows):
+                            print(f"[Preprocessor Sync] Loaded preprocessor was fitted on mock/stale rows ({prep_rows}), but train.parquet contains {n_train_rows} rows. Re-fitting from training data...", flush=True)
                             preprocessor = None
                         else:
                             print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features ({prep_rows} train rows).", flush=True)
@@ -802,7 +837,11 @@ def train_specialist(
                     print(f"Warning: Model file {model_file} not found. Skipping {model_name}.", flush=True)
                     continue
             else:
-                model_inst = joblib.load(model_file)
+                try:
+                    model_inst = joblib.load(model_file)
+                except Exception as e:
+                    print(f"Warning: Failed to load model file {model_file}: {e}. Skipping {model_name}.", flush=True)
+                    continue
 
             print(f"\n--- Evaluating {spec_name} :: {model_name} on validation split ---", flush=True)
             # Step 1: Evaluate baseline (uncalibrated)
@@ -950,7 +989,7 @@ def train_specialist(
                 except Exception:
                     pass
 
-                if cached_train_rows < 1000 and n_train_raw > 5000:
+                if should_invalidate_checkpoint(cached_train_rows, n_train_raw):
                     print(f"\n[Checkpoint] Invalidation: cached report {report_file} has only {cached_train_rows} rows (available: {n_train_raw}). Re-training {model_name}...", flush=True)
                 else:
                     print(f"\n[Checkpoint] Skipping {spec_name} :: {model_name} (already completed).", flush=True)
@@ -1247,7 +1286,7 @@ def main():
                 stage_a_only=args.stage_a_only,
                 force=args.force_retrain
             )
-        else:
+        elif norm_spec == "IDS2018":
             from utils.optimize_ids2018 import run_ids2018_optimization
             run_ids2018_optimization(
                 config=config,
@@ -1257,6 +1296,8 @@ def main():
                 stage_a_only=args.stage_a_only,
                 force=args.force_retrain
             )
+        else:
+            raise ValueError(f"Progressive optimization is not implemented for specialist '{norm_spec}'. Available: ['IDS2018', 'CICIoT2023']")
         return
 
     train_all_specialists(

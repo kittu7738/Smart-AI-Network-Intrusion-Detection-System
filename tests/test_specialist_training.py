@@ -1154,8 +1154,61 @@ class TestSpecialistTraining(unittest.TestCase):
             n_train_rows = 5357406
 
             # Logic test: prep_rows >= 1000 must NOT trigger discard
-            should_discard = (prep_rows < 1000 and n_train_rows > 5000)
+            from utils.train_models import should_invalidate_checkpoint
+            should_discard = should_invalidate_checkpoint(prep_rows, n_train_rows)
             self.assertFalse(should_discard)
+
+    def test_arp_checkpoint_invalidation_contract(self):
+        """ARP micro-stubs (<= 10 rows) must be invalidated when real data is available."""
+        from utils.train_models import should_invalidate_checkpoint
+        # Micro stub vs real data
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=2500))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=100))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=10, n_train_raw=50))
+        
+        # Subsample vs full data
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=60, n_train_raw=1200))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=500, n_train_raw=10000))
+
+        # Legitimate full training must NOT invalidate
+        self.assertFalse(should_invalidate_checkpoint(cached_train_rows=2500, n_train_raw=2500))
+        self.assertFalse(should_invalidate_checkpoint(cached_train_rows=50000, n_train_raw=50000))
+        self.assertFalse(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=2))
+
+    def test_arp_smoke_test_evaluate_only_does_not_pollute_production(self):
+        """ARP smoke test in evaluate-only mode must not overwrite production metadata or selection reports."""
+        prod_model_dir = os.path.abspath("models/ARP_Spoofing")
+        prod_rep_dir = os.path.abspath("reports/model_training/ARP_Spoofing")
+
+        meta_file = os.path.join(prod_model_dir, "specialist_metadata.json")
+        sel_file = os.path.join(prod_rep_dir, "final_model_selection.json")
+
+        meta_mtime_before = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_before = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        train_specialist(
+            spec_name="ARP_Spoofing",
+            smoke_test=True,
+            evaluate_only=True,
+            save_artifacts=True
+        )
+
+        meta_mtime_after = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_after = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        self.assertEqual(meta_mtime_after, meta_mtime_before)
+        self.assertEqual(sel_mtime_after, sel_mtime_before)
+
+    def test_optimize_unsupported_specialist_raises_error(self):
+        """Passing --optimize on specialists without progressive optimizer must raise ValueError."""
+        import subprocess
+        result = subprocess.run(
+            [sys.executable, "-m", "utils.train_models", "--dataset", "ARP_Spoofing", "--optimize"],
+            capture_output=True,
+            text=True
+        )
+        self.assertNotEqual(result.returncode, 0)
+        self.assertIn("Progressive optimization is not implemented for specialist 'ARP_Spoofing'", result.stderr)
 
 
 if __name__ == "__main__":

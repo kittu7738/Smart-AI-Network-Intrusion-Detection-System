@@ -355,6 +355,7 @@ def run_ids2018_optimization(
         preproc_full.fit(train_df)
         if save_artifacts:
             preproc_full.save(os.path.join(models_dir, "preprocessor.joblib"))
+            preproc_full.save(os.path.join(models_dir, "candidate_preprocessor.joblib"))
         X_train_full = preproc_full.transform_features(train_df)
         y_train_full = preproc_full.transform_labels(train_df)
 
@@ -519,7 +520,8 @@ def run_ids2018_optimization(
             "class_weighting": best_results["weighting_strategy"],
             "model_path": os.path.join(models_dir, f"candidate_{best_overall_cand}.joblib"),
             "threshold_multipliers": threshold_tuning_report.get("optimized", {}).get("multipliers", None),
-            "training_command": f"python3 -m utils.train_models --dataset IDS2018 --model {final_model_name_for_cli} --force"
+            "evaluation_command": "python3 -m utils.train_models --dataset IDS2018 --evaluate-only --optimized",
+            "training_command": f"python3 -m utils.train_models --dataset IDS2018 --model {best_overall_cand.lower()} --force"
         }
     }
 
@@ -537,7 +539,7 @@ def run_ids2018_optimization(
     print(f"Selected Winning Model: {best_overall_cand}", flush=True)
     print(f"Validation Macro F1: {best_results['val_macro_f1']:.4f} | Validation Accuracy: {best_results['val_accuracy']:.4f}", flush=True)
     print(f"Saved artifacts under: reports/model_training/IDS2018/optimization/", flush=True)
-    print(f"Recommended Colab Command: {optimization_summary['recommendations']['training_command']}", flush=True)
+    print(f"Recommended Colab Evaluation Command: {optimization_summary['recommendations']['evaluation_command']}", flush=True)
     print("=" * 70 + "\n", flush=True)
 
     return optimization_summary

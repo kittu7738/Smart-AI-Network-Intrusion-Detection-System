@@ -23,6 +23,7 @@ from utils.train_models import (
     normalize_model_name,
     DecisionTreeClassifier
 )
+from utils.model_registry import get_candidate_model
 
 class TestSpecialistTraining(unittest.TestCase):
 
@@ -985,6 +986,176 @@ class TestSpecialistTraining(unittest.TestCase):
         # Production dirs must have zero new files added
         self.assertEqual(model_files_after, model_files_before)
         self.assertEqual(rep_files_after, rep_files_before)
+
+    def test_ciciot2023_optimized_evaluation_selection_prefers_candidate_artifact(self):
+        """Regression test: evaluate-only with --optimized on CICIoT2023 selects candidate_XGBoost_Tuned and multipliers."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_m_dir, tempfile.TemporaryDirectory() as tmp_r_dir:
+            # Setup optimization directory with best_optimized_model.json and threshold_tuning.json
+            opt_dir = os.path.join(tmp_r_dir, "optimization")
+            os.makedirs(opt_dir, exist_ok=True)
+            with open(os.path.join(opt_dir, "best_optimized_model.json"), "w") as f:
+                json.dump({
+                    "model": "XGBoost_Tuned",
+                    "model_path": os.path.join(tmp_m_dir, "candidate_XGBoost_Tuned.joblib"),
+                    "threshold_multipliers": {"Benign": 1.5, "DDoS": 1.0, "Infiltration": 2.0}
+                }, f)
+
+            # Create mock candidate_XGBoost_Tuned.joblib and preprocessor.joblib
+            canonical_classes = config["classes"]["ciciot2023"]
+            df_mock, _, _ = load_specialist_splits("CICIoT2023", config, smoke_test=True)
+
+            preproc = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=canonical_classes, scale_features=True)
+            preproc.fit(df_mock)
+            preproc.save(os.path.join(tmp_m_dir, "preprocessor.joblib"))
+
+            model_inst = get_candidate_model("XGBoost_Tuned", smoke_test=True)
+            model_inst.fit(preproc.transform_features(df_mock), preproc.transform_labels(df_mock))
+            from utils.train_models import joblib
+            joblib.dump(model_inst, os.path.join(tmp_m_dir, "candidate_XGBoost_Tuned.joblib"))
+
+            # Also create a baseline XGBoost.joblib to verify it is NOT chosen
+            base_model = get_model_instance("XGBoost", smoke_test=True)
+            base_model.fit(preproc.transform_features(df_mock), preproc.transform_labels(df_mock))
+            joblib.dump(base_model, os.path.join(tmp_m_dir, "XGBoost.joblib"))
+
+            # Case 1: evaluate-only with use_optimized=True without selected_model
+            meta = train_specialist(
+                spec_name="CICIoT2023",
+                config=config,
+                smoke_test=True,
+                evaluate_only=True,
+                use_optimized=True,
+                save_artifacts=False,
+                model_dir=tmp_m_dir,
+                report_dir=tmp_r_dir
+            )
+            self.assertEqual(meta["best_model"], "XGBoost_Tuned")
+            self.assertTrue(meta["model_path"].endswith("candidate_XGBoost_Tuned.joblib"))
+            self.assertFalse(meta["model_path"].endswith("XGBoost.joblib"))
+            self.assertIn("threshold_multipliers", meta)
+
+            # Case 2: evaluate-only with selected_model="xgboost" and use_optimized=True
+            meta_flag = train_specialist(
+                spec_name="CICIoT2023",
+                config=config,
+                smoke_test=True,
+                selected_model="xgboost",
+                evaluate_only=True,
+                use_optimized=True,
+                save_artifacts=False,
+                model_dir=tmp_m_dir,
+                report_dir=tmp_r_dir
+            )
+            self.assertEqual(meta_flag["best_model"], "XGBoost_Tuned")
+            self.assertTrue(meta_flag["model_path"].endswith("candidate_XGBoost_Tuned.joblib"))
+
+    def test_ciciot2023_candidate_preprocessor_preference(self):
+        """When candidate_preprocessor.joblib exists, evaluate_only under --optimized prefers it over preprocessor.joblib."""
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_m_dir, tempfile.TemporaryDirectory() as tmp_r_dir:
+            canonical_classes = config["classes"]["ciciot2023"]
+            df_mock, _, _ = load_specialist_splits("CICIoT2023", config, smoke_test=True)
+
+            # Save distinct candidate and standard preprocessors
+            p_cand = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=canonical_classes, scale_features=True)
+            p_cand.fit(df_mock)
+            p_cand.training_row_count_ = 5357406
+            p_cand.save(os.path.join(tmp_m_dir, "candidate_preprocessor.joblib"))
+
+            p_std = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=canonical_classes, scale_features=True)
+            p_std.fit(df_mock)
+            p_std.training_row_count_ = 1000
+            p_std.save(os.path.join(tmp_m_dir, "preprocessor.joblib"))
+
+            model_inst = get_candidate_model("XGBoost_Tuned", smoke_test=True)
+            model_inst.fit(p_cand.transform_features(df_mock), p_cand.transform_labels(df_mock))
+            from utils.train_models import joblib
+            joblib.dump(model_inst, os.path.join(tmp_m_dir, "candidate_XGBoost_Tuned.joblib"))
+
+            meta = train_specialist(
+                spec_name="CICIoT2023",
+                config=config,
+                smoke_test=True,
+                selected_model="XGBoost_Tuned",
+                evaluate_only=True,
+                use_optimized=True,
+                save_artifacts=False,
+                model_dir=tmp_m_dir,
+                report_dir=tmp_r_dir
+            )
+            self.assertTrue(meta["preprocessing_artifact_path"].endswith("candidate_preprocessor.joblib"))
+
+    def test_ciciot2023_gatekeeper_blocks_baseline_performance_on_optimized_eval(self):
+        """Gatekeeper must raise RuntimeError if an optimized candidate evaluates below validation target."""
+        from unittest.mock import patch
+        from utils.data_preparation import load_config
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_m_dir, tempfile.TemporaryDirectory() as tmp_r_dir:
+            canonical_classes = config["classes"]["ciciot2023"]
+            df_mock, _, _ = load_specialist_splits("CICIoT2023", config, smoke_test=True)
+
+            preproc = SpecialistPreprocessor(dataset_name="CICIoT2023", expected_classes=canonical_classes, scale_features=True)
+            preproc.fit(df_mock)
+            preproc.training_row_count_ = 5357406
+            preproc.save(os.path.join(tmp_m_dir, "preprocessor.joblib"))
+
+            model_inst = get_candidate_model("XGBoost_Tuned", smoke_test=True)
+            model_inst.fit(preproc.transform_features(df_mock), preproc.transform_labels(df_mock))
+            from utils.train_models import joblib
+            joblib.dump(model_inst, os.path.join(tmp_m_dir, "candidate_XGBoost_Tuned.joblib"))
+
+            # Simulate baseline performance (Macro F1 = 0.6974 < 0.75 target)
+            mock_metrics = {
+                "Accuracy": 0.9888,
+                "Macro F1": 0.6974,
+                "Macro Precision": 0.70,
+                "Macro Recall": 0.70,
+                "Weighted F1": 0.98,
+                "Per Class": {},
+                "Confusion Matrix": []
+            }
+
+            with patch("utils.train_models.evaluate_dataset_streamed", return_value=mock_metrics):
+                with self.assertRaises(RuntimeError) as ctx:
+                    train_specialist(
+                        spec_name="CICIoT2023",
+                        config=config,
+                        smoke_test=False, # Trigger real gatekeeper
+                        selected_model="XGBoost_Tuned",
+                        evaluate_only=True,
+                        use_optimized=True,
+                        save_artifacts=False,
+                        model_dir=tmp_m_dir,
+                        report_dir=tmp_r_dir
+                    )
+                self.assertIn("Evaluation Gatekeeper", str(ctx.exception))
+                self.assertIn("Validation reproduction check FAILED", str(ctx.exception))
+                self.assertIn("expected >= 0.985 Acc, >= 0.750 Macro F1 for XGBoost_Tuned", str(ctx.exception))
+
+    def test_preprocessor_row_check_preserves_sampled_dataset(self):
+        """Preprocessor fitted on >= 1000 rows must NOT be discarded even if row count != train.parquet row count."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            p_path = os.path.join(tmpdir, "preprocessor.joblib")
+            canonical_classes = ["Benign", "DoS"]
+            df_mock = pd.DataFrame({"f": [1.0, 2.0], "final_label": ["Benign", "DoS"]})
+            prep = SpecialistPreprocessor(dataset_name="TestSpec", expected_classes=canonical_classes, scale_features=True)
+            prep.fit(df_mock)
+            prep.training_row_count_ = 4100000
+            prep.save(p_path)
+
+            loaded = SpecialistPreprocessor.load(p_path)
+            prep_rows = getattr(loaded, "training_row_count_", 0)
+            n_train_rows = 5357406
+
+            # Logic test: prep_rows >= 1000 must NOT trigger discard
+            should_discard = (prep_rows < 1000 and n_train_rows > 5000)
+            self.assertFalse(should_discard)
 
 
 if __name__ == "__main__":

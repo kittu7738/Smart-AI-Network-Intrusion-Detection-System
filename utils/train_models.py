@@ -615,7 +615,12 @@ def train_specialist(
     )
     should_update_checkpoints = bool(save_artifacts and is_default_dirs and (not smoke_test))
 
-    preproc_path = os.path.join(model_dir, "preprocessor.joblib")
+    cand_preproc_file = os.path.join(model_dir, "candidate_preprocessor.joblib")
+    std_preproc_file = os.path.join(model_dir, "preprocessor.joblib")
+    if (use_optimized or (selected_model and "tuned" in selected_model.lower())) and os.path.exists(cand_preproc_file):
+        preproc_path = cand_preproc_file
+    else:
+        preproc_path = std_preproc_file
     val_results = {}
     training_times = {}
     in_memory_models = {}
@@ -654,8 +659,8 @@ def train_specialist(
                         except Exception:
                             pass
                         prep_rows = getattr(preprocessor, "training_row_count_", 0)
-                        if n_train_rows is not None and prep_rows != n_train_rows:
-                            print(f"[Preprocessor Sync] Loaded preprocessor was fitted on {prep_rows} rows, but train.parquet contains {n_train_rows} rows. Re-fitting to eliminate scaling/median contract drift...", flush=True)
+                        if prep_rows < 1000 and n_train_rows is not None and n_train_rows > 5000:
+                            print(f"[Preprocessor Sync] Loaded preprocessor was fitted on mock/smoke rows ({prep_rows}), but train.parquet contains {n_train_rows} rows. Re-fitting from training data...", flush=True)
                             preprocessor = None
                         else:
                             print(f"Loaded existing preprocessor from {preproc_path} with {preprocessor.n_features_in_} features ({prep_rows} train rows).", flush=True)
@@ -712,16 +717,34 @@ def train_specialist(
             candidate_names = [normalize_model_name(m) for m in all_candidates if normalize_model_name(m) in [normalize_model_name(x) for x in model_names]]
         elif selected_model:
             norm_model = normalize_model_name(selected_model)
+            if use_optimized:
+                # If --optimized was passed with a base algorithm name, map to tuned finalist
+                if f"{norm_model}_Tuned" in OPTIMIZATION_CANDIDATE_CONFIGS:
+                    norm_model = f"{norm_model}_Tuned"
+                elif norm_model.lower() == "xgboost":
+                    norm_model = "XGBoost_Tuned"
+                elif norm_model.lower() == "decisiontree":
+                    norm_model = "DecisionTree_Tuned"
+                elif norm_model.lower() == "randomforest":
+                    norm_model = "RandomForest_Tuned"
             if norm_model not in all_candidates:
                 raise ValueError(f"Requested model '{selected_model}' not available. Choose from {all_candidates}")
+            active_opt_dir = os.path.join(report_dir, "optimization") if report_dir else None
+            if not (active_opt_dir and os.path.exists(active_opt_dir)):
+                active_opt_dir = resolve_path(os.path.join("reports", "model_training", spec_name, "optimization"))
+
             candidate_names = [norm_model]
             if (spec_name in ["IDS2018", "CICIoT2023"] or use_optimized) and (norm_model in OPTIMIZATION_CANDIDATE_CONFIGS or use_optimized):
-                threshold_multipliers = load_stored_threshold_multipliers(spec_name)
+                threshold_multipliers = load_stored_threshold_multipliers(spec_name, opt_dir=active_opt_dir)
         else:
             # Check if progressive optimizer finalist model is recorded
             optimized_finalist = None
+            active_opt_dir = os.path.join(report_dir, "optimization") if report_dir else None
+            if not (active_opt_dir and os.path.exists(active_opt_dir)):
+                active_opt_dir = resolve_path(os.path.join("reports", "model_training", spec_name, "optimization"))
+
             if spec_name in ["IDS2018", "CICIoT2023"] or use_optimized:
-                opt_best_path = resolve_path(os.path.join("reports", "model_training", spec_name, "optimization", "best_optimized_model.json"))
+                opt_best_path = os.path.join(active_opt_dir, "best_optimized_model.json")
                 if os.path.exists(opt_best_path):
                     try:
                         with open(opt_best_path, "r") as f:
@@ -734,10 +757,15 @@ def train_specialist(
                                 optimized_finalist = norm_cand_m
                     except Exception:
                         pass
+                if not optimized_finalist and use_optimized:
+                    # If flag --optimized was passed, try default finalist for specialist
+                    default_cand = "XGBoost_Tuned" if spec_name == "CICIoT2023" else "DecisionTree_Tuned"
+                    if os.path.exists(resolve_model_path(model_dir, default_cand)):
+                        optimized_finalist = default_cand
 
             if optimized_finalist:
                 candidate_names = [optimized_finalist]
-                threshold_multipliers = load_stored_threshold_multipliers(spec_name)
+                threshold_multipliers = load_stored_threshold_multipliers(spec_name, opt_dir=active_opt_dir)
                 print(f"[Optimized Evaluation] Loading progressive optimizer finalist model: {optimized_finalist} from {resolve_model_path(model_dir, optimized_finalist)}", flush=True)
                 if threshold_multipliers:
                     print(f"[Threshold Calibration] Applying validation-tuned probability multipliers: {threshold_multipliers}", flush=True)
@@ -1026,8 +1054,15 @@ def train_specialist(
             gate_failed = (uncal_acc < 0.95 or uncal_f1 < 0.80)
             threshold_desc = "expected >= 0.95 Acc, >= 0.80 Macro F1"
         elif spec_name == "CICIoT2023":
-            gate_failed = (uncal_acc < 0.95 or uncal_f1 < 0.69)
-            threshold_desc = "expected >= 0.95 Acc, >= 0.69 Macro F1"
+            if best_model_name in ["XGBoost_Tuned", "candidate_XGBoost_Tuned"] or use_optimized or "tuned" in best_model_name.lower():
+                gate_failed = (uncal_acc < 0.985 or uncal_f1 < 0.75)
+                threshold_desc = "expected >= 0.985 Acc, >= 0.750 Macro F1 for XGBoost_Tuned"
+                if threshold_multipliers and val_f1 < 0.78:
+                    gate_failed = True
+                    threshold_desc += f", and >= 0.780 Calibrated Macro F1 (got {val_f1:.4f})"
+            else:
+                gate_failed = (uncal_acc < 0.95 or uncal_f1 < 0.69)
+                threshold_desc = "expected >= 0.95 Acc, >= 0.69 Macro F1"
 
         if gate_failed:
             raise RuntimeError(
@@ -1175,7 +1210,7 @@ def parse_args():
     parser.add_argument("--evaluate-only", "--eval-only", action="store_true", dest="evaluate_only",
                         help="Evaluate existing trained models and regenerate reports without retraining.")
     parser.add_argument("--optimized", action="store_true", dest="use_optimized",
-                        help="Evaluate the progressive optimizer's saved finalist model for IDS2018.")
+                        help="Evaluate the progressive optimizer's saved finalist model for IDS2018 or CICIoT2023.")
     parser.add_argument("--sync-preprocessor", action="store_true", dest="sync_preprocessor",
                         help="Force re-fitting SpecialistPreprocessor on full train.parquet to guarantee exact preprocessing contract.")
     parser.add_argument("--optimize", action="store_true", dest="optimize",

@@ -1271,6 +1271,93 @@ class TestSpecialistTraining(unittest.TestCase):
         self.assertNotIn("mac_address", prep.feature_names_in_)
         self.assertNotIn("Attack_Type", prep.feature_names_in_)
 
+    def test_dns_tunneling_checkpoint_invalidation_contract(self):
+        """DNS Tunneling micro-stubs (<= 10 rows) must be invalidated when real data is available."""
+        from utils.train_models import should_invalidate_checkpoint
+        # DNS local stub has 2 rows
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=100000))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=500))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=10, n_train_raw=50))
+        # Legitimate full training must NOT invalidate
+        self.assertFalse(should_invalidate_checkpoint(cached_train_rows=100000, n_train_raw=100000))
+
+    def test_dns_tunneling_smoke_test_evaluate_only_does_not_pollute_production(self):
+        """DNS Tunneling smoke test in evaluate-only mode must not overwrite production metadata or selection reports."""
+        prod_model_dir = os.path.abspath("models/DNS_Tunneling")
+        prod_rep_dir = os.path.abspath("reports/model_training/DNS_Tunneling")
+
+        meta_file = os.path.join(prod_model_dir, "specialist_metadata.json")
+        sel_file = os.path.join(prod_rep_dir, "final_model_selection.json")
+
+        meta_mtime_before = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_before = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        train_specialist(
+            spec_name="DNS_Tunneling",
+            smoke_test=True,
+            evaluate_only=True,
+            save_artifacts=True
+        )
+
+        meta_mtime_after = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_after = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        self.assertEqual(meta_mtime_after, meta_mtime_before)
+        self.assertEqual(sel_mtime_after, sel_mtime_before)
+
+    def test_dns_tunneling_preprocessor_contract(self):
+        """DNS Tunneling specialist preprocessor must map to canonical classes Benign (0) and DNS Tunneling (12)."""
+        from utils.specialist_preprocessor import SpecialistPreprocessor
+        prep = SpecialistPreprocessor(
+            dataset_name="DNS_Tunneling",
+            expected_classes=["Benign", "DNS Tunneling"],
+            scale_features=True
+        )
+        self.assertEqual(prep.expected_classes, ["Benign", "DNS Tunneling"])
+        self.assertEqual(prep.local_label_to_id, {"Benign": 0, "DNS Tunneling": 1})
+        self.assertEqual(prep.local_id_to_canonical_id, {0: 0, 1: 12})
+
+        # Test fitting on dummy data with 9 DNS features
+        df_dummy = pd.DataFrame({
+            "query_length": [15.0, 30.0],
+            "num_dots": [2.0, 4.0],
+            "num_subdomains": [3.0, 5.0],
+            "max_label_length": [6.0, 12.0],
+            "avg_label_length": [4.5, 6.2],
+            "digit_count": [0.0, 5.0],
+            "alpha_count": [13.0, 22.0],
+            "special_character_count": [0.0, 1.0],
+            "entropy": [2.5, 3.8],
+            "mac_address": ["00:11:22", "33:44:55"],
+            "final_label": ["Benign", "DNS Tunneling"]
+        })
+        prep.fit(df_dummy)
+        self.assertEqual(prep.n_features_in_, 9)
+        self.assertNotIn("mac_address", prep.feature_names_in_)
+        self.assertEqual(prep.local_id_to_canonical_id[prep.local_label_to_id["DNS Tunneling"]], 12)
+
+    def test_dns_tunneling_split_architecture(self):
+        """DNS Tunneling split_type='train_val_as_test' must derive train/val from train.parquet and use val.parquet as held-out test."""
+        with tempfile.TemporaryDirectory() as tmpdir:
+            train_df = pd.DataFrame({
+                "query_len": np.random.randn(100),
+                "final_label": ["Benign"] * 50 + ["DNS Tunneling"] * 50
+            })
+            val_df = pd.DataFrame({
+                "query_len": np.random.randn(40),
+                "final_label": ["Benign"] * 20 + ["DNS Tunneling"] * 20
+            })
+            train_df.to_parquet(os.path.join(tmpdir, "train.parquet"), index=False)
+            val_df.to_parquet(os.path.join(tmpdir, "val.parquet"), index=False)
+
+            train_s, val_s, test_s = load_specialist_splits(tmpdir, split_type="train_val_as_test", random_seed=42)
+            # Train and Val must partition train.parquet (80/20)
+            self.assertEqual(len(train_s), 80)
+            self.assertEqual(len(val_s), 20)
+            # Test split must match val.parquet completely (40 rows)
+            self.assertEqual(len(test_s), 40)
+            self.assertTrue(np.allclose(test_s["query_len"].values, val_df["query_len"].values))
+
 
 if __name__ == "__main__":
     unittest.main()

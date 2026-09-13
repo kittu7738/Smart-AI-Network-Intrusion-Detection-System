@@ -757,7 +757,12 @@ def main():
         "--force-rebuild-ip" in sys.argv or
         "--force-rebuild-ip-spoofing" in sys.argv
     )
-    force_dns = force_all or "--force-rebuild-dns" in sys.argv
+    force_dns = (
+        force_all or
+        "--force-rebuild-dns" in sys.argv or
+        "--force-rebuild-dns-tunneling" in sys.argv or
+        "--force-rebuild-dnstunneling" in sys.argv
+    )
 
     ids_report = process_ids2018(config, mapping, force_rebuild=force_ids2018)
     iot_report = process_ciciot2023(config, mapping, force_rebuild=force_ciciot)

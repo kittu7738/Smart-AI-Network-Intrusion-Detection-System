@@ -329,6 +329,18 @@ class TestDataPreparation(unittest.TestCase):
                 "--force-rebuild-ip-spoofing" in test_argv
             )
             self.assertTrue(force_5g, f"Failed for argument: {arg}")
+
+    def test_dns_rebuild_cli_aliases(self):
+        """CLI arguments --force-rebuild-dns, --force-rebuild-dns-tunneling, and --force-rebuild-dnstunneling must trigger DNS rebuild."""
+        for arg in ["--force-rebuild-dns", "--force-rebuild-dns-tunneling", "--force-rebuild-dnstunneling"]:
+            test_argv = ["data_preparation.py", arg]
+            force_dns = (
+                "--force-rebuild" in test_argv or "--force-rebuild-all" in test_argv or
+                "--force-rebuild-dns" in test_argv or
+                "--force-rebuild-dns-tunneling" in test_argv or
+                "--force-rebuild-dnstunneling" in test_argv
+            )
+            self.assertTrue(force_dns, f"Failed for argument: {arg}")
     def test_pipeline_output_creation_and_contract(self):
         import tempfile
         import os

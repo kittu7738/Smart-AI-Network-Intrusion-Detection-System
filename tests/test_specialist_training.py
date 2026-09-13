@@ -1211,5 +1211,66 @@ class TestSpecialistTraining(unittest.TestCase):
         self.assertIn("Progressive optimization is not implemented for specialist 'ARP_Spoofing'", result.stderr)
 
 
+    def test_ip_spoofing_checkpoint_invalidation_contract(self):
+        """5G/IP micro-stubs (<= 10 rows) must be invalidated when real data is available."""
+        from utils.train_models import should_invalidate_checkpoint
+        # 5G local stub has 2 rows
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=500000))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=2, n_train_raw=1000))
+        self.assertTrue(should_invalidate_checkpoint(cached_train_rows=10, n_train_raw=50))
+        # Legitimate full training must NOT invalidate
+        self.assertFalse(should_invalidate_checkpoint(cached_train_rows=500000, n_train_raw=500000))
+
+    def test_ip_spoofing_smoke_test_evaluate_only_does_not_pollute_production(self):
+        """5G/IP smoke test in evaluate-only mode must not overwrite production metadata or selection reports."""
+        prod_model_dir = os.path.abspath("models/IP_Spoofing")
+        prod_rep_dir = os.path.abspath("reports/model_training/IP_Spoofing")
+
+        meta_file = os.path.join(prod_model_dir, "specialist_metadata.json")
+        sel_file = os.path.join(prod_rep_dir, "final_model_selection.json")
+
+        meta_mtime_before = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_before = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        train_specialist(
+            spec_name="IP_Spoofing",
+            smoke_test=True,
+            evaluate_only=True,
+            save_artifacts=True
+        )
+
+        meta_mtime_after = os.path.getmtime(meta_file) if os.path.exists(meta_file) else None
+        sel_mtime_after = os.path.getmtime(sel_file) if os.path.exists(sel_file) else None
+
+        self.assertEqual(meta_mtime_after, meta_mtime_before)
+        self.assertEqual(sel_mtime_after, sel_mtime_before)
+
+    def test_ip_spoofing_preprocessor_contract(self):
+        """5G/IP specialist preprocessor must map to canonical classes Benign (0) and IP Spoofing (8)."""
+        from utils.specialist_preprocessor import SpecialistPreprocessor
+        prep = SpecialistPreprocessor(
+            dataset_name="IP_Spoofing",
+            expected_classes=["Benign", "IP Spoofing"],
+            scale_features=True
+        )
+        self.assertEqual(prep.expected_classes, ["Benign", "IP Spoofing"])
+        self.assertEqual(prep.local_label_to_id, {"Benign": 0, "IP Spoofing": 1})
+        self.assertEqual(prep.local_id_to_canonical_id, {0: 0, 1: 8})
+        
+        # Test fitting on dummy data with MAC and non-numeric columns
+        df_dummy = pd.DataFrame({
+            "flow_bytes": [100.0, 200.0],
+            "pkt_rate": [10.5, 20.5],
+            "mac_address": ["00:11:22", "33:44:55"],
+            "Attack_Type": ["Attack1", "Attack2"],
+            "final_label": ["Benign", "IP Spoofing"]
+        })
+        prep.fit(df_dummy)
+        self.assertEqual(prep.n_features_in_, 2)
+        self.assertEqual(prep.feature_names_in_, ["flow_bytes", "pkt_rate"])
+        self.assertNotIn("mac_address", prep.feature_names_in_)
+        self.assertNotIn("Attack_Type", prep.feature_names_in_)
+
+
 if __name__ == "__main__":
     unittest.main()

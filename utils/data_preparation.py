@@ -578,12 +578,13 @@ def extract_arp_features(df):
     return df[cols_to_keep]
 
 def extract_5g_features(df):
-    """Keep defensible 5G features, stripping raw IPs."""
+    """Keep defensible 5G features, stripping raw IPs, MACs, and secondary label columns."""
     # Drop source and destination IPs if they exist
     ip_cols = [c for c in df.columns if "ip" in c.lower() and ("src" in c.lower() or "dst" in c.lower())]
     mac_cols = [c for c in df.columns if "mac" in c.lower()]
-    bad_cols = ip_cols + mac_cols
-    cols_to_keep = [c for c in df.columns if c not in bad_cols]
+    leakage_label_cols = [c for c in df.columns if c.lower() in ("attack", "attack_type", "attack_cat", "category", "sub_cat", "label_name", "label", "target")]
+    bad_cols = ip_cols + mac_cols + leakage_label_cols
+    cols_to_keep = [c for c in df.columns if c not in bad_cols or c == "final_label"]
     return df[cols_to_keep]
 
 def process_dataset_generic(config, mapping, dataset_name, raw_dir_key, processed_dir_key, file_splits, feature_extractor, map_key, force_rebuild=False):
@@ -750,7 +751,12 @@ def main():
     )
     force_ciciot = force_all or "--force-rebuild-ciciot2023" in sys.argv
     force_arp = force_all or "--force-rebuild-arp" in sys.argv
-    force_5g = force_all or "--force-rebuild-5g" in sys.argv
+    force_5g = (
+        force_all or
+        "--force-rebuild-5g" in sys.argv or
+        "--force-rebuild-ip" in sys.argv or
+        "--force-rebuild-ip-spoofing" in sys.argv
+    )
     force_dns = force_all or "--force-rebuild-dns" in sys.argv
 
     ids_report = process_ids2018(config, mapping, force_rebuild=force_ids2018)

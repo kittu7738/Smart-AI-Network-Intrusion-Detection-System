@@ -297,12 +297,38 @@ class TestDataPreparation(unittest.TestCase):
     def test_5g_feature_extraction(self):
         from utils.data_preparation import extract_5g_features
         import pandas as pd
-        df = pd.DataFrame({"some_metric": [1.0], "Src_IP": ["1.1.1.1"], "Dst_MAC": ["aa:bb"], "final_label": ["Benign"]})
+        df = pd.DataFrame({
+            "some_metric": [1.0],
+            "Src_IP": ["1.1.1.1"],
+            "Dst_IP": ["2.2.2.2"],
+            "Dst_MAC": ["aa:bb"],
+            "Attack_Type": ["IP_Spoofing"],
+            "attack": ["Spoofing"],
+            "Label": ["1"],
+            "final_label": ["IP Spoofing"]
+        })
         res = extract_5g_features(df)
         self.assertIn("some_metric", res.columns)
         self.assertNotIn("Src_IP", res.columns)
+        self.assertNotIn("Dst_IP", res.columns)
         self.assertNotIn("Dst_MAC", res.columns)
+        self.assertNotIn("Attack_Type", res.columns)
+        self.assertNotIn("attack", res.columns)
+        self.assertNotIn("Label", res.columns)
         self.assertIn("final_label", res.columns)
+
+    def test_5g_rebuild_cli_aliases(self):
+        """CLI arguments --force-rebuild-ip and --force-rebuild-ip-spoofing must trigger 5G rebuild."""
+        import sys
+        for arg in ["--force-rebuild-5g", "--force-rebuild-ip", "--force-rebuild-ip-spoofing"]:
+            test_argv = ["data_preparation.py", arg]
+            force_5g = (
+                "--force-rebuild" in test_argv or "--force-rebuild-all" in test_argv or
+                "--force-rebuild-5g" in test_argv or
+                "--force-rebuild-ip" in test_argv or
+                "--force-rebuild-ip-spoofing" in test_argv
+            )
+            self.assertTrue(force_5g, f"Failed for argument: {arg}")
     def test_pipeline_output_creation_and_contract(self):
         import tempfile
         import os

@@ -9,6 +9,7 @@ xgboost>=1.7.0
 # Backend & Web
 Flask>=2.2.0
 Werkzeug>=2.2.0
+uvicorn[standard]
 
 # Utilities
 joblib>=1.2.0

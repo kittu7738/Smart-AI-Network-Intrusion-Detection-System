@@ -46,13 +46,14 @@ from utils.train_models import (
     SPECIALIST_SPECS
 )
 
-# Priority order specified for IDS2018 optimization
+# Priority order specified for CICIoT2023 optimization
 DEFAULT_PRIORITY_CANDIDATES = [
     "XGBoost_Tuned",
-    "HistGradientBoosting",
-    "ExtraTrees",
+    "DecisionTree_Tuned",
     "RandomForest_Tuned",
-    "DecisionTree_Tuned"
+    "ExtraTrees",
+    "HistGradientBoosting",
+    "XGBoost_Unweighted"
 ]
 
 def load_checkpoint_progress(checkpoint_file: str) -> dict:
@@ -79,13 +80,12 @@ def save_checkpoint_progress(checkpoint_file: str, data: dict):
         with open(checkpoint_file, "w") as f:
             json.dump(data, f, indent=4)
 
-def run_ids2018_optimization(
+def run_ciciot2023_optimization(
     config: dict = None,
     smoke_test: bool = False,
     screening_samples: int = None,
     top_k: int = 2,
     candidate_list: list = None,
-    feature_representations: list = None,
     tune_thresholds_flag: bool = True,
     stage_a_only: bool = False,
     force: bool = False,
@@ -93,23 +93,25 @@ def run_ids2018_optimization(
     opt_dir: str = None,
     models_dir: str = None
 ) -> dict:
-    """Execute fast, progressive two-stage optimization for IDS2018 specialist.
+    """Execute fast, progressive two-stage optimization for CICIoT2023 specialist.
     
     STAGE A — Candidate Screening:
       - Deterministic stratified training subset (default 500,000 rows).
-      - Preserves 100% of rare minority classes.
+      - Preserves 100% of rare minority classes (Infiltration, Brute Force, Web Attack).
       - Candidate-by-candidate progress and checkpointing (supports resume).
-      - Evaluated against validation set.
+      - Evaluated against full validation split (1,112,810 rows) streamingly.
       
     STAGE B — Full Training:
-      - Top 2-3 winning candidates from Stage A are trained on full dataset.
+      - Top winning candidates from Stage A are trained on full 5.35M dataset.
       - Evaluated on full validation set.
-      - Probability threshold tuning on best full model.
+      - Decision threshold tuning on best full model strictly on validation data.
+      
+    Held-out test split remains 100% untouched and preserved throughout.
     """
     if config is None:
         config = load_config()
 
-    spec_name = "IDS2018"
+    spec_name = "CICIoT2023"
     spec_info = SPECIALIST_SPECS[spec_name]
     expected_classes = config["classes"][spec_info["config_class_key"]]
 
@@ -118,26 +120,26 @@ def run_ids2018_optimization(
         screening_samples = 60 if smoke_test else 500000
 
     print("\n" + "=" * 70, flush=True)
-    print("PROGRESSIVE TWO-STAGE IDS2018 SPECIALIST OPTIMIZATION", flush=True)
-    print(f"Goal: Maximize Validation Macro F1 & Accuracy toward ~99% target", flush=True)
+    print("PROGRESSIVE TWO-STAGE CICIoT2023 SPECIALIST OPTIMIZATION", flush=True)
+    print(f"Goal: Maximize Validation Macro F1 & Minority Recall (Imbalance Mitigation)", flush=True)
     print(f"Stage A Screening Budget: {screening_samples:,} training rows", flush=True)
     print(f"Stage B Full Finalists: Top {top_k} candidates", flush=True)
     print(f"Taxonomy ({len(expected_classes)} classes): {expected_classes}", flush=True)
     print("=" * 70, flush=True)
 
     if opt_dir is None:
-        opt_dir = resolve_path(os.path.join("reports", "model_training", "IDS2018", "optimization"))
+        opt_dir = resolve_path(os.path.join("reports", "model_training", "CICIoT2023", "optimization"))
     else:
         opt_dir = resolve_path(opt_dir)
 
-    default_prod_opt = resolve_path(os.path.join("reports", "model_training", "IDS2018", "optimization"))
+    default_prod_opt = resolve_path(os.path.join("reports", "model_training", "CICIoT2023", "optimization"))
     if models_dir is None:
         if opt_dir != default_prod_opt:
             models_dir = os.path.join(opt_dir, "models")
         elif smoke_test:
-            models_dir = os.path.join(tempfile.gettempdir(), "smoke_ids2018_models")
+            models_dir = resolve_path(os.path.join("scratch", "smoke_test", "models", "CICIoT2023"))
         else:
-            models_dir = resolve_path(os.path.join("models", "IDS2018"))
+            models_dir = resolve_path(os.path.join("models", "CICIoT2023"))
     else:
         models_dir = resolve_path(models_dir)
 
@@ -252,7 +254,6 @@ def run_ids2018_optimization(
 
         t0 = time.time()
         try:
-            # Safe fitting with proper sample_weight handling
             if sample_w is not None and cand_name != "HistGradientBoosting":
                 model_inst.fit(X_train_screen, y_train_screen, sample_weight=sample_w)
             elif sample_w is not None and cand_name == "HistGradientBoosting":
@@ -290,7 +291,6 @@ def run_ids2018_optimization(
                 "confusion_matrix_dict": val_metrics.get("confusion_matrix_dict", {})
             }
 
-            # Checkpoint immediately to disk after every candidate
             if save_artifacts:
                 save_checkpoint_progress(stage_a_ckpt_file, stage_a_results)
 
@@ -300,20 +300,17 @@ def run_ids2018_optimization(
             del model_inst
             gc.collect()
 
-    # Free screening training matrices
     del X_train_screen, y_train_screen, screen_weight_vectors
     gc.collect()
 
     if not stage_a_results:
         raise RuntimeError("Stage A screening produced no successful candidate results.")
 
-    # Save final Stage A summary
     if save_artifacts:
         stage_a_summary_file = os.path.join(opt_dir, "stage_a_screening.json")
         with open(stage_a_summary_file, "w") as f:
             json.dump(stage_a_results, f, indent=4)
 
-    # Sort candidates by Validation Macro F1
     sorted_stage_a = sorted(
         stage_a_results.values(),
         key=lambda x: (x["val_macro_f1"], x["val_accuracy"]),
@@ -321,7 +318,7 @@ def run_ids2018_optimization(
     )
 
     print("\n" + "=" * 70, flush=True)
-    print("STAGE A SCREENING LEADERBOARD", flush=True)
+    print("STAGE A SCREENING LEADERBOARD (CICIoT2023)", flush=True)
     print("=" * 70, flush=True)
     print(f"{'Rank':<5} {'Candidate':<24} {'Val Macro F1':<14} {'Val Accuracy':<14} {'Fit Time (s)':<12}", flush=True)
     print("-" * 70, flush=True)
@@ -329,7 +326,6 @@ def run_ids2018_optimization(
         print(f"{r_idx:<5} {c_res['candidate_name']:<24} {c_res['val_macro_f1']:<14.4f} {c_res['val_accuracy']:<14.4f} {c_res['fit_time_seconds']:<12.2f}", flush=True)
     print("-" * 70, flush=True)
 
-    # Select Top K Candidates for Stage B Full Training
     top_candidates = [c["candidate_name"] for c in sorted_stage_a[:top_k]]
     print(f"\n>> Selected Top {len(top_candidates)} Finalists for Stage B Full Training: {top_candidates}", flush=True)
 
@@ -339,7 +335,7 @@ def run_ids2018_optimization(
     if stage_a_only:
         print("\n[Notice] --stage-a-only requested; skipping Stage B full training.", flush=True)
     else:
-        # 5. STAGE B: Full Training of Finalists on Full Training Set
+        # 5. STAGE B: Full Training of Finalists on Full 5.35M Training Set
         print("\n" + "=" * 70, flush=True)
         print(f"STAGE B: FULL TRAINING ON {n_train_raw:,} ROWS ({len(top_candidates)} finalists)", flush=True)
         print("=" * 70, flush=True)
@@ -348,7 +344,6 @@ def run_ids2018_optimization(
         if stage_b_results:
             print(f"[Resume Checkpoint] Found {len(stage_b_results)} completed finalists in Stage B checkpoint.", flush=True)
 
-        # Preprocessor for full dataset
         preproc_full = SpecialistPreprocessor(
             dataset_name=spec_name, expected_classes=expected_classes, scale_features=True
         )
@@ -367,7 +362,6 @@ def run_ids2018_optimization(
         for b_idx, cand_name in enumerate(top_candidates, start=1):
             cand_cfg = OPTIMIZATION_CANDIDATE_CONFIGS[cand_name]
 
-            # Resume check for Stage B
             if not force and cand_name in stage_b_results:
                 prev = stage_b_results[cand_name]
                 print(f"[Stage B {b_idx}/{len(top_candidates)}] Cached: {cand_name} | Full Val Macro F1: {prev['val_macro_f1']:.4f} | Accuracy: {prev['val_accuracy']:.4f}", flush=True)
@@ -393,12 +387,10 @@ def run_ids2018_optimization(
                 fit_time = time.time() - t0
                 print(f"  Full Fit Completed in {fit_time:.2f}s", flush=True)
 
-                # Save candidate full model to models/
                 cand_model_path = os.path.join(models_dir, f"candidate_{cand_name}.joblib")
                 if save_artifacts:
                     joblib.dump(model_inst, cand_model_path)
 
-                # Streamed evaluation on full validation set
                 t_eval = time.time()
                 val_metrics = evaluate_dataset_streamed(
                     model_inst, val_source, preproc_full, expected_classes, batch_size=100000
@@ -432,7 +424,6 @@ def run_ids2018_optimization(
                 del model_inst
                 gc.collect()
 
-        # Free full training matrix
         del X_train_full, y_train_full, full_weight_vectors
         gc.collect()
 
@@ -445,7 +436,7 @@ def run_ids2018_optimization(
             best_overall_cand = sorted_stage_b[0]["candidate_name"]
 
             print("\n" + "=" * 70, flush=True)
-            print("STAGE B FULL TRAINING LEADERBOARD", flush=True)
+            print("STAGE B FULL TRAINING LEADERBOARD (CICIoT2023)", flush=True)
             print("=" * 70, flush=True)
             print(f"{'Rank':<5} {'Candidate':<24} {'Val Macro F1':<14} {'Val Accuracy':<14} {'Fit Time (s)':<12}", flush=True)
             print("-" * 70, flush=True)
@@ -478,7 +469,7 @@ def run_ids2018_optimization(
                 y_val_prob = best_model_inst.predict_proba(X_val)
                 model_classes = getattr(best_model_inst, "classes_", None)
                 threshold_tuning_report, best_multipliers = tune_validation_thresholds(
-                    y_true=y_val, y_prob=y_val_prob, class_names=expected_classes, benign_idx=0, model_classes=model_classes
+                    y_true=y_val, y_prob=y_val_prob, class_names=expected_classes, benign_idx=0, tune_minority=True, model_classes=model_classes
                 )
                 print(f"Threshold Optimization Complete:", flush=True)
                 print(f"  Baseline Macro F1: {threshold_tuning_report['baseline']['macro_f1']:.4f} -> Calibrated: {threshold_tuning_report['optimized']['macro_f1']:.4f}", flush=True)
@@ -491,7 +482,6 @@ def run_ids2018_optimization(
             del best_model_inst, X_val, y_val
             gc.collect()
 
-    # Free remaining train dataframe
     del train_df
     gc.collect()
 
@@ -519,7 +509,7 @@ def run_ids2018_optimization(
             "class_weighting": best_results["weighting_strategy"],
             "model_path": os.path.join(models_dir, f"candidate_{best_overall_cand}.joblib"),
             "threshold_multipliers": threshold_tuning_report.get("optimized", {}).get("multipliers", None),
-            "training_command": f"python3 -m utils.train_models --dataset IDS2018 --model {final_model_name_for_cli} --force"
+            "training_command": f"python3 -m utils.train_models --dataset CICIoT2023 --model {final_model_name_for_cli} --force"
         }
     }
 
@@ -533,47 +523,39 @@ def run_ids2018_optimization(
             json.dump(optimization_summary["recommendations"], f, indent=4)
 
     print("\n" + "=" * 70, flush=True)
-    print("PROGRESSIVE IDS2018 OPTIMIZATION COMPLETED SUCCESSFULLY", flush=True)
+    print("PROGRESSIVE CICIoT2023 OPTIMIZATION COMPLETED SUCCESSFULLY", flush=True)
     print(f"Selected Winning Model: {best_overall_cand}", flush=True)
     print(f"Validation Macro F1: {best_results['val_macro_f1']:.4f} | Validation Accuracy: {best_results['val_accuracy']:.4f}", flush=True)
-    print(f"Saved artifacts under: reports/model_training/IDS2018/optimization/", flush=True)
+    print(f"Saved artifacts under: reports/model_training/CICIoT2023/optimization/", flush=True)
     print(f"Recommended Colab Command: {optimization_summary['recommendations']['training_command']}", flush=True)
     print("=" * 70 + "\n", flush=True)
 
     return optimization_summary
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="IDS2018 Progressive Two-Stage Validation Optimization Pipeline")
-    parser.add_argument("--smoke-test", action="store_true", help="Run lightweight smoke test.")
-    parser.add_argument("--screening-samples", type=int, default=None, help="Stage A screening sample size (default 500,000).")
-    parser.add_argument("--top-k", type=int, default=2, help="Number of Stage A finalists to train on full dataset in Stage B.")
-    parser.add_argument("--candidates", type=str, default=None, help="Comma-separated candidate list.")
-    parser.add_argument("--stage-a-only", "--skip-stage-b", action="store_true", dest="stage_a_only", help="Run Stage A screening only.")
-    parser.add_argument("--force", action="store_true", help="Ignore cached checkpoints and force re-run.")
-    parser.add_argument("--no-thresholds", action="store_true", help="Disable threshold tuning.")
-    return parser.parse_args()
-
 def main():
-    args = parse_args()
-    config = load_config()
-    cands = [c.strip() for c in args.candidates.split(",")] if args.candidates else None
-    
-    screening_samples = args.screening_samples
-    if screening_samples is None and "NIDS_SCREENING_SAMPLES" in os.environ:
-        try:
-            screening_samples = int(os.environ["NIDS_SCREENING_SAMPLES"])
-        except ValueError:
-            pass
+    parser = argparse.ArgumentParser(description="CICIoT2023 Progressive Two-Stage Validation Optimization Pipeline")
+    parser.add_argument("--smoke-test", action="store_true", help="Run quick 60-row pipeline verification test.")
+    parser.add_argument("--screening-samples", type=int, default=None,
+                        help="Number of training rows for Stage A screening (default: 500,000).")
+    parser.add_argument("--top-k", type=int, default=2,
+                        help="Number of finalists to train on full dataset in Stage B (default: 2).")
+    parser.add_argument("--stage-a-only", action="store_true",
+                        help="Run Stage A screening only, skipping full Stage B training.")
+    parser.add_argument("--force", action="store_true",
+                        help="Force full re-run ignoring saved checkpoint progress.")
+    parser.add_argument("--no-threshold-tuning", action="store_true",
+                        help="Disable decision threshold probability tuning.")
+    args = parser.parse_args()
 
-    run_ids2018_optimization(
+    config = load_config()
+    run_ciciot2023_optimization(
         config=config,
         smoke_test=args.smoke_test,
-        screening_samples=screening_samples,
+        screening_samples=args.screening_samples,
         top_k=args.top_k,
-        candidate_list=cands,
+        tune_thresholds_flag=not args.no_threshold_tuning,
         stage_a_only=args.stage_a_only,
-        force=args.force,
-        tune_thresholds_flag=not args.no_thresholds
+        force=args.force
     )
 
 if __name__ == "__main__":

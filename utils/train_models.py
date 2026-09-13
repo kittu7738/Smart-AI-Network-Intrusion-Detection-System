@@ -703,7 +703,7 @@ def train_specialist(
         # 3. Determine candidate models
         standard_candidates = ["DecisionTree", "RandomForest", "XGBoost"]
         all_candidates = list(standard_candidates)
-        if spec_name == "IDS2018":
+        if spec_name in ["IDS2018", "CICIoT2023"] or use_optimized:
             for opt_c in OPTIMIZATION_CANDIDATE_CONFIGS.keys():
                 if opt_c not in all_candidates:
                     all_candidates.append(opt_c)
@@ -715,13 +715,13 @@ def train_specialist(
             if norm_model not in all_candidates:
                 raise ValueError(f"Requested model '{selected_model}' not available. Choose from {all_candidates}")
             candidate_names = [norm_model]
-            if spec_name == "IDS2018" and (norm_model in OPTIMIZATION_CANDIDATE_CONFIGS or use_optimized):
+            if (spec_name in ["IDS2018", "CICIoT2023"] or use_optimized) and (norm_model in OPTIMIZATION_CANDIDATE_CONFIGS or use_optimized):
                 threshold_multipliers = load_stored_threshold_multipliers(spec_name)
         else:
-            # For IDS2018, check if progressive optimizer finalist model is recorded
+            # Check if progressive optimizer finalist model is recorded
             optimized_finalist = None
-            if spec_name == "IDS2018":
-                opt_best_path = resolve_path(os.path.join("reports", "model_training", "IDS2018", "optimization", "best_optimized_model.json"))
+            if spec_name in ["IDS2018", "CICIoT2023"] or use_optimized:
+                opt_best_path = resolve_path(os.path.join("reports", "model_training", spec_name, "optimization", "best_optimized_model.json"))
                 if os.path.exists(opt_best_path):
                     try:
                         with open(opt_best_path, "r") as f:
@@ -886,7 +886,7 @@ def train_specialist(
         # Determine candidate models to run
         standard_candidates = ["DecisionTree", "RandomForest", "XGBoost"]
         all_candidates = list(standard_candidates)
-        if spec_name == "IDS2018":
+        if spec_name in ["IDS2018", "CICIoT2023"]:
             for opt_c in OPTIMIZATION_CANDIDATE_CONFIGS.keys():
                 if opt_c not in all_candidates:
                     all_candidates.append(opt_c)
@@ -1020,10 +1020,19 @@ def train_specialist(
         val_f1 = val_results[best_model_name].get("Macro F1", 0.0)
         uncal_acc = val_results[best_model_name].get("uncalibrated_baseline", {}).get("Accuracy", val_acc)
         uncal_f1 = val_results[best_model_name].get("uncalibrated_baseline", {}).get("Macro F1", val_f1)
-        if uncal_acc < 0.95 or uncal_f1 < 0.80:
+        gate_failed = False
+        threshold_desc = ""
+        if spec_name == "IDS2018":
+            gate_failed = (uncal_acc < 0.95 or uncal_f1 < 0.80)
+            threshold_desc = "expected >= 0.95 Acc, >= 0.80 Macro F1"
+        elif spec_name == "CICIoT2023":
+            gate_failed = (uncal_acc < 0.95 or uncal_f1 < 0.69)
+            threshold_desc = "expected >= 0.95 Acc, >= 0.69 Macro F1"
+
+        if gate_failed:
             raise RuntimeError(
-                f"[Evaluation Gatekeeper] Validation reproduction check FAILED for {best_model_name}: "
-                f"Validation Accuracy={uncal_acc:.4f} (expected >= 0.95), Macro F1={uncal_f1:.4f} (expected >= 0.80). "
+                f"[Evaluation Gatekeeper] Validation reproduction check FAILED for {spec_name} :: {best_model_name}: "
+                f"Validation Accuracy={uncal_acc:.4f}, Macro F1={uncal_f1:.4f} ({threshold_desc}). "
                 f"Held-out test evaluation strictly blocked to prevent test split contamination."
             )
 
@@ -1192,15 +1201,27 @@ def main():
             pass
 
     if args.optimize:
-        from utils.optimize_ids2018 import run_ids2018_optimization
-        run_ids2018_optimization(
-            config=config,
-            smoke_test=args.smoke_test,
-            screening_samples=args.screening_samples or max_samples,
-            top_k=args.top_k,
-            stage_a_only=args.stage_a_only,
-            force=args.force_retrain
-        )
+        norm_spec = resolve_specialist_name(args.dataset) if args.dataset else "IDS2018"
+        if norm_spec == "CICIoT2023":
+            from utils.optimize_ciciot2023 import run_ciciot2023_optimization
+            run_ciciot2023_optimization(
+                config=config,
+                smoke_test=args.smoke_test,
+                screening_samples=args.screening_samples or max_samples,
+                top_k=args.top_k,
+                stage_a_only=args.stage_a_only,
+                force=args.force_retrain
+            )
+        else:
+            from utils.optimize_ids2018 import run_ids2018_optimization
+            run_ids2018_optimization(
+                config=config,
+                smoke_test=args.smoke_test,
+                screening_samples=args.screening_samples or max_samples,
+                top_k=args.top_k,
+                stage_a_only=args.stage_a_only,
+                force=args.force_retrain
+            )
         return
 
     train_all_specialists(

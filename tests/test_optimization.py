@@ -22,6 +22,7 @@ from utils.threshold_tuner import (
     predict_with_threshold_multipliers
 )
 from utils.optimize_ids2018 import run_ids2018_optimization
+from utils.optimize_ciciot2023 import run_ciciot2023_optimization
 from utils.train_models import normalize_model_name, get_model_instance
 
 class TestIDS2018Optimization(unittest.TestCase):
@@ -279,6 +280,125 @@ class TestIDS2018Optimization(unittest.TestCase):
             # Verify no MAC Spoofing in any output
             data_str = json.dumps(summary).lower()
             self.assertNotIn("mac spoofing", data_str)
+
+
+class TestCICIoT2023Optimization(unittest.TestCase):
+
+    def test_ciciot2023_smoke_optimization_pipeline(self):
+        """End-to-end smoke test of progressive two-stage CICIoT2023 optimization orchestrator."""
+        from utils.data_preparation import load_config
+        import tempfile
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_opt_dir:
+            summary = run_ciciot2023_optimization(
+                config=config,
+                smoke_test=True,
+                screening_samples=60,
+                top_k=1,
+                candidate_list=["DecisionTree_Tuned", "DecisionTree_Baseline"],
+                stage_a_only=False,
+                tune_thresholds_flag=True,
+                force=True,
+                save_artifacts=True,
+                opt_dir=tmp_opt_dir
+            )
+
+            self.assertIn("selected_best_model", summary)
+            self.assertIn("best_validation_metrics", summary)
+            self.assertIn("stage_a_screening", summary)
+            self.assertIn("stage_b_full_training", summary)
+            self.assertIn("recommendations", summary)
+
+            # Verify Stage A, Stage B, and best model reports
+            stage_a_path = os.path.join(tmp_opt_dir, "stage_a_screening.json")
+            stage_b_path = os.path.join(tmp_opt_dir, "stage_b_full_training.json")
+            best_model_path = os.path.join(tmp_opt_dir, "best_optimized_model.json")
+            self.assertTrue(os.path.exists(stage_a_path))
+            self.assertTrue(os.path.exists(stage_b_path))
+            self.assertTrue(os.path.exists(best_model_path))
+
+            # Verify no MAC Spoofing in any output
+            data_str = json.dumps(summary).lower()
+            self.assertNotIn("mac spoofing", data_str)
+
+    def test_ciciot2023_checkpointing_and_resume(self):
+        """Candidate-by-candidate checkpointing must persist and resume without re-fitting completed models."""
+        from utils.data_preparation import load_config
+        from unittest.mock import patch
+        from utils.model_registry import DecisionTreeClassifier
+        import tempfile
+        config = load_config()
+
+        with tempfile.TemporaryDirectory() as tmp_opt_dir:
+            # Step 1: Run Stage A screening for 1 candidate
+            run_ciciot2023_optimization(
+                config=config,
+                smoke_test=True,
+                screening_samples=60,
+                candidate_list=["DecisionTree_Baseline"],
+                stage_a_only=True,
+                force=True,
+                save_artifacts=True,
+                opt_dir=tmp_opt_dir
+            )
+
+            ckpt_file = os.path.join(tmp_opt_dir, "stage_a_screening_progress.json")
+            self.assertTrue(os.path.exists(ckpt_file))
+            with open(ckpt_file, "r") as f:
+                ckpt_data = json.load(f)
+            self.assertIn("DecisionTree_Baseline", ckpt_data)
+
+            # Step 2: Now run with 2 candidates, ensuring DecisionTree_Baseline is NOT re-fit
+            fit_call_counts = {"count": 0}
+            orig_fit = DecisionTreeClassifier.fit
+            def counting_fit(self, X, y, *args, **kwargs):
+                fit_call_counts["count"] += 1
+                return orig_fit(self, X, y, *args, **kwargs)
+
+            with patch.object(DecisionTreeClassifier, "fit", counting_fit):
+                run_ciciot2023_optimization(
+                    config=config,
+                    smoke_test=True,
+                    screening_samples=60,
+                    candidate_list=["DecisionTree_Baseline", "DecisionTree_Tuned"],
+                    stage_a_only=True,
+                    force=False, # resume from checkpoint
+                    save_artifacts=True,
+                    opt_dir=tmp_opt_dir
+                )
+
+            self.assertEqual(fit_call_counts["count"], 1)
+
+            with open(ckpt_file, "r") as f:
+                resumed_data = json.load(f)
+            self.assertIn("DecisionTree_Baseline", resumed_data)
+            self.assertIn("DecisionTree_Tuned", resumed_data)
+
+    def test_targeted_minority_recall_calibration(self):
+        """Test that threshold tuning specifically boosts recall on a minority class with low recall."""
+        classes = ["Benign", "DDoS", "Infiltration"]
+        # 200 Benign, 200 DDoS, 20 Infiltration
+        y_true = np.array([0] * 200 + [1] * 200 + [2] * 20)
+        # Model predicts Benign and DDoS well, but for Infiltration predicts only 0.35 probability
+        # while Benign has 0.40, causing Infiltration recall to be 0
+        prob_benign = np.column_stack([np.full(200, 0.8), np.full(200, 0.1), np.full(200, 0.1)])
+        prob_ddos = np.column_stack([np.full(200, 0.1), np.full(200, 0.8), np.full(200, 0.1)])
+        prob_infil = np.column_stack([np.full(20, 0.38), np.full(20, 0.28), np.full(20, 0.34)])
+        y_prob = np.vstack([prob_benign, prob_ddos, prob_infil])
+
+        # Baseline argmax gives 0 recall to Infiltration
+        y_base = np.argmax(y_prob, axis=1)
+        base_infil_recall = np.sum((y_true == 2) & (y_base == 2)) / 20.0
+        self.assertEqual(base_infil_recall, 0.0)
+
+        summary, best_mults = tune_validation_thresholds(y_true, y_prob, classes, benign_idx=0)
+        # Calibrated prediction
+        y_opt = predict_with_threshold_multipliers(y_prob, best_mults)
+        opt_infil_recall = np.sum((y_true == 2) & (y_opt == 2)) / 20.0
+        self.assertGreater(opt_infil_recall, 0.0)
+        self.assertGreaterEqual(summary["optimized"]["macro_f1"], summary["baseline"]["macro_f1"])
+
 
 if __name__ == "__main__":
     unittest.main()

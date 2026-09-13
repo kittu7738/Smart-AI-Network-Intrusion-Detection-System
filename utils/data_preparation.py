@@ -9,6 +9,8 @@ import gc
 import pyarrow as pa
 from collections import defaultdict
 
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 def resolve_path(rel_path):
     """Resolve paths dynamically based on NIDS_DATA_ROOT, NIDS_PROJECT_ROOT, or CWD."""
     if not rel_path:
@@ -19,12 +21,21 @@ def resolve_path(rel_path):
 
     norm_rel = os.path.normpath(rel_path).replace("\\", "/")
 
+    # Check for explicit environment configuration
+    has_explicit_data_root = "NIDS_DATA_ROOT" in os.environ
+    has_explicit_project_root = "NIDS_PROJECT_ROOT" in os.environ
+
     data_root = os.environ.get("NIDS_DATA_ROOT")
     if data_root:
         data_root = data_root.strip().strip('"').strip("'")
+    else:
+        data_root = None
 
-    # Auto-detect standard Colab Google Drive mount if NIDS_DATA_ROOT is not explicitly set
-    if not data_root:
+    # Auto-detect standard Colab Google Drive mount ONLY if:
+    # Neither NIDS_DATA_ROOT nor NIDS_PROJECT_ROOT was explicitly set in environ.
+    # If NIDS_PROJECT_ROOT was explicitly provided (e.g. during a test), do NOT hijack
+    # paths to the production Drive mount!
+    if not data_root and not has_explicit_data_root and not has_explicit_project_root:
         colab_default = "/content/drive/MyDrive/Smart-AI-NIDS"
         if os.path.isdir(colab_default):
             data_root = colab_default
@@ -82,11 +93,21 @@ def resolve_path(rel_path):
     return os.path.normpath(os.path.join(project_root, norm_rel))
 
 def load_config():
-    with open(resolve_path("config/preprocessing_config.json"), "r") as f:
+    cfg_path = resolve_path("config/preprocessing_config.json")
+    if not os.path.exists(cfg_path):
+        fallback_path = os.path.join(REPO_ROOT, "config", "preprocessing_config.json")
+        if os.path.exists(fallback_path):
+            cfg_path = fallback_path
+    with open(cfg_path, "r") as f:
         return json.load(f)
 
 def load_label_mapping():
-    with open(resolve_path("config/label_mapping.json"), "r") as f:
+    cfg_path = resolve_path("config/label_mapping.json")
+    if not os.path.exists(cfg_path):
+        fallback_path = os.path.join(REPO_ROOT, "config", "label_mapping.json")
+        if os.path.exists(fallback_path):
+            cfg_path = fallback_path
+    with open(cfg_path, "r") as f:
         return json.load(f)
 
 def update_env_checkpoint(key, value):

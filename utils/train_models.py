@@ -1264,6 +1264,13 @@ def parse_args():
 
 def main():
     args = parse_args()
+
+    # If progressive optimization is requested, validate specialist support first
+    if args.optimize:
+        norm_spec = resolve_specialist_name(args.dataset) if args.dataset else "IDS2018"
+        if norm_spec not in ("IDS2018", "CICIoT2023"):
+            raise ValueError(f"Progressive optimization is not implemented for specialist '{norm_spec}'. Available: ['IDS2018', 'CICIoT2023']")
+
     config = load_config()
 
     # Environment variable fallback for max training samples
@@ -1296,8 +1303,6 @@ def main():
                 stage_a_only=args.stage_a_only,
                 force=args.force_retrain
             )
-        else:
-            raise ValueError(f"Progressive optimization is not implemented for specialist '{norm_spec}'. Available: ['IDS2018', 'CICIoT2023']")
         return
 
     train_all_specialists(

@@ -3,327 +3,746 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart AI Network Intrusion Detection System (SAI-IDS)</title>
+  <title>Smart AI NIDS — Enterprise Security Operations Center</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="env.js"></script>
 </head>
 <body>
-  <div class="app-container">
+  <div class="app-shell">
 
-    <!-- Header -->
-    <header class="app-header">
-      <div class="brand-section">
-        <div class="brand-icon">🛡️</div>
+    <!-- ==================================================
+         LEFT SIDEBAR
+         ================================================== -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo-icon">🛡️</div>
         <div>
-          <h1 class="brand-title">SMART AI NIDS</h1>
-          <div class="brand-sub">Network Intrusion Detection System</div>
+          <div class="sidebar-brand-title">SMART AI NIDS</div>
+          <div class="sidebar-brand-subtitle">Network Intrusion Detection System</div>
         </div>
       </div>
 
-      <div class="header-badges">
-        <div id="backend-status-badge" class="badge badge-status-offline">
-          <span id="backend-status-dot" class="status-dot"></span>
-          <span id="backend-status-text">OFFLINE</span>
-        </div>
-        <div id="engine-readiness-badge" class="badge">UnifiedNIDS: Checking...</div>
-        <div id="specialists-count-badge" class="badge">Specialists: 5 Models</div>
-        <div class="badge">Taxonomy: 13 Frozen Classes</div>
-        <button id="btn-reconnect" class="btn-cyber" title="Retry Backend Connection">🔄 Reconnect</button>
-        <button id="btn-settings" class="btn-cyber" title="Configure Backend API URL">⚙️ API Config</button>
-      </div>
-    </header>
+      <nav class="sidebar-nav">
+        <div class="nav-section-title">Navigation</div>
+        <button class="nav-item active" data-view="view-overview">
+          <span class="nav-icon">📊</span>
+          <span>Overview</span>
+        </button>
+        <button class="nav-item" data-view="view-detections">
+          <span class="nav-icon">🚨</span>
+          <span>Live Detections</span>
+        </button>
+        <button class="nav-item" data-view="view-playground">
+          <span class="nav-icon">⚡</span>
+          <span>Detection Playground</span>
+        </button>
+        <button class="nav-item" data-view="view-models">
+          <span class="nav-icon">🤖</span>
+          <span>Specialist Models</span>
+        </button>
+        <button class="nav-item" data-view="view-architecture">
+          <span class="nav-icon">🌐</span>
+          <span>Unified Architecture</span>
+        </button>
+        <button class="nav-item" data-view="view-audit">
+          <span class="nav-icon">📋</span>
+          <span>Audit / Events</span>
+        </button>
 
-    <!-- System Overview Cards (5 Main Areas) -->
-    <section class="metrics-grid">
-      <div class="metric-card" id="card-api-status">
-        <div class="metric-label">System Status</div>
-        <div id="metric-system-status" class="metric-value" style="color: var(--status-critical);">OFFLINE</div>
-        <div id="metric-system-sub" class="metric-sub">FastAPI Backend Service</div>
-      </div>
-      <div class="metric-card" id="card-unified-status">
-        <div class="metric-label">UnifiedNIDS Status</div>
-        <div id="metric-unified-status" class="metric-value" style="color: var(--accent-cyan);">INITIALIZING</div>
-        <div id="metric-unified-sub" class="metric-sub">13-Class Canonical Engine</div>
-      </div>
-      <div class="metric-card" id="card-models-status">
-        <div class="metric-label">Specialist Models</div>
-        <div id="metric-specialist-status" class="metric-value" style="color: var(--accent-blue);">0 / 5</div>
-        <div id="metric-specialist-sub" class="metric-sub">Pipelines Ready</div>
-      </div>
-      <div class="metric-card" id="card-traffic-status">
-        <div class="metric-label">Traffic Status</div>
-        <div id="metric-traffic-status" class="metric-value">WAITING</div>
-        <div id="metric-status-sub" class="metric-sub">Waiting for live traffic</div>
-      </div>
-      <div class="metric-card" id="card-detection-status">
-        <div class="metric-label">Detection Status</div>
-        <div id="metric-threat-level" class="metric-value threat-low">WAITING</div>
-        <div id="metric-detection-sub" class="metric-sub">No detections yet</div>
-      </div>
-    </section>
+        <div class="nav-section-title" style="margin-top: 0.5rem;">Configuration</div>
+        <button class="nav-item" data-view="view-settings">
+          <span class="nav-icon">⚙️</span>
+          <span>Settings</span>
+        </button>
+      </nav>
 
-    <!-- 13-Class Canonical Detection Panel -->
-    <section class="canonical-panel">
-      <div class="panel-header" style="margin-bottom: 0;">
-        <div class="panel-title">
-          <span>🛡️</span> 13-Class Canonical Detection Taxonomy
+      <div class="sidebar-footer">
+        <div class="sidebar-footer-title">
+          <span>🛡️</span> Smart AI NIDS
         </div>
-        <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
-          Frozen Standard &bull; IDs 0 &ndash; 12
-        </div>
+        <div class="sidebar-footer-desc">Safer Networks &bull; Smarter Tomorrow</div>
       </div>
-      <div id="canonical-grid" class="canonical-grid">
-        <!-- Injected dynamically by app.js: exactly 13 canonical classes with ID, Name, Severity & Detections -->
-      </div>
-    </section>
+    </aside>
 
-    <!-- Main Dashboard Grid: 3D Visualization + Interactive Test Panel -->
-    <section class="main-dashboard-grid">
-      <!-- 3D Pipeline Visualizer -->
-      <div class="viz-panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>🌐</span> 3D Cybersecurity Pipeline & Specialist Topology
-          </div>
-          <div style="display: flex; align-items: center; gap: 0.75rem;">
-            <div id="pipeline-live-badge" class="badge" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
-              Live Inference Topology
+    <!-- ==================================================
+         MAIN WRAPPER
+         ================================================== -->
+    <div class="main-wrapper">
+
+      <!-- TOP HEADER -->
+      <header class="top-header">
+        <div class="header-left">
+          <button class="mobile-menu-btn" id="mobile-menu-btn" title="Toggle Navigation">☰</button>
+
+          <div class="header-status-group">
+            <div id="top-system-chip" class="status-chip offline">
+              <span class="status-dot-pulse"></span>
+              <span id="top-system-text">System Offline</span>
             </div>
-            <button id="btn-reset-cam" class="btn-cyber" title="Reset Camera">Reset View</button>
-          </div>
-        </div>
 
-        <div id="pipeline3d-canvas-container" class="canvas-container">
-          <!-- 3D Canvas dynamically injected here -->
-        </div>
-
-        <div class="viz-legend">
-          <div class="legend-item"><span class="legend-dot" style="background: #0284c7;"></span> Traffic Gateway</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #6366f1;"></span> Schema Router</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span> 5 Specialist Models</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #06b6d4;"></span> UnifiedNIDS Core</div>
-          <div class="legend-item"><span class="legend-dot" style="background: #10b981;"></span> 13-Class Canonical Verdicts</div>
-        </div>
-      </div>
-
-      <!-- Interactive Security Playground / Traffic Injector -->
-      <div class="viz-panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>⚡</span> Real-Time Traffic Injector & Inference Playground
-          </div>
-          <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
-            Dispatches to FastAPI <code>/predict</code>
-          </div>
-        </div>
-
-        <div class="control-tabs">
-          <button class="tab-btn active" data-target="tab-presets">Preset Attacks</button>
-          <button class="tab-btn" data-target="tab-custom">Custom Payload</button>
-          <button class="tab-btn" data-target="tab-batch">Batch Inference</button>
-        </div>
-
-        <div class="tab-content">
-          <!-- Tab 1: Presets -->
-          <div id="tab-presets" class="tab-pane" style="display: block;">
-            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
-              Click any sample network record to test automatic schema routing and live classification:
+            <div class="header-meta-badge">
+              <span class="header-meta-label">API Service</span>
+              <span id="top-api-text" class="header-meta-value">Render / Localhost</span>
             </div>
-            <div class="preset-grid">
-              <button class="preset-btn" data-payload='{"query": "data-exfiltration.tunnel.malicious-domain.net"}'>
-                📡 DNS Tunneling
-                <span class="spec-tag">Auto &rarr; DNS_Tunneling</span>
-              </button>
-              <button class="preset-btn" data-payload='{"query": "portal.internal-corp.company.com"}'>
-                🌐 Benign DNS Query
-                <span class="spec-tag">Auto &rarr; DNS_Tunneling</span>
-              </button>
-              <button class="preset-btn" data-payload='{"features": {"arp_opcode": 1.0, "frame_number": 105.0}, "specialist": "ARP_Spoofing"}'>
-                ⚡ ARP Spoofing
-                <span class="spec-tag">Route &rarr; ARP_Spoofing</span>
-              </button>
-              <button class="preset-btn" data-payload='{"features": {"some_feature": 0.5, "Seq": 12.0, "GTP": 1.0}, "specialist": "IP_Spoofing"}'>
-                🛰️ 5G IP Spoofing
-                <span class="spec-tag">Route &rarr; IP_Spoofing</span>
-              </button>
-              <button class="preset-btn" data-payload='{"features": {"Rate": 25.4, "Srate": 18.2, "Drate": 7.2, "Header_Length": 54.0}, "specialist": "CICIoT2023"}'>
-                🤖 IoT Network Flow
-                <span class="spec-tag">Route &rarr; CICIoT2023</span>
-              </button>
-              <button class="preset-btn" data-payload='{"features": {"Flow Duration": 15000.0, "Tot Fwd Pkts": 8.0, "Tot Bwd Pkts": 6.0}, "specialist": "IDS2018"}'>
-                🏢 Enterprise Flow
-                <span class="spec-tag">Route &rarr; IDS2018</span>
-              </button>
+
+            <div class="header-meta-badge">
+              <span class="header-meta-label">Taxonomy</span>
+              <span class="header-meta-value">13 Classes &bull; Unified</span>
+            </div>
+
+            <div class="header-meta-badge">
+              <span class="header-meta-label">Specialists</span>
+              <span id="top-specialists-text" class="header-meta-value">5 Active Models</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="header-right">
+          <div id="live-clock" class="header-clock">--:--:-- UTC</div>
+          <button id="btn-header-reconnect" class="btn-reconnect" title="Refresh API Connection">
+            <span>🔄</span> Reconnect
+          </button>
+        </div>
+      </header>
+
+      <!-- CONTENT CONTAINER -->
+      <main class="content-container">
+
+        <!-- ==================================================
+             VIEW 1: OVERVIEW PAGE
+             ================================================== -->
+        <section id="view-overview" class="view-panel active">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Security Overview</h1>
+              <div class="page-subtitle">Real-time network intrusion detection using specialized AI models</div>
+            </div>
+            <div id="overview-nids-badge" class="nids-status-badge offline">
+              <span>●</span> <span id="overview-nids-text">NIDS OFFLINE</span>
             </div>
           </div>
 
-          <!-- Tab 2: Custom JSON -->
-          <div id="tab-custom" class="tab-pane" style="display: none;">
-            <div class="form-group">
-              <label class="form-label">Inference JSON Payload (raw query or feature mapping):</label>
-              <textarea id="custom-payload-json" class="form-textarea" rows="5">{
-  "query": "malicious-beacon-subdomain.stealth-tunnel.org"
-}</textarea>
-            </div>
-            <div id="custom-json-error" style="color: var(--status-critical); font-size: 0.75rem; margin-bottom: 0.5rem; font-family: var(--font-mono);"></div>
-            <button id="btn-send-custom" class="btn-cyber btn-cyber-primary" style="width: 100%;">
-              Classify via POST /predict
-            </button>
-          </div>
-
-          <!-- Tab 3: Batch -->
-          <div id="tab-batch" class="tab-pane" style="display: none;">
-            <div class="form-group">
-              <label class="form-label">Batch JSON Array (Array of network records):</label>
-              <textarea id="batch-payload-json" class="form-textarea" rows="5">[
-  { "query": "google.com" },
-  { "query": "exfiltration.dns-tunnel-attack.net" },
-  { "query": "corp-update.microsoft.com" }
-]</textarea>
-            </div>
-            <div id="batch-json-error" style="color: var(--status-critical); font-size: 0.75rem; margin-bottom: 0.5rem; font-family: var(--font-mono);"></div>
-            <button id="btn-send-batch" class="btn-cyber btn-cyber-primary" style="width: 100%;">
-              Execute POST /predict/batch
-            </button>
-            <div id="batch-results-container" style="display: none;" class="batch-results-wrapper">
-              <div class="batch-results-header">
-                <span id="batch-results-title">Batch Results</span>
-                <span id="batch-results-spec" style="color: var(--accent-cyan);">Specialist: auto</span>
+          <!-- 5 Overview KPI Cards -->
+          <div class="kpi-grid">
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Total Packets</span>
+                <div class="kpi-icon blue">📦</div>
               </div>
-              <div class="batch-table-scroll">
-                <table class="cyber-table" style="margin: 0;">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Class ID</th>
-                      <th>Class Name</th>
-                      <th>Confidence</th>
-                      <th>Specialist</th>
-                      <th>Severity</th>
-                    </tr>
-                  </thead>
-                  <tbody id="batch-table-body">
-                  </tbody>
-                </table>
+              <div id="kpi-total-packets" class="kpi-value">—</div>
+              <div id="kpi-packets-sub" class="kpi-sub">Waiting for telemetry</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Benign Traffic</span>
+                <div class="kpi-icon green">🛡️</div>
+              </div>
+              <div id="kpi-benign-traffic" class="kpi-value" style="color: var(--color-success-text);">—</div>
+              <div class="kpi-sub">Normal network flow records</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Malicious Traffic</span>
+                <div class="kpi-icon red">⚠️</div>
+              </div>
+              <div id="kpi-malicious-traffic" class="kpi-value" style="color: var(--color-danger-text);">—</div>
+              <div class="kpi-sub">Confirmed threats identified</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Detection Rate</span>
+                <div class="kpi-icon orange">📈</div>
+              </div>
+              <div id="kpi-detection-rate" class="kpi-value">—</div>
+              <div class="kpi-sub">Threats / Total flows</div>
+            </div>
+
+            <div class="kpi-card">
+              <div class="kpi-header">
+                <span class="kpi-title">Active Specialists</span>
+                <div class="kpi-icon purple">🤖</div>
+              </div>
+              <div id="kpi-active-specialists" class="kpi-value" style="color: var(--color-purple-text);">0 / 5</div>
+              <div id="kpi-specialists-sub" class="kpi-sub">Pipelines ready</div>
+            </div>
+          </div>
+
+          <!-- Threat Distribution + 13-Class Canonical Panel -->
+          <div class="grid-2col">
+            <!-- Threat Distribution Chart -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <div>
+                  <div class="soc-card-title"><span>📊</span> Threat Distribution</div>
+                  <div class="soc-card-desc">Session classification volume across the frozen 13-class taxonomy</div>
+                </div>
+                <span class="status-chip">13 Classes</span>
+              </div>
+              <div class="soc-card-body" style="height: 380px; position: relative;">
+                <canvas id="overviewThreatChart"></canvas>
+                <div id="chart-empty-state" class="empty-state-box" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff;">
+                  <div class="empty-state-icon">📊</div>
+                  <div class="empty-state-text">No detection telemetry available</div>
+                  <div class="empty-state-sub">Execute inference queries in the Playground to populate distribution statistics.</div>
+                </div>
               </div>
             </div>
-          </div>
 
-          <!-- Live Result Banner -->
-          <div id="live-result-banner" class="prediction-result-banner" style="display: none;">
-            <div class="result-row">
-              <div>
-                <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">PREDICTED CLASSIFICATION</span>
-                <div id="result-predicted-class" class="result-class">Benign</div>
+            <!-- 13-Class Registry Grid -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <div>
+                  <div class="soc-card-title"><span>🛡️</span> Canonical Taxonomy Registry</div>
+                  <div class="soc-card-desc">Exact 13-class canonical attack and benign labels (IDs 0 &ndash; 12)</div>
+                </div>
+                <span class="status-chip" style="font-family: var(--font-mono);">IDs 0–12</span>
               </div>
-              <div style="text-align: right;">
-                <div id="result-confidence" class="result-confidence">Confidence: 99.4%</div>
-                <div id="result-id-tag" style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
-                  <span id="result-specialist">Specialist: DNS_Tunneling</span> &bull; <span id="result-canonical-id">Canonical ID: 0</span>
+              <div class="soc-card-body" style="max-height: 380px; overflow-y: auto; padding: 1rem;">
+                <div id="overview-canonical-grid" class="canonical-soc-grid">
+                  <!-- Dynamically populated by app.js -->
                 </div>
               </div>
             </div>
           </div>
 
-        </div>
-      </div>
-    </section>
-
-    <!-- Specialist Model Grid Section -->
-    <section class="specialists-panel">
-      <div class="panel-title">
-        <span>🤖</span> Specialized ML Intrusion Detection Pipelines
-      </div>
-      <div id="specialists-grid" class="specialists-grid">
-        <div style="color: var(--text-muted); font-size: 0.8rem;">Loading specialist models...</div>
-      </div>
-    </section>
-
-    <!-- Lower Grid: 13-Class Analytics & Recent Detections Table -->
-    <section class="lower-dashboard-grid">
-      <!-- 13-Class Analytics Chart -->
-      <div class="viz-panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>📊</span> 13-Class Canonical Security Posterior Distribution
+          <!-- Live Network Detections Overview Table -->
+          <div class="soc-card" style="margin-top: 1.5rem;">
+            <div class="soc-card-header">
+              <div>
+                <div class="soc-card-title"><span>📋</span> Live Network Detections</div>
+                <div class="soc-card-desc">Real-time audit log of inference classifications processed this session</div>
+              </div>
+              <button class="btn-reconnect" data-view="view-detections" onclick="document.querySelector('[data-view=view-detections]').click();">
+                View All &rarr;
+              </button>
+            </div>
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Time</th>
+                    <th>Source / Payload</th>
+                    <th>Specialist</th>
+                    <th>Predicted Class</th>
+                    <th>Confidence</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="overview-detections-tbody">
+                  <tr>
+                    <td colspan="6">
+                      <div class="empty-state-box">
+                        <div class="empty-state-icon">📡</div>
+                        <div class="empty-state-text">No live detections yet</div>
+                        <div class="empty-state-sub">Waiting for network telemetry. Use the Detection Playground to run test flows.</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
           </div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">
-            IDs 0 to 12
-          </div>
-        </div>
-        <div style="padding: 1.25rem; height: 380px; position: relative;">
-          <canvas id="analyticsChart"></canvas>
-        </div>
-      </div>
+        </section>
 
-      <!-- Recent Detections Table -->
-      <div class="viz-panel">
-        <div class="panel-header">
-          <div class="panel-title">
-            <span>📋</span> Real-Time Intrusion Detection Log
+        <!-- ==================================================
+             VIEW 2: LIVE DETECTIONS PAGE
+             ================================================== -->
+        <section id="view-detections" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Live Network Detections</h1>
+              <div class="page-subtitle">Real-time telemetry stream of all network flow records classified by the AI engine</div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; align-items: center;">
+              <span id="live-det-count-badge" class="status-chip">0 Detections Recorded</span>
+            </div>
           </div>
-          <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">
-            Unified Audit Log
-          </div>
-        </div>
-        <div class="table-container" style="padding: 0 1.25rem 1.25rem 1.25rem; height: 380px;">
-          <table class="cyber-table">
-            <thead>
-              <tr>
-                <th>Time</th>
-                <th>Source / Input</th>
-                <th>Classification</th>
-                <th>Confidence</th>
-                <th>Specialist</th>
-                <th>Severity</th>
-                <th>Status</th>
-              </tr>
-            </thead>
-            <tbody id="detections-table-body">
-              <tr>
-                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
-                  No classifications recorded yet. Use the Traffic Injector above to send live packets.
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
-    </section>
 
-    <!-- API Config Modal -->
-    <div id="settings-modal" class="modal-backdrop" style="display: none;">
-      <div class="modal-card">
-        <h3 style="font-size: 1.1rem; color: var(--accent-cyan); font-family: var(--font-mono); margin-bottom: 0.5rem;">
-          FastAPI Backend Configuration
-        </h3>
-        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
-          Configure the base URL of the running FastAPI UnifiedNIDS service:
-        </p>
-        <div class="form-group">
-          <label class="form-label">FastAPI Base URL:</label>
-          <input type="text" id="api-base-url-input" class="form-input" value="http://localhost:8000">
-        </div>
-        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
-          <button id="btn-close-modal" class="btn-cyber">Cancel</button>
-          <button id="btn-save-api-url" class="btn-cyber btn-cyber-primary">Save &amp; Reconnect</button>
-        </div>
-      </div>
+          <!-- Filter & Search Bar -->
+          <div class="soc-card" style="margin-bottom: 1.25rem;">
+            <div class="soc-card-body" style="padding: 1rem 1.25rem;">
+              <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
+                <div style="flex: 1; min-width: 200px;">
+                  <input type="text" id="filter-search-input" class="form-input" placeholder="Search source, query, class..." style="font-family: var(--font-sans);">
+                </div>
+                <div style="min-width: 170px;">
+                  <select id="filter-specialist-select" class="form-select">
+                    <option value="">All Specialists</option>
+                    <option value="IDS2018">IDS2018</option>
+                    <option value="CICIoT2023">CICIoT2023</option>
+                    <option value="ARP_Spoofing">ARP_Spoofing</option>
+                    <option value="IP_Spoofing">IP_Spoofing</option>
+                    <option value="DNS_Tunneling">DNS_Tunneling</option>
+                  </select>
+                </div>
+                <div style="min-width: 170px;">
+                  <select id="filter-class-select" class="form-select">
+                    <option value="">All Classes (13)</option>
+                    <option value="Benign">Benign</option>
+                    <option value="DDoS">DDoS</option>
+                    <option value="DoS">DoS</option>
+                    <option value="Botnet">Botnet</option>
+                    <option value="Infiltration">Infiltration</option>
+                    <option value="Brute Force">Brute Force</option>
+                    <option value="Web Attack">Web Attack</option>
+                    <option value="DNS Spoofing">DNS Spoofing</option>
+                    <option value="IP Spoofing">IP Spoofing</option>
+                    <option value="ARP Spoofing">ARP Spoofing</option>
+                    <option value="Recon / Port Scan">Recon / Port Scan</option>
+                    <option value="MITM">MITM</option>
+                    <option value="DNS Tunneling">DNS Tunneling</option>
+                  </select>
+                </div>
+                <button id="btn-clear-filters" class="btn-reconnect">Reset</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Full Table -->
+          <div class="soc-card">
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Source / Query</th>
+                    <th>Specialist Model</th>
+                    <th>Predicted Class</th>
+                    <th>Canonical ID</th>
+                    <th>Confidence</th>
+                    <th>Verdict</th>
+                  </tr>
+                </thead>
+                <tbody id="live-detections-full-tbody">
+                  <tr>
+                    <td colspan="7">
+                      <div class="empty-state-box">
+                        <div class="empty-state-icon">📡</div>
+                        <div class="empty-state-text">No live detections yet</div>
+                        <div class="empty-state-sub">Waiting for network telemetry... Run queries in the Playground to record live verdicts.</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================
+             VIEW 3: DETECTION PLAYGROUND
+             ================================================== -->
+        <section id="view-playground" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Detection Playground</h1>
+              <div class="page-subtitle">Submit raw queries or flow vectors to test automated schema routing and canonical 13-class evaluation</div>
+            </div>
+          </div>
+
+          <div class="playground-tabs">
+            <button class="pg-tab-btn active" data-tab="tab-dns">DNS Query Mode</button>
+            <button class="pg-tab-btn" data-tab="tab-structured">Structured Features Mode</button>
+            <button class="pg-tab-btn" data-tab="tab-batch">Batch Inference Mode</button>
+          </div>
+
+          <div class="playground-content">
+            <!-- Left Input Column -->
+            <div>
+              <!-- Tab 1: DNS Query -->
+              <div id="tab-dns" class="pg-pane" style="display: block;">
+                <div class="soc-card">
+                  <div class="soc-card-header">
+                    <div class="soc-card-title"><span>📡</span> Raw DNS Query Inspection</div>
+                    <span class="status-chip">Auto &rarr; DNS_Tunneling</span>
+                  </div>
+                  <div class="soc-card-body">
+                    <div class="form-group">
+                      <label class="form-label">Sample Presets:</label>
+                      <div class="preset-chip-group">
+                        <button class="preset-chip" data-dns="tunnel-beacon.exfiltration.malicious-domain.net">🚨 Tunnel Exfiltration</button>
+                        <button class="preset-chip" data-dns="corp-portal.secure-internal.company.com">✅ Benign Corporate</button>
+                        <button class="preset-chip" data-dns="x89fa210bca3.stealth-c2.evil-server.org">🚨 Long Hex Subdomain</button>
+                        <button class="preset-chip" data-dns="mail.google.com">✅ Clean Standard Domain</button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="dns-query-input">Enter DNS Query String:</label>
+                      <input type="text" id="dns-query-input" class="form-input" placeholder="e.g. data-exfiltration.tunnel.malicious.net" value="tunnel-beacon.exfiltration.malicious-domain.net">
+                    </div>
+
+                    <div id="dns-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+
+                    <button id="btn-analyze-dns" class="btn-primary">
+                      <span>⚡</span> ANALYZE QUERY
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 2: Structured Features -->
+              <div id="tab-structured" class="pg-pane" style="display: none;">
+                <div class="soc-card">
+                  <div class="soc-card-header">
+                    <div class="soc-card-title"><span>⚙️</span> Structured Flow Features</div>
+                    <span class="status-chip">POST /predict</span>
+                  </div>
+                  <div class="soc-card-body">
+                    <div class="form-group">
+                      <label class="form-label">Target Specialist:</label>
+                      <select id="pg-specialist-select" class="form-select">
+                        <option value="auto">AUTO (Intelligent Schema Routing)</option>
+                        <option value="IDS2018">IDS2018 (Enterprise Flow)</option>
+                        <option value="CICIoT2023">CICIoT2023 (IoT Network)</option>
+                        <option value="ARP_Spoofing">ARP_Spoofing (Layer-2 Packet)</option>
+                        <option value="IP_Spoofing">IP_Spoofing (5G GTP / IP)</option>
+                        <option value="DNS_Tunneling">DNS_Tunneling (DNS Statistical)</option>
+                      </select>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label">Quick Attack / Flow Presets:</label>
+                      <div class="preset-chip-group">
+                        <button class="preset-chip" data-struct='{"features": {"arp_opcode": 1.0, "frame_number": 105.0}, "specialist": "ARP_Spoofing"}'>⚡ ARP Spoofing</button>
+                        <button class="preset-chip" data-struct='{"features": {"some_feature": 0.5, "Seq": 12.0, "GTP": 1.0}, "specialist": "IP_Spoofing"}'>🛰️ 5G IP Spoofing</button>
+                        <button class="preset-chip" data-struct='{"features": {"Rate": 25.4, "Srate": 18.2, "Drate": 7.2, "Header_Length": 54.0}, "specialist": "CICIoT2023"}'>🤖 IoT Network Flow</button>
+                        <button class="preset-chip" data-struct='{"features": {"Flow Duration": 15000.0, "Tot Fwd Pkts": 8.0, "Tot Bwd Pkts": 6.0}, "specialist": "IDS2018"}'>🏢 Enterprise Flow</button>
+                      </div>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="structured-json-input">JSON Payload Body:</label>
+                      <textarea id="structured-json-input" class="form-textarea" rows="6">{
+  "features": {
+    "arp_opcode": 1.0,
+    "frame_number": 105.0
+  },
+  "specialist": "ARP_Spoofing"
+}</textarea>
+                    </div>
+
+                    <div id="struct-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+
+                    <button id="btn-run-structured" class="btn-primary">
+                      <span>⚡</span> RUN DETECTION
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Tab 3: Batch Inference -->
+              <div id="tab-batch" class="pg-pane" style="display: none;">
+                <div class="soc-card">
+                  <div class="soc-card-header">
+                    <div class="soc-card-title"><span>📦</span> Batch Network Flow Evaluation</div>
+                    <span class="status-chip">POST /predict/batch</span>
+                  </div>
+                  <div class="soc-card-body">
+                    <div class="form-group">
+                      <label class="form-label" for="batch-json-input">JSON Records Array:</label>
+                      <textarea id="batch-json-input" class="form-textarea" rows="6">[
+  { "query": "google.com" },
+  { "query": "exfiltration.dns-tunnel-attack.net" },
+  { "query": "internal-update.corp-portal.company.com" }
+]</textarea>
+                    </div>
+
+                    <div id="batch-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+
+                    <button id="btn-execute-batch" class="btn-primary">
+                      <span>📦</span> EXECUTE BATCH INFERENCE
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right Result Column -->
+            <div>
+              <div class="verdict-card">
+                <div>
+                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">
+                    Inference Verdict Result
+                  </div>
+
+                  <div id="verdict-banner-box" class="verdict-banner">
+                    <div>
+                      <div class="verdict-title">CLASSIFICATION VERDICT</div>
+                      <div id="verdict-class-name" class="verdict-class">Waiting for query</div>
+                    </div>
+                    <div class="verdict-confidence-badge">
+                      <div id="verdict-conf-value" class="verdict-conf-val">—</div>
+                      <div class="verdict-conf-sub">Posterior Confidence</div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="verdict-meta-grid">
+                  <div class="verdict-meta-item">
+                    <div class="verdict-meta-label">Dispatched Specialist</div>
+                    <div id="verdict-specialist-name" class="verdict-meta-val">None</div>
+                  </div>
+                  <div class="verdict-meta-item">
+                    <div class="verdict-meta-label">Canonical Class ID</div>
+                    <div id="verdict-canonical-id" class="verdict-meta-val">—</div>
+                  </div>
+                </div>
+
+                <div>
+                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.6rem;">
+                    13-Class Posterior Distribution
+                  </div>
+                  <div id="verdict-prob-list" class="prob-list">
+                    <!-- Populated dynamically with actual 13-class probabilities -->
+                    <div style="font-size: 0.78rem; color: var(--text-muted); padding: 1rem 0; text-align: center;">
+                      No inference executed yet.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Batch Results Display Card -->
+          <div id="batch-results-soc-card" class="soc-card" style="display: none; margin-top: 1.5rem;">
+            <div class="soc-card-header">
+              <div>
+                <div class="soc-card-title"><span>📊</span> Batch Prediction Results</div>
+                <div id="batch-summary-subtitle" class="soc-card-desc">0 flows classified</div>
+              </div>
+              <span id="batch-spec-badge" class="status-chip">Specialist: Auto</span>
+            </div>
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Class ID</th>
+                    <th>Class Name</th>
+                    <th>Confidence</th>
+                    <th>Specialist</th>
+                    <th>Verdict Status</th>
+                  </tr>
+                </thead>
+                <tbody id="batch-results-tbody">
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================
+             VIEW 4: SPECIALIST MODELS
+             ================================================== -->
+        <section id="view-models" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Specialist Models Catalog</h1>
+              <div class="page-subtitle">5 Domain-specialized machine learning classifiers coordinating unified intrusion detection</div>
+            </div>
+          </div>
+
+          <div id="specialist-models-catalog-grid" class="specialist-card-grid">
+            <div style="color: var(--text-muted); font-size: 0.85rem;">Loading specialist models catalog from backend...</div>
+          </div>
+        </section>
+
+        <!-- ==================================================
+             VIEW 5: UNIFIED ARCHITECTURE
+             ================================================== -->
+        <section id="view-architecture" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Unified NIDS Architecture</h1>
+              <div class="page-subtitle">Multi-model intelligent schema routing and frozen 13-class canonical decision projection</div>
+            </div>
+          </div>
+
+          <div class="soc-card">
+            <div class="soc-card-header">
+              <div class="soc-card-title"><span>🌐</span> Multi-Specialist Inference Pipeline</div>
+              <span class="status-chip online">Verified Pipeline Contract</span>
+            </div>
+            <div class="soc-card-body">
+              <div class="arch-diagram-wrapper">
+
+                <!-- Stage 1 -->
+                <div class="arch-node">
+                  <div>🌐 NETWORK TRAFFIC</div>
+                  <div class="arch-node-desc">Raw PCAP / CSV / DNS Packets / IoT Flows</div>
+                </div>
+
+                <div class="arch-connector-arrow">↓</div>
+
+                <!-- Stage 2 -->
+                <div class="arch-node primary">
+                  <div>🛡️ API &amp; INGRESS GATEWAY</div>
+                  <div class="arch-node-desc">FastAPI / Input Validation / Schema Guard</div>
+                </div>
+
+                <div class="arch-connector-arrow">↓</div>
+
+                <!-- Stage 3 -->
+                <div class="arch-node">
+                  <div>⚡ SPECIALIST SCHEMA ROUTER</div>
+                  <div class="arch-node-desc">Signature Feature Indicator Matching</div>
+                </div>
+
+                <div class="arch-connector-arrow">↓</div>
+
+                <!-- Stage 4: 5 Specialists Row -->
+                <div class="arch-specialist-row">
+                  <div class="arch-spec-box">
+                    <div class="arch-spec-title">IDS2018</div>
+                    <div class="arch-spec-sub">Enterprise 77-Features</div>
+                  </div>
+                  <div class="arch-spec-box">
+                    <div class="arch-spec-title">CICIoT2023</div>
+                    <div class="arch-spec-sub">IoT 46-Features</div>
+                  </div>
+                  <div class="arch-spec-box">
+                    <div class="arch-spec-title">ARP_Spoofing</div>
+                    <div class="arch-spec-sub">Layer-2 Protocol</div>
+                  </div>
+                  <div class="arch-spec-box">
+                    <div class="arch-spec-title">IP_Spoofing</div>
+                    <div class="arch-spec-sub">5G-NIDD GTP Metric</div>
+                  </div>
+                  <div class="arch-spec-box">
+                    <div class="arch-spec-title">DNS_Tunneling</div>
+                    <div class="arch-spec-sub">Raw Query Statistical</div>
+                  </div>
+                </div>
+
+                <div class="arch-connector-arrow">↓</div>
+
+                <!-- Stage 5 -->
+                <div class="arch-node primary">
+                  <div>🤖 UNIFIED NIDS AI CORE</div>
+                  <div class="arch-node-desc">In-Memory Specialists &bull; Threshold Calibration &bull; Canonical Projection</div>
+                </div>
+
+                <div class="arch-connector-arrow">↓</div>
+
+                <!-- Stage 6 -->
+                <div class="arch-node success">
+                  <div>🎯 13-CLASS CANONICAL VERDICT</div>
+                  <div class="arch-node-desc">Frozen IDs 0 &ndash; 12 &bull; Dimension-13 Normalized Posterior Vector</div>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================
+             VIEW 6: AUDIT / EVENTS
+             ================================================== -->
+        <section id="view-audit" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">Audit / Events Log</h1>
+              <div class="page-subtitle">Operational events, system telemetry, and inference transactions recorded during this session</div>
+            </div>
+            <button id="btn-clear-audit" class="btn-reconnect">Clear Audit</button>
+          </div>
+
+          <div class="soc-card">
+            <div class="table-responsive">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Timestamp</th>
+                    <th>Category</th>
+                    <th>Event Details</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="audit-events-tbody">
+                  <tr>
+                    <td colspan="4">
+                      <div class="empty-state-box">
+                        <div class="empty-state-icon">📋</div>
+                        <div class="empty-state-text">No audit events available</div>
+                        <div class="empty-state-sub">Events will record automatically as API transactions occur.</div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ==================================================
+             VIEW 7: SETTINGS
+             ================================================== -->
+        <section id="view-settings" class="view-panel">
+          <div class="page-header-block">
+            <div>
+              <h1 class="page-title">System Settings</h1>
+              <div class="page-subtitle">Configure backend connection parameters and environment integration</div>
+            </div>
+          </div>
+
+          <div class="soc-card">
+            <div class="soc-card-header">
+              <div class="soc-card-title"><span>⚙️</span> FastAPI Backend Configuration</div>
+            </div>
+            <div class="soc-card-body">
+              <div class="settings-form-grid">
+                <div class="form-group">
+                  <label class="form-label" for="settings-api-url-input">FastAPI Base URL (VITE_API_BASE_URL):</label>
+                  <input type="text" id="settings-api-url-input" class="form-input" value="http://localhost:8000">
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">
+                    Default local port is 8000. In production, provide the HTTPS Render service URL.
+                  </div>
+                </div>
+
+                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
+                  <button id="btn-settings-test" class="btn-reconnect" style="padding: 0.65rem 1rem;">
+                    🧪 Test Connection
+                  </button>
+                  <button id="btn-settings-save" class="btn-primary" style="width: auto; padding: 0.65rem 1.5rem;">
+                    Save &amp; Reconnect
+                  </button>
+                </div>
+
+                <div id="settings-test-banner" style="display: none;" class="connection-status-banner">
+                </div>
+
+                <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 2rem 0;">
+
+                <div class="form-group">
+                  <label class="form-label">Theme Interface:</label>
+                  <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
+                    Enterprise White SOC UI (Default)
+                  </div>
+                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">
+                    Clean minimal light security operations theme with blue primary accent.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
     </div>
-
   </div>
 
-  <!-- Vendor Scripts (Three.js, OrbitControls, Chart.js) -->
-  <script src="vendor/three.min.js"></script>
-  <script src="vendor/OrbitControls.js"></script>
+  <!-- Vendor Scripts (Chart.js only, no heavy 3D dependency required) -->
   <script src="vendor/chart.min.js"></script>
 
-  <!-- Application Scripts -->
+  <!-- Application Logic -->
   <script src="js/api.js"></script>
-  <script src="js/pipeline3d.js"></script>
   <script src="js/app.js"></script>
 </body>
 </html>

@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart AI Network Intrusion Detection System (SAI-IDS)</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="env.js"></script>
+</head>
+<body>
+  <div class="app-container">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="brand-section">
+        <div class="brand-icon">🛡️</div>
+        <div>
+          <h1 class="brand-title">SMART AI NIDS</h1>
+          <div class="brand-sub">Network Intrusion Detection System</div>
+        </div>
+      </div>
+
+      <div class="header-badges">
+        <div id="backend-status-badge" class="badge badge-status-offline">
+          <span id="backend-status-dot" class="status-dot"></span>
+          <span id="backend-status-text">OFFLINE</span>
+        </div>
+        <div id="engine-readiness-badge" class="badge">UnifiedNIDS: Checking...</div>
+        <div id="specialists-count-badge" class="badge">Specialists: 5 Models</div>
+        <div class="badge">Taxonomy: 13 Frozen Classes</div>
+        <button id="btn-reconnect" class="btn-cyber" title="Retry Backend Connection">🔄 Reconnect</button>
+        <button id="btn-settings" class="btn-cyber" title="Configure Backend API URL">⚙️ API Config</button>
+      </div>
+    </header>
+
+    <!-- System Overview Cards (5 Main Areas) -->
+    <section class="metrics-grid">
+      <div class="metric-card" id="card-api-status">
+        <div class="metric-label">System Status</div>
+        <div id="metric-system-status" class="metric-value" style="color: var(--status-critical);">OFFLINE</div>
+        <div id="metric-system-sub" class="metric-sub">FastAPI Backend Service</div>
+      </div>
+      <div class="metric-card" id="card-unified-status">
+        <div class="metric-label">UnifiedNIDS Status</div>
+        <div id="metric-unified-status" class="metric-value" style="color: var(--accent-cyan);">INITIALIZING</div>
+        <div id="metric-unified-sub" class="metric-sub">13-Class Canonical Engine</div>
+      </div>
+      <div class="metric-card" id="card-models-status">
+        <div class="metric-label">Specialist Models</div>
+        <div id="metric-specialist-status" class="metric-value" style="color: var(--accent-blue);">0 / 5</div>
+        <div id="metric-specialist-sub" class="metric-sub">Pipelines Ready</div>
+      </div>
+      <div class="metric-card" id="card-traffic-status">
+        <div class="metric-label">Traffic Status</div>
+        <div id="metric-traffic-status" class="metric-value">WAITING</div>
+        <div id="metric-status-sub" class="metric-sub">Waiting for live traffic</div>
+      </div>
+      <div class="metric-card" id="card-detection-status">
+        <div class="metric-label">Detection Status</div>
+        <div id="metric-threat-level" class="metric-value threat-low">WAITING</div>
+        <div id="metric-detection-sub" class="metric-sub">No detections yet</div>
+      </div>
+    </section>
+
+    <!-- 13-Class Canonical Detection Panel -->
+    <section class="canonical-panel">
+      <div class="panel-header" style="margin-bottom: 0;">
+        <div class="panel-title">
+          <span>🛡️</span> 13-Class Canonical Detection Taxonomy
+        </div>
+        <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
+          Frozen Standard &bull; IDs 0 &ndash; 12
+        </div>
+      </div>
+      <div id="canonical-grid" class="canonical-grid">
+        <!-- Injected dynamically by app.js: exactly 13 canonical classes with ID, Name, Severity & Detections -->
+      </div>
+    </section>
+
+    <!-- Main Dashboard Grid: 3D Visualization + Interactive Test Panel -->
+    <section class="main-dashboard-grid">
+      <!-- 3D Pipeline Visualizer -->
+      <div class="viz-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>🌐</span> 3D Cybersecurity Pipeline & Specialist Topology
+          </div>
+          <div style="display: flex; align-items: center; gap: 0.75rem;">
+            <div id="pipeline-live-badge" class="badge" style="background: rgba(56, 189, 248, 0.1); border-color: rgba(56, 189, 248, 0.3); color: #38bdf8;">
+              Live Inference Topology
+            </div>
+            <button id="btn-reset-cam" class="btn-cyber" title="Reset Camera">Reset View</button>
+          </div>
+        </div>
+
+        <div id="pipeline3d-canvas-container" class="canvas-container">
+          <!-- 3D Canvas dynamically injected here -->
+        </div>
+
+        <div class="viz-legend">
+          <div class="legend-item"><span class="legend-dot" style="background: #0284c7;"></span> Traffic Gateway</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #6366f1;"></span> Schema Router</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #38bdf8;"></span> 5 Specialist Models</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #06b6d4;"></span> UnifiedNIDS Core</div>
+          <div class="legend-item"><span class="legend-dot" style="background: #10b981;"></span> 13-Class Canonical Verdicts</div>
+        </div>
+      </div>
+
+      <!-- Interactive Security Playground / Traffic Injector -->
+      <div class="viz-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>⚡</span> Real-Time Traffic Injector & Inference Playground
+          </div>
+          <div style="font-size: 0.75rem; color: var(--text-secondary); font-family: var(--font-mono);">
+            Dispatches to FastAPI <code>/predict</code>
+          </div>
+        </div>
+
+        <div class="control-tabs">
+          <button class="tab-btn active" data-target="tab-presets">Preset Attacks</button>
+          <button class="tab-btn" data-target="tab-custom">Custom Payload</button>
+          <button class="tab-btn" data-target="tab-batch">Batch Inference</button>
+        </div>
+
+        <div class="tab-content">
+          <!-- Tab 1: Presets -->
+          <div id="tab-presets" class="tab-pane" style="display: block;">
+            <div style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 0.75rem;">
+              Click any sample network record to test automatic schema routing and live classification:
+            </div>
+            <div class="preset-grid">
+              <button class="preset-btn" data-payload='{"query": "data-exfiltration.tunnel.malicious-domain.net"}'>
+                📡 DNS Tunneling
+                <span class="spec-tag">Auto &rarr; DNS_Tunneling</span>
+              </button>
+              <button class="preset-btn" data-payload='{"query": "portal.internal-corp.company.com"}'>
+                🌐 Benign DNS Query
+                <span class="spec-tag">Auto &rarr; DNS_Tunneling</span>
+              </button>
+              <button class="preset-btn" data-payload='{"features": {"arp_opcode": 1.0, "frame_number": 105.0}, "specialist": "ARP_Spoofing"}'>
+                ⚡ ARP Spoofing
+                <span class="spec-tag">Route &rarr; ARP_Spoofing</span>
+              </button>
+              <button class="preset-btn" data-payload='{"features": {"some_feature": 0.5, "Seq": 12.0, "GTP": 1.0}, "specialist": "IP_Spoofing"}'>
+                🛰️ 5G IP Spoofing
+                <span class="spec-tag">Route &rarr; IP_Spoofing</span>
+              </button>
+              <button class="preset-btn" data-payload='{"features": {"Rate": 25.4, "Srate": 18.2, "Drate": 7.2, "Header_Length": 54.0}, "specialist": "CICIoT2023"}'>
+                🤖 IoT Network Flow
+                <span class="spec-tag">Route &rarr; CICIoT2023</span>
+              </button>
+              <button class="preset-btn" data-payload='{"features": {"Flow Duration": 15000.0, "Tot Fwd Pkts": 8.0, "Tot Bwd Pkts": 6.0}, "specialist": "IDS2018"}'>
+                🏢 Enterprise Flow
+                <span class="spec-tag">Route &rarr; IDS2018</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab 2: Custom JSON -->
+          <div id="tab-custom" class="tab-pane" style="display: none;">
+            <div class="form-group">
+              <label class="form-label">Inference JSON Payload (raw query or feature mapping):</label>
+              <textarea id="custom-payload-json" class="form-textarea" rows="5">{
+  "query": "malicious-beacon-subdomain.stealth-tunnel.org"
+}</textarea>
+            </div>
+            <div id="custom-json-error" style="color: var(--status-critical); font-size: 0.75rem; margin-bottom: 0.5rem; font-family: var(--font-mono);"></div>
+            <button id="btn-send-custom" class="btn-cyber btn-cyber-primary" style="width: 100%;">
+              Classify via POST /predict
+            </button>
+          </div>
+
+          <!-- Tab 3: Batch -->
+          <div id="tab-batch" class="tab-pane" style="display: none;">
+            <div class="form-group">
+              <label class="form-label">Batch JSON Array (Array of network records):</label>
+              <textarea id="batch-payload-json" class="form-textarea" rows="5">[
+  { "query": "google.com" },
+  { "query": "exfiltration.dns-tunnel-attack.net" },
+  { "query": "corp-update.microsoft.com" }
+]</textarea>
+            </div>
+            <div id="batch-json-error" style="color: var(--status-critical); font-size: 0.75rem; margin-bottom: 0.5rem; font-family: var(--font-mono);"></div>
+            <button id="btn-send-batch" class="btn-cyber btn-cyber-primary" style="width: 100%;">
+              Execute POST /predict/batch
+            </button>
+            <div id="batch-results-container" style="display: none;" class="batch-results-wrapper">
+              <div class="batch-results-header">
+                <span id="batch-results-title">Batch Results</span>
+                <span id="batch-results-spec" style="color: var(--accent-cyan);">Specialist: auto</span>
+              </div>
+              <div class="batch-table-scroll">
+                <table class="cyber-table" style="margin: 0;">
+                  <thead>
+                    <tr>
+                      <th>#</th>
+                      <th>Class ID</th>
+                      <th>Class Name</th>
+                      <th>Confidence</th>
+                      <th>Specialist</th>
+                      <th>Severity</th>
+                    </tr>
+                  </thead>
+                  <tbody id="batch-table-body">
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Live Result Banner -->
+          <div id="live-result-banner" class="prediction-result-banner" style="display: none;">
+            <div class="result-row">
+              <div>
+                <span style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">PREDICTED CLASSIFICATION</span>
+                <div id="result-predicted-class" class="result-class">Benign</div>
+              </div>
+              <div style="text-align: right;">
+                <div id="result-confidence" class="result-confidence">Confidence: 99.4%</div>
+                <div id="result-id-tag" style="font-size: 0.7rem; color: var(--text-muted); font-family: var(--font-mono);">
+                  <span id="result-specialist">Specialist: DNS_Tunneling</span> &bull; <span id="result-canonical-id">Canonical ID: 0</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+
+    <!-- Specialist Model Grid Section -->
+    <section class="specialists-panel">
+      <div class="panel-title">
+        <span>🤖</span> Specialized ML Intrusion Detection Pipelines
+      </div>
+      <div id="specialists-grid" class="specialists-grid">
+        <div style="color: var(--text-muted); font-size: 0.8rem;">Loading specialist models...</div>
+      </div>
+    </section>
+
+    <!-- Lower Grid: 13-Class Analytics & Recent Detections Table -->
+    <section class="lower-dashboard-grid">
+      <!-- 13-Class Analytics Chart -->
+      <div class="viz-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📊</span> 13-Class Canonical Security Posterior Distribution
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">
+            IDs 0 to 12
+          </div>
+        </div>
+        <div style="padding: 1.25rem; height: 380px; position: relative;">
+          <canvas id="analyticsChart"></canvas>
+        </div>
+      </div>
+
+      <!-- Recent Detections Table -->
+      <div class="viz-panel">
+        <div class="panel-header">
+          <div class="panel-title">
+            <span>📋</span> Real-Time Intrusion Detection Log
+          </div>
+          <div style="font-size: 0.7rem; color: var(--text-secondary); font-family: var(--font-mono);">
+            Unified Audit Log
+          </div>
+        </div>
+        <div class="table-container" style="padding: 0 1.25rem 1.25rem 1.25rem; height: 380px;">
+          <table class="cyber-table">
+            <thead>
+              <tr>
+                <th>Time</th>
+                <th>Source / Input</th>
+                <th>Classification</th>
+                <th>Confidence</th>
+                <th>Specialist</th>
+                <th>Severity</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody id="detections-table-body">
+              <tr>
+                <td colspan="7" style="text-align: center; color: var(--text-muted); padding: 2rem;">
+                  No classifications recorded yet. Use the Traffic Injector above to send live packets.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- API Config Modal -->
+    <div id="settings-modal" class="modal-backdrop" style="display: none;">
+      <div class="modal-card">
+        <h3 style="font-size: 1.1rem; color: var(--accent-cyan); font-family: var(--font-mono); margin-bottom: 0.5rem;">
+          FastAPI Backend Configuration
+        </h3>
+        <p style="font-size: 0.8rem; color: var(--text-secondary); margin-bottom: 1rem;">
+          Configure the base URL of the running FastAPI UnifiedNIDS service:
+        </p>
+        <div class="form-group">
+          <label class="form-label">FastAPI Base URL:</label>
+          <input type="text" id="api-base-url-input" class="form-input" value="http://localhost:8000">
+        </div>
+        <div style="display: flex; justify-content: flex-end; gap: 0.75rem; margin-top: 1.25rem;">
+          <button id="btn-close-modal" class="btn-cyber">Cancel</button>
+          <button id="btn-save-api-url" class="btn-cyber btn-cyber-primary">Save &amp; Reconnect</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Vendor Scripts (Three.js, OrbitControls, Chart.js) -->
+  <script src="vendor/three.min.js"></script>
+  <script src="vendor/OrbitControls.js"></script>
+  <script src="vendor/chart.min.js"></script>
+
+  <!-- Application Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/pipeline3d.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>

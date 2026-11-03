@@ -255,10 +255,15 @@ class UnifiedNIDS:
         elif isinstance(data, list):
             if len(data) == 0:
                 raise ValueError("Input data list is empty.")
-            if isinstance(data[0], dict):
-                df = pd.DataFrame(data)
-            else:
+            if not isinstance(data[0], dict):
                 raise TypeError(f"Unsupported element in data list: {type(data[0])}")
+            # If auto-routing, check whether all records map to the same specialist
+            if specialist == "auto":
+                specs = [self.route_traffic(item) for item in data]
+                if len(set(specs)) > 1:
+                    # Heterogeneous batch: route each record to its appropriate specialist
+                    return [self.predict(item, specialist=s) for item, s in zip(data, specs)]
+            df = pd.DataFrame(data)
         elif isinstance(data, pd.DataFrame):
             if len(data) == 0:
                 raise ValueError("Input DataFrame is empty.")

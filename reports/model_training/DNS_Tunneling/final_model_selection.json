@@ -1,9 +1,10 @@
 {
     "dataset": "DNS_Tunneling",
-    "best_model": "RandomForest",
+    "best_model": "DecisionTree",
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/DecisionTree.joblib",
     "selection_metric": "Validation Macro F1",
     "validation_macro_f1": 0.0,
-    "test_row_count": 3,
+    "test_row_count": 1,
     "test_metrics": {
         "Accuracy": 1.0,
         "Macro Precision": 0.5,
@@ -47,6 +48,25 @@
                 0
             ]
         ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 1,
+                "DNS Tunneling": 0
+            },
+            "DNS Tunneling": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "class_order": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "total_samples": 1,
         "canonical_mapping": {
             "Benign": 0,
             "DNS Tunneling": 12

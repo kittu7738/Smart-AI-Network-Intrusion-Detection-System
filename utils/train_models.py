@@ -598,7 +598,7 @@ def get_model_instance(model_name: str, smoke_test: bool = False):
         # Lightweight baseline: max_depth=15 prevents uncontrolled combinatorial leaf growth
         return DecisionTreeClassifier(
             max_depth=15,
-            min_samples_leaf=5,
+            min_samples_leaf=1,
             random_state=SEED,
             class_weight="balanced"
         )

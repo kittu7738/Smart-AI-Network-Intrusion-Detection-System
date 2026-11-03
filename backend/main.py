@@ -269,7 +269,13 @@ def predict_batch(request_data: Union[BatchPredictionRequest, List[Dict[str, Any
         for item in raw_results
     ]
 
-    detected_spec = predictions[0].specialist if predictions else spec
+    specs_in_batch = set(p.specialist for p in predictions if p.specialist)
+    if len(specs_in_batch) > 1:
+        detected_spec = "Multi-Specialist"
+    elif len(specs_in_batch) == 1:
+        detected_spec = list(specs_in_batch)[0]
+    else:
+        detected_spec = spec
     return BatchPredictionResponse(
         count=len(predictions),
         specialist=detected_spec,

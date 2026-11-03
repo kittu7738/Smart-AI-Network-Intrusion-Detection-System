@@ -1,7 +1,7 @@
 {
     "dataset": "DNS_Tunneling",
     "model_name": "RandomForest",
-    "fit_duration_seconds": 6.4849853515625e-05,
+    "fit_duration_seconds": 0.015674829483032227,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,
@@ -46,6 +46,25 @@
                 0
             ]
         ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            },
+            "DNS Tunneling": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "class_order": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "total_samples": 0,
         "canonical_mapping": {
             "Benign": 0,
             "DNS Tunneling": 12

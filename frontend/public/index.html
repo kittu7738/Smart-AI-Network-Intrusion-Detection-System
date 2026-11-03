@@ -203,9 +203,12 @@
               <h1 class="page-title">Security Overview</h1>
               <div class="page-subtitle">Real-time network intrusion detection using specialized AI models</div>
             </div>
-            <div class="nids-status-badge" id="overview-nids-badge">
-              <span class="badge-dot"></span>
-              <span id="overview-nids-text">NIDS ONLINE</span>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <button id="btn-run-13-demo" class="btn-primary-action" style="padding: 7px 15px; font-size: 13px; border-radius: 6px; cursor: pointer;">⚡ Run 13-Class Live Demo</button>
+              <div class="nids-status-badge" id="overview-nids-badge">
+                <span class="badge-dot"></span>
+                <span id="overview-nids-text">NIDS ONLINE</span>
+              </div>
             </div>
           </div>
 
@@ -223,12 +226,12 @@
                   </svg>
                 </div>
                 <div class="kpi-data-block">
-                  <span class="kpi-label">Total Packets</span>
-                  <span class="kpi-value" id="kpi-total-packets">12,458</span>
+                  <span class="kpi-label">Total Inferences</span>
+                  <span class="kpi-value" id="kpi-total-packets">0</span>
                 </div>
               </div>
               <div class="kpi-bottom-row">
-                <span class="kpi-trend green" id="kpi-packets-trend">↑ 12.5%</span>
+                <span class="kpi-trend green" id="kpi-packets-trend">Live Verified</span>
                 <svg class="kpi-sparkline" viewBox="0 0 58 22">
                   <path d="M2 18 Q 15 12, 28 15 T 56 4" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
@@ -245,11 +248,11 @@
                 </div>
                 <div class="kpi-data-block">
                   <span class="kpi-label">Benign Traffic</span>
-                  <span class="kpi-value" id="kpi-benign-traffic">11,892</span>
+                  <span class="kpi-value" id="kpi-benign-traffic">0</span>
                 </div>
               </div>
               <div class="kpi-bottom-row">
-                <span class="kpi-trend green" id="kpi-benign-trend">95.5%</span>
+                <span class="kpi-trend green" id="kpi-benign-trend">0.0%</span>
                 <svg class="kpi-sparkline" viewBox="0 0 58 22">
                   <path d="M2 16 Q 16 14, 30 11 T 56 6" fill="none" stroke="#22C55E" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
@@ -268,11 +271,11 @@
                 </div>
                 <div class="kpi-data-block">
                   <span class="kpi-label">Malicious Traffic</span>
-                  <span class="kpi-value" id="kpi-malicious-traffic">566</span>
+                  <span class="kpi-value" id="kpi-malicious-traffic">0</span>
                 </div>
               </div>
               <div class="kpi-bottom-row">
-                <span class="kpi-trend red" id="kpi-malicious-trend">4.5%</span>
+                <span class="kpi-trend red" id="kpi-malicious-trend">0.0%</span>
                 <svg class="kpi-sparkline" viewBox="0 0 58 22">
                   <path d="M2 18 Q 14 16, 26 13 T 56 8" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
@@ -291,11 +294,11 @@
                 </div>
                 <div class="kpi-data-block">
                   <span class="kpi-label">Detection Rate</span>
-                  <span class="kpi-value" id="kpi-detection-rate">98.7%</span>
+                  <span class="kpi-value" id="kpi-detection-rate">100.0%</span>
                 </div>
               </div>
               <div class="kpi-bottom-row">
-                <span class="kpi-trend green" id="kpi-rate-trend">↑ 0.3%</span>
+                <span class="kpi-trend green" id="kpi-rate-trend">Online</span>
                 <svg class="kpi-sparkline" viewBox="0 0 58 22">
                   <path d="M2 17 Q 16 15, 32 10 T 56 4" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"/>
                 </svg>
@@ -662,6 +665,7 @@
             <button class="pg-tab-btn active" data-tab="tab-dns">DNS Query Inspection</button>
             <button class="pg-tab-btn" data-tab="tab-structured">Structured Flow Features</button>
             <button class="pg-tab-btn" data-tab="tab-batch">Batch Flow Evaluation</button>
+            <button class="pg-tab-btn" data-tab="tab-csv">📁 CSV / Dataset Upload</button>
           </div>
 
           <div class="dashboard-grid-2col">
@@ -770,6 +774,39 @@
                   </div>
                 </div>
               </div>
+
+              <!-- Tab 4: CSV Dataset Upload -->
+              <div id="tab-csv" class="pg-pane" style="display: none;">
+                <div class="soc-card">
+                  <div class="soc-card-header">
+                    <span class="soc-card-title">CSV / Flow Dataset Ingestion</span>
+                    <span class="mini-badge-online" style="background: #EFF6FF; color: #2563EB;">Bulk Ingestion</span>
+                  </div>
+                  <div class="soc-card-body">
+                    <label class="form-label">Upload CSV File:</label>
+                    <input type="file" id="csv-file-input" accept=".csv" class="form-input" style="padding: 6px; margin-bottom: 12px;">
+
+                    <label class="form-label">Or Load Genuine Sample Benchmark:</label>
+                    <div class="preset-chip-list" style="margin-bottom: 12px;">
+                      <button class="preset-chip-btn" id="btn-sample-5g">🛰️ Genuine 5G Sample (IP Spoofing + Benign)</button>
+                      <button class="preset-chip-btn" id="btn-sample-ciciot">🤖 Genuine IoT Sample (10 Classes)</button>
+                      <button class="preset-chip-btn" id="btn-sample-dns">🔍 Genuine DNS Sample (Tunneling + Benign)</button>
+                    </div>
+
+                    <div class="form-group">
+                      <label class="form-label" for="csv-preview-textarea">CSV Content / Preview:</label>
+                      <textarea id="csv-preview-textarea" class="form-textarea" rows="7" placeholder="Paste CSV rows here or upload a file above..."></textarea>
+                    </div>
+
+                    <div id="csv-error-box" style="color: var(--color-danger); font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono);"></div>
+                    <div id="csv-status-box" style="color: var(--color-success); font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono);"></div>
+
+                    <button id="btn-execute-csv" class="btn-primary-action">
+                      Upload & Ingest Records
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Right: Verdict Output Card -->
@@ -854,9 +891,9 @@
                 <div class="arch-specialists-stack">
                   <div class="arch-spec-pill blue">IDS2018 (77 Features)</div>
                   <div class="arch-spec-pill purple">CICIoT2023 (46 Features)</div>
-                  <div class="arch-spec-pill red">ARP (2 Features)</div>
-                  <div class="arch-spec-pill" style="background:#FFF7ED; color:#C2410C; border-color:#FFEDD5;">IP_Spoofing (12 Features)</div>
-                  <div class="arch-spec-pill" style="background:#F0FDFA; color:#0F766E; border-color:#CCFBF1;">DNS_Tunneling (12 Features)</div>
+                  <div class="arch-spec-pill red">ARP_Spoofing (1 Feature)</div>
+                  <div class="arch-spec-pill" style="background:#FFF7ED; color:#C2410C; border-color:#FFEDD5;">IP_Spoofing (44 Features)</div>
+                  <div class="arch-spec-pill" style="background:#F0FDFA; color:#0F766E; border-color:#CCFBF1;">DNS_Tunneling (9 Features)</div>
                 </div>
                 <span class="arch-arrow">&rarr;</span>
                 <div class="arch-step-node">
@@ -873,6 +910,76 @@
                   <span class="arch-step-label">13-Class Threat Verdict</span>
                 </div>
               </div>
+            </div>
+          </div>
+
+          <!-- Network Input Sources & Telemetry Ingestion Matrix -->
+          <div class="soc-card" style="margin-top: 24px;">
+            <div class="soc-card-header">
+              <span class="soc-card-title">Network Input Sources & Telemetry Ingestion Matrix</span>
+              <span class="mini-badge-online">INTERFACE SUPPORT</span>
+            </div>
+            <div class="soc-card-body" style="padding: 18px;">
+              <table class="soc-table">
+                <thead>
+                  <tr>
+                    <th>Input Source / Ingestion Interface</th>
+                    <th>Supported Telemetry Format</th>
+                    <th>Target Specialist Routing</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><strong>REST API (/predict, /predict/batch)</strong></td>
+                    <td>JSON Single Flow / Batch Records</td>
+                    <td>Automated Schema Fingerprinting</td>
+                    <td><span class="mini-badge-online" style="background:#ECFDF5; color:#059669;">IMPLEMENTED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>CSV Flow Dataset Upload</strong></td>
+                    <td>RFC 4180 CSV (Auto-parsed headers)</td>
+                    <td>Multi-Specialist Routing (IoT, 5G, ARP, DNS)</td>
+                    <td><span class="mini-badge-online" style="background:#ECFDF5; color:#059669;">IMPLEMENTED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Structured Flow Telemetry</strong></td>
+                    <td>JSON Feature Dict (CICIoT2023 / IDS2018)</td>
+                    <td>IoT & Enterprise Flow Specialists</td>
+                    <td><span class="mini-badge-online" style="background:#ECFDF5; color:#059669;">IMPLEMENTED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Raw DNS Query Inspection</strong></td>
+                    <td>ASCII String (e.g. FQDN / Tunnel Payload)</td>
+                    <td>DNS_Tunneling Statistical Pipeline</td>
+                    <td><span class="mini-badge-online" style="background:#ECFDF5; color:#059669;">IMPLEMENTED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>CSV Drag-and-Drop Batch Ingestion</strong></td>
+                    <td>Browser File API Drag-and-Drop</td>
+                    <td>Auto-parsed & Chunked POST /predict/batch</td>
+                    <td><span class="mini-badge-online" style="background:#EFF6FF; color:#2563EB;">PARTIALLY IMPLEMENTED</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Raw Interface Packet Sniffing</strong></td>
+                    <td>Live Network Interface (AF_PACKET / libpcap)</td>
+                    <td>Real-time Flow Assembler Engine</td>
+                    <td><span class="mini-badge-online" style="background:#F3F4F6; color:#6B7280;">PLANNED / ROADMAP</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Hardware Acceleration Offload</strong></td>
+                    <td>DPDK / SmartNIC Kernel Bypass</td>
+                    <td>High-throughput Zero-copy Ring</td>
+                    <td><span class="mini-badge-online" style="background:#F3F4F6; color:#6B7280;">PLANNED / ROADMAP</span></td>
+                  </tr>
+                  <tr>
+                    <td><strong>Suricata EVE-JSON Ingestion</strong></td>
+                    <td>Suricata Fast.log / EVE Output</td>
+                    <td>Traditional Rule-based Engine</td>
+                    <td><span class="mini-badge-online" style="background:#FEF2F2; color:#DC2626;">PERMANENTLY EXCLUDED</span></td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </section>

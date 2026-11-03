@@ -1,7 +1,7 @@
 {
     "dataset": "ARP_Spoofing",
     "model_name": "DecisionTree",
-    "fit_duration_seconds": 6.699562072753906e-05,
+    "fit_duration_seconds": 0.0021550655364990234,
     "train_row_count": 2,
     "validation_metrics": {
         "Accuracy": 0.0,

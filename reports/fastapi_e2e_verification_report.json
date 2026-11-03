@@ -1,0 +1,123 @@
+{
+    "status": "PASS",
+    "all_passed": true,
+    "results": [
+        {
+            "canonical_id": 0,
+            "expected": "Benign",
+            "predicted": "Benign",
+            "predicted_id": 0,
+            "specialist": "CICIoT2023",
+            "confidence": 0.7188788056373596,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 1,
+            "expected": "DDoS",
+            "predicted": "DDoS",
+            "predicted_id": 1,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9691302180290222,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 2,
+            "expected": "DoS",
+            "predicted": "DoS",
+            "predicted_id": 2,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9886257648468018,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 3,
+            "expected": "Botnet",
+            "predicted": "Botnet",
+            "predicted_id": 3,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9893999695777893,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 4,
+            "expected": "Infiltration",
+            "predicted": "Infiltration",
+            "predicted_id": 4,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9761713147163391,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 5,
+            "expected": "Brute Force",
+            "predicted": "Brute Force",
+            "predicted_id": 5,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9688535332679749,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 6,
+            "expected": "Web Attack",
+            "predicted": "Web Attack",
+            "predicted_id": 6,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9738113880157471,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 7,
+            "expected": "DNS Spoofing",
+            "predicted": "DNS Spoofing",
+            "predicted_id": 7,
+            "specialist": "CICIoT2023",
+            "confidence": 0.7836363315582275,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 8,
+            "expected": "IP Spoofing",
+            "predicted": "IP Spoofing",
+            "predicted_id": 8,
+            "specialist": "IP_Spoofing",
+            "confidence": 1.0,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 9,
+            "expected": "ARP Spoofing",
+            "predicted": "ARP Spoofing",
+            "predicted_id": 9,
+            "specialist": "ARP_Spoofing",
+            "confidence": 1.0,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 10,
+            "expected": "Recon / Port Scan",
+            "predicted": "Recon / Port Scan",
+            "predicted_id": 10,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9645315408706665,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 11,
+            "expected": "MITM",
+            "predicted": "MITM",
+            "predicted_id": 11,
+            "specialist": "CICIoT2023",
+            "confidence": 0.9776507616043091,
+            "status": "PASS"
+        },
+        {
+            "canonical_id": 12,
+            "expected": "DNS Tunneling",
+            "predicted": "DNS Tunneling",
+            "predicted_id": 12,
+            "specialist": "DNS_Tunneling",
+            "confidence": 1.0,
+            "status": "PASS"
+        }
+    ]
+}

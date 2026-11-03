@@ -1,0 +1,818 @@
+{
+  "audit": {
+    "suricata_binary": "/opt/homebrew/bin/suricata",
+    "suricata_version": "This is Suricata version 8.0.8 RELEASE",
+    "suricata_available": true,
+    "config_file": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/suricata/suricata.yaml",
+    "config_exists": true,
+    "rules_file": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/suricata/rules/canonical_threats.rules",
+    "rules_exists": true,
+    "rule_count": 32,
+    "config_validation_status": "PASSED",
+    "supported_classes": [
+      {
+        "id": 0,
+        "name": "Benign",
+        "notes": "Baseline traffic with no triggered alert"
+      },
+      {
+        "id": 1,
+        "name": "DDoS",
+        "notes": "SYN flood and amplification signatures"
+      },
+      {
+        "id": 2,
+        "name": "DoS",
+        "notes": "Slowloris, RST flood, and ICMP flood rules"
+      },
+      {
+        "id": 3,
+        "name": "Botnet",
+        "notes": "Mirai, Mozi, and IRC C2 signatures"
+      },
+      {
+        "id": 4,
+        "name": "Infiltration",
+        "notes": "Metasploit and reverse shell signatures"
+      },
+      {
+        "id": 5,
+        "name": "Brute Force",
+        "notes": "SSH, FTP, and HTTP auth threshold rules"
+      },
+      {
+        "id": 6,
+        "name": "Web Attack",
+        "notes": "SQLi, XSS, and directory traversal signatures"
+      },
+      {
+        "id": 7,
+        "name": "DNS Spoofing",
+        "notes": "Rogue authoritative response mismatch rules"
+      },
+      {
+        "id": 8,
+        "name": "IP Spoofing",
+        "notes": "Land attack and bogus header rules"
+      },
+      {
+        "id": 10,
+        "name": "Recon / Port Scan",
+        "notes": "Xmas, NULL, SYN-FIN, and horizontal sweep rules"
+      },
+      {
+        "id": 11,
+        "name": "MITM",
+        "notes": "SSLStrip and certificate mismatch rules"
+      },
+      {
+        "id": 12,
+        "name": "DNS Tunneling",
+        "notes": "Long subdomain and Base64 DNS tunnel signatures"
+      }
+    ],
+    "unsupported_classes": [
+      {
+        "id": 9,
+        "name": "ARP Spoofing",
+        "notes": "UNSUPPORTED: Suricata operates on L3/L4/L7; Layer-2 ARP is out of scope for standard rule engine"
+      }
+    ]
+  },
+  "pcap_stream_results": {
+    "engine": "Suricata",
+    "version": "This is Suricata version 8.0.8 RELEASE",
+    "status": "ONLINE",
+    "total_alerts": 2,
+    "total_flows_tracked": 69,
+    "execution_duration_sec": 0.0967,
+    "throughput_packets_per_sec": 37838.7,
+    "class_distribution": {
+      "Benign": 0,
+      "DDoS": 0,
+      "DoS": 0,
+      "Botnet": 0,
+      "Infiltration": 0,
+      "Brute Force": 0,
+      "Web Attack": 0,
+      "DNS Spoofing": 2,
+      "IP Spoofing": 0,
+      "ARP Spoofing": 0,
+      "Recon / Port Scan": 0,
+      "MITM": 0,
+      "DNS Tunneling": 0
+    },
+    "sample_alerts": [
+      {
+        "timestamp": "2026-07-21T18:17:47.394683+0530",
+        "flow_id": 1076851066356626,
+        "pcap_cnt": 128,
+        "src_ip": "10.97.99.78",
+        "src_port": 53,
+        "dest_ip": "10.97.99.41",
+        "dest_port": 59027,
+        "proto": "UDP",
+        "app_proto": "dns",
+        "community_id": "1:ZKfmWxaG8RlSuL23P1AOrLI8j8M=",
+        "event_type": "alert",
+        "action": "allowed",
+        "gid": 1,
+        "sid": 9000070,
+        "rev": 1,
+        "signature": "SURICATA T-NIDS [Class 7: DNS Spoofing] Rogue DNS Poisoning Authoritative Reply Mismatch",
+        "category": "Potentially Bad Traffic",
+        "severity": 2,
+        "metadata": {},
+        "payload_printable": ".............stocks-data-service.apple.com..A.............-.stocks-data-service.lb-apple.com.akadns.net..;.......1...stocks-data-service-row.O.t.......2. .stocks-data-service.v.aaplimg.&.........).*.a.gslb..\nhostmaster. fBG[.......,...@...,",
+        "canonical_id": 7,
+        "canonical_class": "DNS Spoofing",
+        "mapping_method": "EXPLICIT_SID"
+      },
+      {
+        "timestamp": "2026-07-21T18:18:00.484793+0530",
+        "flow_id": 126848666848908,
+        "pcap_cnt": 3510,
+        "src_ip": "10.97.99.78",
+        "src_port": 53,
+        "dest_ip": "10.97.99.41",
+        "dest_port": 53693,
+        "proto": "UDP",
+        "app_proto": "dns",
+        "community_id": "1:2CBbqISRR3vMiSaac6xPYgb6DFE=",
+        "event_type": "alert",
+        "action": "allowed",
+        "gid": 1,
+        "sid": 9000070,
+        "rev": 1,
+        "signature": "SURICATA T-NIDS [Class 7: DNS Spoofing] Rogue DNS Poisoning Authoritative Reply Mismatch",
+        "category": "Potentially Bad Traffic",
+        "severity": 2,
+        "metadata": {},
+        "payload_printable": "(............ap-sin-00001.s3.dualstack.ap-southeast-1.amazonaws.com.................$....,..4.|.................$....,..4.}?................$.......4...................$.......4..C................$.......4...................$.......4...................$.......4...................$.......4.)............./_...ns-672.awsdns-20.net........./_...ns-1235.awsdns-26.org........./_...ns-1561.awsdns-03.co.uk........./_...ns-241.awsdns-30.?",
+        "canonical_id": 7,
+        "canonical_class": "DNS Spoofing",
+        "mapping_method": "EXPLICIT_SID"
+      }
+    ]
+  },
+  "ground_truth_benchmark": {
+    "system_name": "Traditional NIDS (Suricata Baseline)",
+    "total_samples": 650,
+    "accuracy": 0.8077,
+    "macro_precision": 0.8681,
+    "macro_recall": 0.8077,
+    "macro_f1": 0.8034,
+    "weighted_precision": 0.8681,
+    "weighted_recall": 0.8077,
+    "weighted_f1": 0.8034,
+    "binary_threat_detection_rate": 0.7917,
+    "binary_threat_precision": 1.0,
+    "binary_false_alarm_rate": 0.0,
+    "per_class": {
+      "Benign": {
+        "class_id": 0,
+        "samples": 50,
+        "tp": 50,
+        "fp": 125,
+        "fn": 0,
+        "tn": 475,
+        "precision": 0.2857,
+        "recall": 1.0,
+        "f1_score": 0.4444,
+        "false_positive_rate": 0.2083,
+        "false_negative_rate": 0.0
+      },
+      "DDoS": {
+        "class_id": 1,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "DoS": {
+        "class_id": 2,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "Botnet": {
+        "class_id": 3,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "Infiltration": {
+        "class_id": 4,
+        "samples": 50,
+        "tp": 25,
+        "fp": 0,
+        "fn": 25,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1_score": 0.6667,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.5
+      },
+      "Brute Force": {
+        "class_id": 5,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "Web Attack": {
+        "class_id": 6,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "DNS Spoofing": {
+        "class_id": 7,
+        "samples": 50,
+        "tp": 25,
+        "fp": 0,
+        "fn": 25,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1_score": 0.6667,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.5
+      },
+      "IP Spoofing": {
+        "class_id": 8,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "ARP Spoofing": {
+        "class_id": 9,
+        "samples": 50,
+        "tp": 0,
+        "fp": 0,
+        "fn": 50,
+        "tn": 600,
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1_score": 0.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 1.0
+      },
+      "Recon / Port Scan": {
+        "class_id": 10,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "MITM": {
+        "class_id": 11,
+        "samples": 50,
+        "tp": 50,
+        "fp": 0,
+        "fn": 0,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1_score": 1.0,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.0
+      },
+      "DNS Tunneling": {
+        "class_id": 12,
+        "samples": 50,
+        "tp": 25,
+        "fp": 0,
+        "fn": 25,
+        "tn": 600,
+        "precision": 1.0,
+        "recall": 0.5,
+        "f1_score": 0.6667,
+        "false_positive_rate": 0.0,
+        "false_negative_rate": 0.5
+      }
+    },
+    "confusion_matrix": [
+      [
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        25,
+        0,
+        0,
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        25,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        50,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        50,
+        0
+      ],
+      [
+        25,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        0,
+        25
+      ]
+    ],
+    "timing": {
+      "total_benchmark_time_sec": 0.0005,
+      "mean_latency_ms": 0.0003,
+      "median_latency_ms": 0.0003,
+      "p99_latency_ms": 0.0007
+    }
+  },
+  "sample_predictions": [
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.003
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.001
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    },
+    {
+      "true_id": 0,
+      "true_name": "Benign",
+      "pred_id": 0,
+      "pred_name": "Benign",
+      "detected": false,
+      "reason": "No alert fired (Pass-through)",
+      "latency_ms": 0.0
+    }
+  ]
+}

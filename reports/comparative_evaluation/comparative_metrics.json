@@ -1,0 +1,46 @@
+{
+  "pcap_correlation": {
+    "mutual_threat_detections": 0,
+    "ai_only_novel_detections": 52,
+    "suricata_only_detections": 0,
+    "mutual_benign_flows": 18,
+    "detection_coverage_delta": {
+      "suricata_covered_classes": 12,
+      "ai_covered_classes": 13,
+      "unsupported_in_suricata": [
+        "ARP Spoofing"
+      ]
+    },
+    "latency_comparison": {
+      "suricata_total_sec": 0.0967,
+      "ai_total_sec": 0.5627,
+      "ai_inference_only_sec": 0.1532
+    }
+  },
+  "benchmark_delta": {
+    "accuracy_delta": 0.0077,
+    "macro_f1_delta": -0.0069,
+    "weighted_f1_delta": -0.0069,
+    "threat_detection_rate_delta": 0.0983,
+    "false_alarm_rate_delta": 0.0,
+    "unsupported_in_suricata": [
+      "ARP Spoofing (Class 9)"
+    ],
+    "arp_spoofing_recall_suricata": 0.0,
+    "arp_spoofing_recall_ai_nids": 1.0
+  },
+  "suricata_summary": {
+    "accuracy": 0.8077,
+    "macro_f1": 0.8034,
+    "weighted_f1": 0.8034,
+    "threat_detection_rate": 0.7917,
+    "false_alarm_rate": 0.0
+  },
+  "ai_nids_summary": {
+    "accuracy": 0.8154,
+    "macro_f1": 0.7965,
+    "weighted_f1": 0.7965,
+    "threat_detection_rate": 0.89,
+    "false_alarm_rate": 0.0
+  }
+}

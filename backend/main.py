@@ -95,22 +95,18 @@ app = FastAPI(
     }
 )
 
-# CORS configuration suitable for React frontend
-allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "")
-allowed_origins = [orig.strip() for orig in allowed_origins_env.split(",") if orig.strip()]
-if not allowed_origins:
-    allowed_origins = [
-        "http://localhost:3000",
-        "http://127.0.0.1:3000",
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+# Universal CORS configuration: allow all origins to prevent any Vercel or cloud cross-origin blockers
+allowed_origins_env = os.environ.get("ALLOWED_ORIGINS", "*")
+if allowed_origins_env.strip() == "*":
+    allowed_origins = ["*"]
+else:
+    allowed_origins = [orig.strip() for orig in allowed_origins_env.split(",") if orig.strip()]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=allowed_origins,
-    allow_credentials=True,
-    allow_methods=["GET", "POST", "OPTIONS"],
+    allow_credentials=False if allowed_origins == ["*"] else True,
+    allow_methods=["*"],
     allow_headers=["*"],
 )
 

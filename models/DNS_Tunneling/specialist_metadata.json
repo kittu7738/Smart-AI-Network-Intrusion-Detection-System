@@ -1,0 +1,243 @@
+{
+    "dataset": "DNS_Tunneling",
+    "model_name": "DecisionTree",
+    "best_model": "DecisionTree",
+    "feature_list": [
+        "query_length",
+        "num_dots",
+        "num_subdomains",
+        "max_label_length",
+        "avg_label_length",
+        "digit_count",
+        "alpha_count",
+        "special_character_count",
+        "entropy"
+    ],
+    "feature_count": 9,
+    "canonical_label_list": [
+        "Benign",
+        "DNS Tunneling"
+    ],
+    "local_label_to_id": {
+        "Benign": 0,
+        "DNS Tunneling": 1
+    },
+    "local_id_to_canonical_id": {
+        "0": 0,
+        "1": 12
+    },
+    "training_row_count": 2,
+    "validation_row_count": 0,
+    "test_row_count": 1,
+    "preprocessing_artifact_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/preprocessor.joblib",
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/DecisionTree.joblib",
+    "random_seed": 42,
+    "training_duration_seconds": 0.0007109642028808594,
+    "validation_metrics": {
+        "Accuracy": 0.0,
+        "Macro Precision": 0.0,
+        "Macro Recall": 0.0,
+        "Macro F1": 0.0,
+        "Weighted F1": 0.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "DNS Tunneling": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            }
+        },
+        "Confusion Matrix": [
+            [
+                0,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            },
+            "DNS Tunneling": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "class_order": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "total_samples": 0,
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
+    },
+    "final_test_metrics": {
+        "Accuracy": 1.0,
+        "Macro Precision": 0.5,
+        "Macro Recall": 0.5,
+        "Macro F1": 0.5,
+        "Weighted F1": 1.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 1
+            },
+            "DNS Tunneling": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 0.5,
+                "recall": 0.5,
+                "f1-score": 0.5,
+                "support": 1
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 1
+            }
+        },
+        "Confusion Matrix": [
+            [
+                1,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 1,
+                "DNS Tunneling": 0
+            },
+            "DNS Tunneling": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "class_order": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "total_samples": 1,
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
+    },
+    "test_metrics": {
+        "Accuracy": 1.0,
+        "Macro Precision": 0.5,
+        "Macro Recall": 0.5,
+        "Macro F1": 0.5,
+        "Weighted F1": 1.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 1
+            },
+            "DNS Tunneling": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 0.5,
+                "recall": 0.5,
+                "f1-score": 0.5,
+                "support": 1
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 1
+            }
+        },
+        "Confusion Matrix": [
+            [
+                1,
+                0
+            ],
+            [
+                0,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 1,
+                "DNS Tunneling": 0
+            },
+            "DNS Tunneling": {
+                "Benign": 0,
+                "DNS Tunneling": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "class_order": [
+            "Benign",
+            "DNS Tunneling"
+        ],
+        "total_samples": 1,
+        "canonical_mapping": {
+            "Benign": 0,
+            "DNS Tunneling": 12
+        }
+    },
+    "sampling_details": {
+        "sampled": false,
+        "original_train_rows": 2,
+        "used_train_rows": 2,
+        "sampling_method": "none"
+    }
+}

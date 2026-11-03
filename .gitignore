@@ -39,7 +39,6 @@ raw/
 scratch/
 uploads/
 captures/
-models/
 data/processed/
 data/raw/
 database/*.sqlite

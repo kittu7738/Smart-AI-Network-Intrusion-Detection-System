@@ -1,0 +1,278 @@
+{
+    "dataset": "IP_Spoofing",
+    "model_name": "DecisionTree",
+    "best_model": "DecisionTree",
+    "feature_list": [
+        "ip.len",
+        "ip.flags.df",
+        "ip.flags.mf",
+        "tcp.port",
+        "tcp.window_size",
+        "tcp.ack_raw",
+        "ip.fragment",
+        "ip.fragment.count",
+        "ip.fragments",
+        "ip.ttl",
+        "ip.proto",
+        "tcp.window_size.1",
+        "tcp.ack",
+        "tcp.seq",
+        "tcp.len",
+        "tcp.stream",
+        "tcp.urgent_pointer",
+        "tcp.flags",
+        "tcp.analysis.ack_rtt",
+        "tcp.segments",
+        "tcp.reassembled.length",
+        "http.request",
+        "udp.port",
+        "udp.length",
+        "frame.time_relative",
+        "frame.time_delta",
+        "tcp.time_relative",
+        "tcp.time_delta",
+        "gtp.ext_hdr",
+        "gtp.ext_hdr.length",
+        "gtp.ext_hdr.pdu_ses_con.pdu_type",
+        "gtp.ext_hdr.pdu_ses_con.qos_flow_id",
+        "gtp.ext_hdr.pdu_ses_cont.ppp",
+        "gtp.ext_hdr.pdu_ses_cont.rqi",
+        "gtp.flags",
+        "gtp.flags.e",
+        "gtp.flags.payload",
+        "gtp.flags.pn",
+        "gtp.flags.reserved",
+        "gtp.flags.s",
+        "gtp.flags.version",
+        "gtp.length",
+        "gtp.message",
+        "gtp.teid"
+    ],
+    "feature_count": 44,
+    "canonical_label_list": [
+        "Benign",
+        "IP Spoofing"
+    ],
+    "local_label_to_id": {
+        "Benign": 0,
+        "IP Spoofing": 1
+    },
+    "local_id_to_canonical_id": {
+        "0": 0,
+        "1": 8
+    },
+    "training_row_count": 24230,
+    "validation_row_count": 6058,
+    "test_row_count": 3787,
+    "preprocessing_artifact_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/IP_Spoofing/preprocessor.joblib",
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/IP_Spoofing/DecisionTree.joblib",
+    "random_seed": 42,
+    "training_duration_seconds": 0.015403032302856445,
+    "validation_metrics": {
+        "Accuracy": 1.0,
+        "Macro Precision": 1.0,
+        "Macro Recall": 1.0,
+        "Macro F1": 1.0,
+        "Weighted F1": 1.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 4778
+            },
+            "IP Spoofing": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 1280
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 6058
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 6058
+            }
+        },
+        "Confusion Matrix": [
+            [
+                4778,
+                0
+            ],
+            [
+                0,
+                1280
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 4778,
+                "IP Spoofing": 0
+            },
+            "IP Spoofing": {
+                "Benign": 0,
+                "IP Spoofing": 1280
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "class_order": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "total_samples": 6058,
+        "canonical_mapping": {
+            "Benign": 0,
+            "IP Spoofing": 8
+        }
+    },
+    "final_test_metrics": {
+        "Accuracy": 1.0,
+        "Macro Precision": 1.0,
+        "Macro Recall": 1.0,
+        "Macro F1": 1.0,
+        "Weighted F1": 1.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 2987
+            },
+            "IP Spoofing": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 800
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 3787
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 3787
+            }
+        },
+        "Confusion Matrix": [
+            [
+                2987,
+                0
+            ],
+            [
+                0,
+                800
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 2987,
+                "IP Spoofing": 0
+            },
+            "IP Spoofing": {
+                "Benign": 0,
+                "IP Spoofing": 800
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "class_order": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "total_samples": 3787,
+        "canonical_mapping": {
+            "Benign": 0,
+            "IP Spoofing": 8
+        }
+    },
+    "test_metrics": {
+        "Accuracy": 1.0,
+        "Macro Precision": 1.0,
+        "Macro Recall": 1.0,
+        "Macro F1": 1.0,
+        "Weighted F1": 1.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 2987
+            },
+            "IP Spoofing": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 800
+            },
+            "accuracy": 1.0,
+            "macro avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 3787
+            },
+            "weighted avg": {
+                "precision": 1.0,
+                "recall": 1.0,
+                "f1-score": 1.0,
+                "support": 3787
+            }
+        },
+        "Confusion Matrix": [
+            [
+                2987,
+                0
+            ],
+            [
+                0,
+                800
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 2987,
+                "IP Spoofing": 0
+            },
+            "IP Spoofing": {
+                "Benign": 0,
+                "IP Spoofing": 800
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "class_order": [
+            "Benign",
+            "IP Spoofing"
+        ],
+        "total_samples": 3787,
+        "canonical_mapping": {
+            "Benign": 0,
+            "IP Spoofing": 8
+        }
+    },
+    "sampling_details": {
+        "sampled": false,
+        "original_train_rows": 24230,
+        "used_train_rows": 24230,
+        "sampling_method": "none"
+    }
+}

@@ -1,0 +1,307 @@
+{
+    "dataset": "ARP_Spoofing",
+    "model_name": "DecisionTree",
+    "best_model": "DecisionTree",
+    "feature_list": [
+        "frame_number"
+    ],
+    "feature_count": 1,
+    "canonical_label_list": [
+        "Benign",
+        "ARP Spoofing",
+        "DoS"
+    ],
+    "local_label_to_id": {
+        "Benign": 0,
+        "ARP Spoofing": 1,
+        "DoS": 2
+    },
+    "local_id_to_canonical_id": {
+        "0": 0,
+        "1": 9,
+        "2": 2
+    },
+    "training_row_count": 2,
+    "validation_row_count": 0,
+    "test_row_count": 2,
+    "preprocessing_artifact_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/ARP_Spoofing/preprocessor.joblib",
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/ARP_Spoofing/DecisionTree.joblib",
+    "random_seed": 42,
+    "training_duration_seconds": 0.0021550655364990234,
+    "validation_metrics": {
+        "Accuracy": 0.0,
+        "Macro Precision": 0.0,
+        "Macro Recall": 0.0,
+        "Macro F1": 0.0,
+        "Weighted F1": 0.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "ARP Spoofing": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "DoS": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            }
+        },
+        "Confusion Matrix": [
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "ARP Spoofing": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "DoS": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "class_order": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "total_samples": 0,
+        "canonical_mapping": {
+            "Benign": 0,
+            "ARP Spoofing": 9,
+            "DoS": 2
+        }
+    },
+    "final_test_metrics": {
+        "Accuracy": 0.0,
+        "Macro Precision": 0.0,
+        "Macro Recall": 0.0,
+        "Macro F1": 0.0,
+        "Weighted F1": 0.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 1
+            },
+            "ARP Spoofing": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "DoS": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 1
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 2
+            },
+            "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 2
+            }
+        },
+        "Confusion Matrix": [
+            [
+                0,
+                1,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                1,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "ARP Spoofing": 1,
+                "DoS": 0
+            },
+            "ARP Spoofing": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "DoS": {
+                "Benign": 0,
+                "ARP Spoofing": 1,
+                "DoS": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "class_order": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "total_samples": 2,
+        "canonical_mapping": {
+            "Benign": 0,
+            "ARP Spoofing": 9,
+            "DoS": 2
+        }
+    },
+    "test_metrics": {
+        "Accuracy": 0.0,
+        "Macro Precision": 0.0,
+        "Macro Recall": 0.0,
+        "Macro F1": 0.0,
+        "Weighted F1": 0.0,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 1
+            },
+            "ARP Spoofing": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 0
+            },
+            "DoS": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 1
+            },
+            "accuracy": 0.0,
+            "macro avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 2
+            },
+            "weighted avg": {
+                "precision": 0.0,
+                "recall": 0.0,
+                "f1-score": 0.0,
+                "support": 2
+            }
+        },
+        "Confusion Matrix": [
+            [
+                0,
+                1,
+                0
+            ],
+            [
+                0,
+                0,
+                0
+            ],
+            [
+                0,
+                1,
+                0
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 0,
+                "ARP Spoofing": 1,
+                "DoS": 0
+            },
+            "ARP Spoofing": {
+                "Benign": 0,
+                "ARP Spoofing": 0,
+                "DoS": 0
+            },
+            "DoS": {
+                "Benign": 0,
+                "ARP Spoofing": 1,
+                "DoS": 0
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "class_order": [
+            "Benign",
+            "ARP Spoofing",
+            "DoS"
+        ],
+        "total_samples": 2,
+        "canonical_mapping": {
+            "Benign": 0,
+            "ARP Spoofing": 9,
+            "DoS": 2
+        }
+    },
+    "sampling_details": {
+        "sampled": false,
+        "original_train_rows": 2,
+        "used_train_rows": 2,
+        "sampling_method": "none"
+    }
+}

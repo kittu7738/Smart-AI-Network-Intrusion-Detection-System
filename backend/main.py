@@ -384,6 +384,35 @@ def compare_sample():
     return evaluator.evaluate_pcap(sample_pcap, max_packets=5000)
 
 
+@app.get("/compare/metrics")
+def get_comparative_metrics():
+    """Retrieve full verified comparative evaluation artifacts and reconciled metrics."""
+    reports_dir = os.path.join(REPO_ROOT, "reports", "comparative_evaluation")
+    p_comp = os.path.join(reports_dir, "comparative_metrics.json")
+    p_cm = os.path.join(reports_dir, "confusion_matrices.json")
+    p_suri = os.path.join(reports_dir, "suricata_results.json")
+    p_ai = os.path.join(reports_dir, "ai_nids_results.json")
+
+    import json
+    data = {"status": "ok"}
+    if os.path.exists(p_comp):
+        with open(p_comp, "r") as f:
+            data["comparative_metrics"] = json.load(f)
+    if os.path.exists(p_cm):
+        with open(p_cm, "r") as f:
+            data["confusion_matrices"] = json.load(f)
+    if os.path.exists(p_suri):
+        with open(p_suri, "r") as f:
+            s_full = json.load(f)
+            data["suricata_summary"] = s_full.get("ground_truth_benchmark", {})
+    if os.path.exists(p_ai):
+        with open(p_ai, "r") as f:
+            ai_full = json.load(f)
+            data["ai_summary"] = ai_full.get("ground_truth_benchmark", {})
+
+    return data
+
+
 # Mount static frontend files if present (enables all-in-one single server deployment on Render, Railway, or VPS)
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 frontend_dir = os.path.join(REPO_ROOT, "frontend", "public")

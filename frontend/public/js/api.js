@@ -173,6 +173,14 @@ class ApiService {
   }
 
   /**
+   * GET /compare/metrics
+   * Retrieve full verified comparative evaluation artifacts and reconciled metrics.
+   */
+  async getComparativeMetrics() {
+    return this._request("/compare/metrics", { method: "GET" }, 10000);
+  }
+
+  /**
    * GET /suricata/status
    * Retrieve installation, version, and signature coverage metadata for Suricata.
    */

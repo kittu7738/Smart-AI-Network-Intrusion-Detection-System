@@ -22,6 +22,11 @@ from utils.train_models import (
     resolve_model_path,
     load_stored_threshold_multipliers,
 )
+import __main__
+import utils.train_models as tm
+for _cls in ["DecisionTreeClassifier", "RandomForestClassifier", "XGBClassifier", "HistGradientBoostingClassifier", "ExtraTreesClassifier"]:
+    if hasattr(tm, _cls) and not hasattr(__main__, _cls):
+        setattr(__main__, _cls, getattr(tm, _cls))
 
 
 class UnifiedNIDS:

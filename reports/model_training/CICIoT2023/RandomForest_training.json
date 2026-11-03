@@ -1,0 +1,375 @@
+{
+    "dataset": "CICIoT2023",
+    "model_name": "RandomForest",
+    "fit_duration_seconds": 0.8781008720397949,
+    "train_row_count": 74256,
+    "validation_metrics": {
+        "Accuracy": 0.9786055121718892,
+        "Macro Precision": 0.596956328541963,
+        "Macro Recall": 0.7775863290295895,
+        "Macro F1": 0.6049656495052671,
+        "Weighted F1": 0.9826176254977618,
+        "Per Class": {
+            "Benign": {
+                "precision": 0.8956602031394275,
+                "recall": 0.7448932575641223,
+                "f1-score": 0.8133489854100286,
+                "support": 26044
+            },
+            "DDoS": {
+                "precision": 0.9998309267328456,
+                "recall": 0.9917099480623253,
+                "f1-score": 0.9957538797925165,
+                "support": 810972
+            },
+            "DoS": {
+                "precision": 0.9866329761514825,
+                "recall": 0.986961383435184,
+                "f1-score": 0.986797152469749,
+                "support": 192275
+            },
+            "Botnet": {
+                "precision": 0.9994514005421453,
+                "recall": 0.9917702062251825,
+                "f1-score": 0.9955959881702455,
+                "support": 62456
+            },
+            "Infiltration": {
+                "precision": 0.059166666666666666,
+                "recall": 0.8068181818181818,
+                "f1-score": 0.11024844720496893,
+                "support": 88
+            },
+            "Brute Force": {
+                "precision": 0.03203187250996016,
+                "recall": 0.730909090909091,
+                "f1-score": 0.061374045801526715,
+                "support": 275
+            },
+            "Web Attack": {
+                "precision": 0.08754512635379061,
+                "recall": 0.542910447761194,
+                "f1-score": 0.15077720207253884,
+                "support": 536
+            },
+            "DNS Spoofing": {
+                "precision": 0.6798323036187114,
+                "recall": 0.7122052704576977,
+                "f1-score": 0.6956423571912396,
+                "support": 4326
+            },
+            "Recon / Port Scan": {
+                "precision": 0.4833728090952155,
+                "recall": 0.5998824221046444,
+                "f1-score": 0.5353620146904512,
+                "support": 8505
+            },
+            "MITM": {
+                "precision": 0.7460390006093846,
+                "recall": 0.6678030819582709,
+                "f1-score": 0.7047564222494064,
+                "support": 7333
+            },
+            "accuracy": 0.9786055121718892,
+            "macro avg": {
+                "precision": 0.596956328541963,
+                "recall": 0.7775863290295895,
+                "f1-score": 0.6049656495052671,
+                "support": 1112810
+            },
+            "weighted avg": {
+                "precision": 0.987474714195909,
+                "recall": 0.9786055121718892,
+                "f1-score": 0.9826176254977618,
+                "support": 1112810
+            }
+        },
+        "Confusion Matrix": [
+            [
+                19400,
+                0,
+                0,
+                0,
+                296,
+                3134,
+                1568,
+                737,
+                360,
+                549
+            ],
+            [
+                371,
+                804249,
+                2566,
+                7,
+                11,
+                253,
+                24,
+                78,
+                2932,
+                481
+            ],
+            [
+                98,
+                133,
+                189768,
+                22,
+                1,
+                112,
+                44,
+                154,
+                1786,
+                157
+            ],
+            [
+                29,
+                3,
+                3,
+                61942,
+                1,
+                27,
+                6,
+                56,
+                248,
+                141
+            ],
+            [
+                0,
+                0,
+                0,
+                0,
+                71,
+                4,
+                13,
+                0,
+                0,
+                0
+            ],
+            [
+                19,
+                0,
+                0,
+                0,
+                18,
+                201,
+                21,
+                3,
+                11,
+                2
+            ],
+            [
+                3,
+                0,
+                0,
+                0,
+                72,
+                130,
+                291,
+                11,
+                11,
+                18
+            ],
+            [
+                244,
+                0,
+                2,
+                0,
+                234,
+                233,
+                270,
+                3081,
+                41,
+                221
+            ],
+            [
+                871,
+                0,
+                0,
+                3,
+                366,
+                1228,
+                738,
+                99,
+                5102,
+                98
+            ],
+            [
+                625,
+                0,
+                0,
+                2,
+                130,
+                953,
+                349,
+                313,
+                64,
+                4897
+            ]
+        ],
+        "confusion_matrix_dict": {
+            "Benign": {
+                "Benign": 19400,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 0,
+                "Infiltration": 296,
+                "Brute Force": 3134,
+                "Web Attack": 1568,
+                "DNS Spoofing": 737,
+                "Recon / Port Scan": 360,
+                "MITM": 549
+            },
+            "DDoS": {
+                "Benign": 371,
+                "DDoS": 804249,
+                "DoS": 2566,
+                "Botnet": 7,
+                "Infiltration": 11,
+                "Brute Force": 253,
+                "Web Attack": 24,
+                "DNS Spoofing": 78,
+                "Recon / Port Scan": 2932,
+                "MITM": 481
+            },
+            "DoS": {
+                "Benign": 98,
+                "DDoS": 133,
+                "DoS": 189768,
+                "Botnet": 22,
+                "Infiltration": 1,
+                "Brute Force": 112,
+                "Web Attack": 44,
+                "DNS Spoofing": 154,
+                "Recon / Port Scan": 1786,
+                "MITM": 157
+            },
+            "Botnet": {
+                "Benign": 29,
+                "DDoS": 3,
+                "DoS": 3,
+                "Botnet": 61942,
+                "Infiltration": 1,
+                "Brute Force": 27,
+                "Web Attack": 6,
+                "DNS Spoofing": 56,
+                "Recon / Port Scan": 248,
+                "MITM": 141
+            },
+            "Infiltration": {
+                "Benign": 0,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 0,
+                "Infiltration": 71,
+                "Brute Force": 4,
+                "Web Attack": 13,
+                "DNS Spoofing": 0,
+                "Recon / Port Scan": 0,
+                "MITM": 0
+            },
+            "Brute Force": {
+                "Benign": 19,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 0,
+                "Infiltration": 18,
+                "Brute Force": 201,
+                "Web Attack": 21,
+                "DNS Spoofing": 3,
+                "Recon / Port Scan": 11,
+                "MITM": 2
+            },
+            "Web Attack": {
+                "Benign": 3,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 0,
+                "Infiltration": 72,
+                "Brute Force": 130,
+                "Web Attack": 291,
+                "DNS Spoofing": 11,
+                "Recon / Port Scan": 11,
+                "MITM": 18
+            },
+            "DNS Spoofing": {
+                "Benign": 244,
+                "DDoS": 0,
+                "DoS": 2,
+                "Botnet": 0,
+                "Infiltration": 234,
+                "Brute Force": 233,
+                "Web Attack": 270,
+                "DNS Spoofing": 3081,
+                "Recon / Port Scan": 41,
+                "MITM": 221
+            },
+            "Recon / Port Scan": {
+                "Benign": 871,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 3,
+                "Infiltration": 366,
+                "Brute Force": 1228,
+                "Web Attack": 738,
+                "DNS Spoofing": 99,
+                "Recon / Port Scan": 5102,
+                "MITM": 98
+            },
+            "MITM": {
+                "Benign": 625,
+                "DDoS": 0,
+                "DoS": 0,
+                "Botnet": 2,
+                "Infiltration": 130,
+                "Brute Force": 953,
+                "Web Attack": 349,
+                "DNS Spoofing": 313,
+                "Recon / Port Scan": 64,
+                "MITM": 4897
+            }
+        },
+        "confusion_matrix_labels": [
+            "Benign",
+            "DDoS",
+            "DoS",
+            "Botnet",
+            "Infiltration",
+            "Brute Force",
+            "Web Attack",
+            "DNS Spoofing",
+            "Recon / Port Scan",
+            "MITM"
+        ],
+        "class_order": [
+            "Benign",
+            "DDoS",
+            "DoS",
+            "Botnet",
+            "Infiltration",
+            "Brute Force",
+            "Web Attack",
+            "DNS Spoofing",
+            "Recon / Port Scan",
+            "MITM"
+        ],
+        "total_samples": 1112810,
+        "canonical_mapping": {
+            "Benign": 0,
+            "DDoS": 1,
+            "DoS": 2,
+            "Botnet": 3,
+            "Infiltration": 4,
+            "Brute Force": 5,
+            "Web Attack": 6,
+            "DNS Spoofing": 7,
+            "Recon / Port Scan": 10,
+            "MITM": 11
+        }
+    },
+    "sampling_details": {
+        "sampled": true,
+        "original_train_rows": 5357406,
+        "used_train_rows": 74256,
+        "sampling_method": "stratified_minority_preserving"
+    }
+}

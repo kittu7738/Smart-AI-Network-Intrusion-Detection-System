@@ -410,6 +410,56 @@ def sample_training_data(
         "target_per_majority_class": target_per_class
     }
 
+def read_stratified_parquet(parquet_path: str, max_samples: int, target_col: str = "final_label", seed: int = 42) -> pd.DataFrame:
+    """Memory-safe stratified loader directly from Parquet without loading full file into RAM."""
+    import pyarrow.parquet as pq
+    pf = pq.ParquetFile(parquet_path)
+    total_rows = pf.metadata.num_rows
+    if max_samples is None or total_rows <= max_samples:
+        return pd.read_parquet(parquet_path)
+
+    # Read only target label column to compute indices with near-zero memory footprint (< 20MB)
+    tbl_labels = pq.read_table(parquet_path, columns=[target_col])
+    labels = tbl_labels[target_col].to_pandas()
+    del tbl_labels
+
+    class_counts = labels.value_counts()
+    n_classes = len(class_counts)
+    target_per_class = max(1, max_samples // n_classes)
+
+    rng = np.random.default_rng(seed)
+    chosen_indices = []
+    for c, cnt in class_counts.items():
+        idxs = np.where(labels == c)[0]
+        if cnt <= target_per_class:
+            chosen_indices.extend(idxs)
+        else:
+            chosen_indices.extend(rng.choice(idxs, size=target_per_class, replace=False))
+
+    chosen_indices = np.array(sorted(chosen_indices))
+    del labels
+    gc.collect()
+
+    chunks = []
+    current_row = 0
+    for i in range(pf.num_row_groups):
+        rg = pf.metadata.row_group(i)
+        num_rows = rg.num_rows
+        rg_indices = [int(idx - current_row) for idx in chosen_indices if current_row <= idx < current_row + num_rows]
+        if rg_indices:
+            rg_table = pf.read_row_group(i)
+            sub_table = rg_table.take(rg_indices)
+            chunks.append(sub_table.to_pandas())
+            del rg_table, sub_table
+            gc.collect()
+        current_row += num_rows
+
+    df_out = pd.concat(chunks, ignore_index=True).sample(frac=1, random_state=seed).reset_index(drop=True)
+    df_out._original_train_rows = total_rows
+    del chunks
+    gc.collect()
+    return df_out
+
 def load_specialist_splits(
     spec_or_dir: str,
     config: dict = None,
@@ -417,7 +467,8 @@ def load_specialist_splits(
     smoke_test: bool = False,
     random_seed: int = None,
     seed: int = 42,
-    lazy_val_test: bool = False
+    lazy_val_test: bool = False,
+    max_train_samples: int = None
 ):
     """Load train, validation, and test splits for a specialist model.
 
@@ -454,7 +505,18 @@ def load_specialist_splits(
         raise FileNotFoundError(f"Processed training file not found at {train_path}. Run data preparation first.")
 
     if split_type == "train_val_test":
-        train_df = pd.read_parquet(train_path)
+        if max_train_samples is not None and os.path.exists(train_path):
+            try:
+                import pyarrow.parquet as pq
+                if pq.read_metadata(train_path).num_rows > max_train_samples:
+                    train_df = read_stratified_parquet(train_path, max_samples=max_train_samples, seed=seed)
+                else:
+                    train_df = pd.read_parquet(train_path)
+            except Exception:
+                train_df = pd.read_parquet(train_path)
+        else:
+            train_df = pd.read_parquet(train_path)
+
         if smoke_test:
             val_df = pd.read_parquet(val_path).head(30) if os.path.exists(val_path) else None
             test_df = pd.read_parquet(test_path).head(30) if os.path.exists(test_path) else None
@@ -913,9 +975,9 @@ def train_specialist(
         # Standard Training Workflow
         # 1. Load Data Splits (lazy validation and test references avoid loading 1.8M unused rows into RAM)
         train_df, val_source, test_source = load_specialist_splits(
-            spec_name, config, smoke_test=smoke_test, lazy_val_test=True
+            spec_name, config, smoke_test=smoke_test, lazy_val_test=True, max_train_samples=max_train_samples
         )
-        n_train_raw = len(train_df)
+        n_train_raw = getattr(train_df, "_original_train_rows", len(train_df))
         val_repr = len(val_source) if isinstance(val_source, pd.DataFrame) else "disk (streamed)"
         test_repr = len(test_source) if isinstance(test_source, pd.DataFrame) else "disk (streamed)"
         print(f"Raw splits initialized: Train={n_train_raw} | Val={val_repr} | Test={test_repr}", flush=True)
@@ -924,6 +986,11 @@ def train_specialist(
         train_sampled, sampling_meta = sample_training_data(
             train_df, target_col="final_label", max_samples=max_train_samples, seed=SEED
         )
+        if hasattr(train_df, "_original_train_rows"):
+            sampling_meta["original_train_rows"] = train_df._original_train_rows
+            sampling_meta["sampled"] = True
+            sampling_meta["used_train_rows"] = len(train_sampled)
+            sampling_meta["sampling_method"] = "stratified_minority_preserving"
         del train_df
         gc.collect()
 

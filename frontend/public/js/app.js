@@ -80,6 +80,7 @@ class EnterpriseSocController {
     this.renderAuditEvents();
     this.renderVerdictCard("Benign", 0, 0.991, "Unified NIDS", []);
     this.bindControls();
+    this.initComparisonView();
 
     // Verify connection to backend
     await this.checkBackendStatus();
@@ -910,5 +911,166 @@ class EnterpriseSocController {
       banner.textContent = `Configuration saved. Base URL: ${inp.value}`;
     }
     this.checkBackendStatus();
+  }
+
+  /**
+   * Traditional NIDS vs Smart AI-NIDS Comparative Evaluation View
+   */
+  initComparisonView() {
+    const btnSample = document.getElementById("btn-compare-sample");
+    const fileInput = document.getElementById("compare-file-input");
+
+    if (btnSample) {
+      btnSample.addEventListener("click", async () => {
+        btnSample.disabled = true;
+        btnSample.textContent = "⏳ Running Comparison...";
+        try {
+          const result = await this.api.runComparisonSample();
+          this.renderComparisonResults(result);
+        } catch (err) {
+          alert(`Comparison run failed: ${err.message}`);
+        } finally {
+          btnSample.disabled = false;
+          btnSample.textContent = "⚡ Run Benchmark PCAP";
+        }
+      });
+    }
+
+    if (fileInput) {
+      fileInput.addEventListener("change", async (e) => {
+        if (!e.target.files || e.target.files.length === 0) return;
+        const file = e.target.files[0];
+        const origText = btnSample ? btnSample.textContent : "";
+        if (btnSample) {
+          btnSample.disabled = true;
+          btnSample.textContent = `⏳ Processing ${file.name}...`;
+        }
+        try {
+          const result = await this.api.runComparisonPcap(file);
+          this.renderComparisonResults(result);
+        } catch (err) {
+          alert(`PCAP comparison failed: ${err.message}`);
+        } finally {
+          if (btnSample) {
+            btnSample.disabled = false;
+            btnSample.textContent = origText || "⚡ Run Benchmark PCAP";
+          }
+          fileInput.value = "";
+        }
+      });
+    }
+
+    // Check Suricata status in background
+    this.checkSuricataStatus();
+  }
+
+  async checkSuricataStatus() {
+    const dot = document.getElementById("suricata-status-dot");
+    const meta = document.getElementById("comp-suricata-meta");
+    try {
+      const res = await this.api.getSuricataStatus();
+      if (res && res.installed) {
+        if (dot) dot.style.background = "#10b981";
+        if (meta) meta.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">Suricata ${res.version} | ${res.rules_loaded || 32} Rules Active</span>`;
+      } else {
+        if (dot) dot.style.background = "#f59e0b";
+        if (meta) meta.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">${res.message || "Suricata engine offline"}</span>`;
+      }
+    } catch (e) {
+      // Graceful fallback
+    }
+  }
+
+  renderComparisonResults(data) {
+    if (!data) return;
+
+    const suricataData = data.traditional_nids_suricata || {};
+    const aiData = data.smart_ai_nids || {};
+    const compData = data.comparative_analysis || {};
+    const latencyData = compData.latency_comparison || {};
+
+    const suricataAlerts = suricataData.total_alerts !== undefined ? suricataData.total_alerts : (data.suricata_alerts || 0);
+    const suricataRuntime = suricataData.execution_duration_sec || latencyData.suricata_total_sec || 0;
+    const suricataPktsSec = suricataData.throughput_packets_per_sec || 0;
+
+    const aiThreats = aiData.threats_detected !== undefined ? aiData.threats_detected : (data.ai_threat_flows || 0);
+    const aiBenign = aiData.benign_classified !== undefined ? aiData.benign_classified : 0;
+    const aiRuntime = aiData.total_duration_sec || latencyData.ai_total_sec || 0;
+    const totalFlows = data.traffic_source?.total_flows || aiData.total_inferences || (data.total_flows_evaluated || 0);
+
+    const mutualBenign = compData.mutual_benign_flows || 0;
+    const mutualThreats = compData.mutual_threat_detections || 0;
+
+    // Update KPIs
+    const elSuricataAlerts = document.getElementById("comp-suricata-alerts");
+    const elSuricataMeta = document.getElementById("comp-suricata-meta");
+    const elAiThreats = document.getElementById("comp-ai-threats");
+    const elAiMeta = document.getElementById("comp-ai-meta");
+    const elTotalFlows = document.getElementById("comp-total-flows");
+    const elFlowRate = document.getElementById("comp-flow-rate");
+    const elLatency = document.getElementById("comp-latency");
+    const elBadgeSuricata = document.getElementById("badge-suricata-count");
+    const elBadgeAi = document.getElementById("badge-ai-count");
+
+    if (elSuricataAlerts) elSuricataAlerts.textContent = `${suricataAlerts} Alerts`;
+    if (elSuricataMeta) {
+      elSuricataMeta.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">Runtime: ${suricataRuntime.toFixed(3)}s | ${Math.round(suricataPktsSec)} pkts/s</span>`;
+    }
+
+    if (elAiThreats) elAiThreats.textContent = `${aiThreats} Threats`;
+    if (elAiMeta) {
+      elAiMeta.innerHTML = `<span style="font-size: 11px; color: var(--text-muted);">AI Runtime: ${aiRuntime.toFixed(3)}s | ${aiBenign} Benign</span>`;
+    }
+
+    if (elTotalFlows) elTotalFlows.textContent = `${totalFlows} Flows`;
+    if (elFlowRate) elFlowRate.textContent = `Mutual Benign: ${mutualBenign} | Mutual Threats: ${mutualThreats}`;
+
+    if (elLatency) {
+      elLatency.textContent = `Suricata: ${suricataRuntime.toFixed(3)}s | AI: ${aiRuntime.toFixed(3)}s`;
+    }
+
+    if (elBadgeSuricata) elBadgeSuricata.textContent = `${suricataAlerts} Alerts`;
+    if (elBadgeAi) elBadgeAi.textContent = `${aiThreats} Threat Flows`;
+
+    // Render Suricata Alerts table
+    const suricataTbody = document.getElementById("comp-suricata-tbody");
+    const alertList = suricataData.sample_alerts || data.suricata_alert_details || [];
+    if (suricataTbody) {
+      if (alertList.length === 0) {
+        suricataTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 18px;">Zero alerts fired by loaded Suricata signatures.</td></tr>`;
+      } else {
+        suricataTbody.innerHTML = alertList.map((a) => `
+          <tr>
+            <td>
+              <div style="font-weight: 600; color: #f59e0b;">SID ${a.sid || a.signature_id || 'N/A'}</div>
+              <div style="font-size: 10px; color: var(--text-secondary); max-width: 220px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;" title="${a.signature || ''}">${a.signature || 'Signature Match'}</div>
+            </td>
+            <td><span class="tag-status yellow">${a.canonical_class || a.canonical_class_name || a.category || 'Threat'}</span></td>
+            <td><code style="font-size: 10px;">${a.src_ip || '?'}:${a.src_port || ''} &rarr; ${a.dest_ip || '?'}:${a.dest_port || ''}</code></td>
+            <td style="text-align: right;"><span class="severity-badge ${a.severity === 1 ? 'critical' : a.severity === 2 ? 'high' : 'suspicious'}">${a.severity || 1}</span></td>
+          </tr>
+        `).join("");
+      }
+    }
+
+    // Render AI-NIDS Classifications table
+    const aiTbody = document.getElementById("comp-ai-tbody");
+    const predList = aiData.sample_predictions || data.ai_detections || [];
+    if (aiTbody) {
+      if (predList.length === 0) {
+        aiTbody.innerHTML = `<tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 18px;">Zero threat flows classified by AI-NIDS.</td></tr>`;
+      } else {
+        aiTbody.innerHTML = predList.slice(0, 50).map((d) => `
+          <tr>
+            <td><code style="font-size: 10px;">${d.src_ip ? `${d.src_ip}:${d.src_port}&rarr;${d.dest_ip}:${d.dest_port}` : (d.flow_id || 'Flow')}</code></td>
+            <td>
+              <span class="tag-status ${d.canonical_id === 0 || d.canonical_class_id === 0 ? 'green' : 'red'}">${d.class_name || d.canonical_class_name || 'Class ' + d.canonical_id}</span>
+            </td>
+            <td><span class="tag-status blue" style="font-size: 10px;">${d.specialist || 'Unified'}</span></td>
+            <td style="text-align: right;"><strong style="font-family: var(--font-mono);">${((d.confidence || d.probability || 0.95) * 100).toFixed(1)}%</strong></td>
+          </tr>
+        `).join("");
+      }
+    }
   }
 }

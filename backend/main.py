@@ -9,9 +9,11 @@ import os
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional, Union
 
-from fastapi import FastAPI, HTTPException, Request, status
+from fastapi import FastAPI, HTTPException, Request, status, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+import tempfile
+import shutil
 
 from utils.taxonomy import (
     CLASS_NAMES,
@@ -21,6 +23,10 @@ from utils.taxonomy import (
 )
 from utils.unified_nids import UnifiedNIDS
 from utils.train_models import SPECIALIST_SPECS
+from utils.suricata_runner import run_suricata_pcap, get_suricata_version, validate_pcap_file
+from utils.suricata_eve_parser import SuricataEveParser
+from utils.suricata_mapper import map_suricata_alert, RULE_COVERAGE_STATUS
+from utils.comparative_evaluator import ComparativeEvaluator
 from backend.schemas import (
     HealthResponse,
     ModelsResponse,
@@ -34,6 +40,7 @@ from backend.schemas import (
 
 # Global engine singleton
 _engine: Optional[UnifiedNIDS] = None
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def get_engine() -> UnifiedNIDS:
@@ -277,6 +284,104 @@ def predict_batch(request_data: Union[BatchPredictionRequest, List[Dict[str, Any
         specialist=detected_spec,
         predictions=predictions,
     )
+
+
+# ==============================================================================
+# SURICATA TRADITIONAL NIDS & COMPARATIVE EVALUATION ENDPOINTS
+# ==============================================================================
+
+@app.get("/suricata/status")
+def suricata_status():
+    """Return Suricata Traditional NIDS installation status and rule coverage."""
+    status_info = get_suricata_version()
+    return {
+        "status": "online" if status_info["available"] else "offline",
+        "engine": "Suricata Traditional NIDS",
+        "version": status_info["version"],
+        "binary_path": status_info["binary_path"],
+        "rule_coverage": RULE_COVERAGE_STATUS,
+        "available": status_info["available"],
+    }
+
+
+@app.post("/suricata/analyze-pcap")
+async def analyze_pcap(file: UploadFile = File(...)):
+    """Analyze an uploaded PCAP / PCAPNG using offline Suricata engine."""
+    if not file.filename.lower().endswith((".pcap", ".pcapng", ".cap")):
+        raise HTTPException(status_code=400, detail="Uploaded file must be a .pcap or .pcapng packet capture.")
+
+    temp_dir = tempfile.mkdtemp(prefix="suricata_upload_")
+    pcap_path = os.path.join(temp_dir, file.filename)
+    try:
+        with open(pcap_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        result = run_suricata_pcap(pcap_path)
+        if result["status"] != "SUCCESS":
+            raise HTTPException(status_code=500, detail=f"Suricata execution failed: {result.get('stderr')}")
+
+        parser = SuricataEveParser(result["eve_path"])
+        parsed = parser.parse_all()
+
+        mapped_alerts = []
+        for a in parsed["alerts"]:
+            mapped = map_suricata_alert(a)
+            a_copy = dict(a)
+            a_copy.update(mapped)
+            mapped_alerts.append(a_copy)
+
+        return {
+            "status": "SUCCESS",
+            "pcap_file": file.filename,
+            "duration_seconds": result["duration_seconds"],
+            "summary": parsed["summary"],
+            "alerts": mapped_alerts,
+            "flows": parsed["flows"][:100],
+        }
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@app.post("/compare/pcap")
+async def compare_pcap(file: UploadFile = File(...)):
+    """Run dual-engine comparative evaluation (Suricata vs UnifiedNIDS) on uploaded PCAP."""
+    if not file.filename.lower().endswith((".pcap", ".pcapng", ".cap")):
+        raise HTTPException(status_code=400, detail="Uploaded file must be a .pcap or .pcapng packet capture.")
+
+    temp_dir = tempfile.mkdtemp(prefix="compare_upload_")
+    pcap_path = os.path.join(temp_dir, file.filename)
+    try:
+        with open(pcap_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        engine = get_engine()
+        evaluator = ComparativeEvaluator(nids_engine=engine)
+        comparison = evaluator.evaluate_pcap(pcap_path)
+        return comparison
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@app.get("/compare/sample")
+def compare_sample():
+    """Run dual-engine comparison on genuine repository benchmark capture."""
+    candidates = [
+        os.path.join(REPO_ROOT, "sample_traffic", "benchmark.pcapng"),
+        "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/network/output.pcapng",
+        os.path.join(REPO_ROOT, "output.pcapng")
+    ]
+    sample_pcap = None
+    for cand in candidates:
+        if os.path.exists(cand):
+            sample_pcap = cand
+            break
+
+    if not sample_pcap:
+        raise HTTPException(status_code=404, detail="Sample benchmark PCAP file not found.")
+
+    engine = get_engine()
+    evaluator = ComparativeEvaluator(nids_engine=engine)
+    return evaluator.evaluate_pcap(sample_pcap, max_packets=5000)
 
 
 # Mount static frontend files if present (enables all-in-one single server deployment on Render, Railway, or VPS)

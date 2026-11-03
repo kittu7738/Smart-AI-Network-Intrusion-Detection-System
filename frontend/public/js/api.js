@@ -171,6 +171,41 @@ class ApiService {
       body: JSON.stringify({ records, specialist }),
     });
   }
+
+  /**
+   * GET /suricata/status
+   * Retrieve installation, version, and signature coverage metadata for Suricata.
+   */
+  async getSuricataStatus() {
+    return this._request("/suricata/status", { method: "GET" }, 8000);
+  }
+
+  /**
+   * GET /compare/sample
+   * Run head-to-head comparison on genuine benchmark PCAP.
+   */
+  async runComparisonSample() {
+    return this._request("/compare/sample", { method: "GET" }, 30000);
+  }
+
+  /**
+   * POST /compare/pcap
+   * Upload and evaluate a PCAP/PCAPNG file through both Suricata and Smart AI-NIDS.
+   */
+  async runComparisonPcap(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const url = `${this.getBaseUrl()}/compare/pcap`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: "PCAP comparison failed" }));
+      throw new Error(err.detail || `HTTP ${response.status}`);
+    }
+    return response.json();
+  }
 }
 
 // Export singleton to global scope for application access

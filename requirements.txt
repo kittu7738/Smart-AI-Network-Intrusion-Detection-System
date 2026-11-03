@@ -11,6 +11,8 @@ Flask>=2.2.0
 Werkzeug>=2.2.0
 fastapi>=0.100.0
 uvicorn[standard]
+python-multipart>=0.0.9
+scapy>=2.5.0
 
 # Utilities
 joblib>=1.2.0

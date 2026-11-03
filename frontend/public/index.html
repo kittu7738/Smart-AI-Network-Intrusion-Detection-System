@@ -141,6 +141,14 @@
             </button>
           </li>
           <li>
+            <button class="nav-link-btn" data-view="view-comparison">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+              </svg>
+              <span>Traditional vs AI</span>
+            </button>
+          </li>
+          <li>
             <button class="nav-link-btn" data-view="view-architecture">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
                 <line x1="6" y1="3" x2="6" y2="15"/>
@@ -1009,6 +1017,233 @@
                 </thead>
                 <tbody id="audit-events-tbody">
                   <!-- Rendered dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ================================================================
+             VIEW: TRADITIONAL VS AI COMPARISON (SURICATA VS SMART AI-NIDS)
+             ================================================================ -->
+        <section id="view-comparison" class="view-panel">
+          <div class="page-headline-row">
+            <div>
+              <h1 class="page-title">Traditional NIDS vs Smart AI-NIDS</h1>
+              <div class="page-subtitle">Rigorous comparative evaluation on identical packet and flow traffic streams</div>
+            </div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <button id="btn-compare-sample" class="btn-primary-action" style="padding: 7px 16px; font-size: 13px; border-radius: 6px; cursor: pointer;">
+                ⚡ Run Benchmark PCAP
+              </button>
+              <label for="compare-file-input" class="soc-card-header-btn" style="padding: 7px 14px; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                Upload PCAP
+              </label>
+              <input type="file" id="compare-file-input" accept=".pcap,.pcapng,.cap" style="display: none;">
+            </div>
+          </div>
+
+          <!-- COMPARISON KPI METRICS -->
+          <div class="kpi-row-grid" style="grid-template-columns: repeat(4, 1fr); margin-bottom: 20px;">
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <span class="kpi-label">SURICATA (T-NIDS)</span>
+                <span class="badge-dot" style="background: #f59e0b;" id="suricata-status-dot"></span>
+              </div>
+              <div class="kpi-value-num" id="comp-suricata-alerts">0 Alerts</div>
+              <div class="kpi-footer-row" id="comp-suricata-meta">
+                <span style="font-size: 11px; color: var(--text-muted);">Rules: 32 loaded | Status: Active</span>
+              </div>
+            </div>
+
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <span class="kpi-label">SMART AI-NIDS</span>
+                <span class="badge-dot" style="background: #10b981;"></span>
+              </div>
+              <div class="kpi-value-num" id="comp-ai-threats">0 Threats</div>
+              <div class="kpi-footer-row" id="comp-ai-meta">
+                <span style="font-size: 11px; color: var(--text-muted);">5 Specialists | 13 Classes</span>
+              </div>
+            </div>
+
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <span class="kpi-label">EVALUATED FLOWS</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+              </div>
+              <div class="kpi-value-num" id="comp-total-flows">0 Flows</div>
+              <div class="kpi-footer-row">
+                <span style="font-size: 11px; color: var(--text-muted);" id="comp-flow-rate">Mutual Benign: 0</span>
+              </div>
+            </div>
+
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <span class="kpi-label">LATENCY COMPARISON</span>
+                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              </div>
+              <div class="kpi-value-num" id="comp-latency" style="font-size: 18px;">Suricata: 0.05s | AI: 0.63s</div>
+              <div class="kpi-footer-row">
+                <span style="font-size: 11px; color: var(--text-muted);">Packet-level vs Flow-level ML</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- COMPARISON ARCHITECTURE CALLOUT -->
+          <div style="background: rgba(30, 41, 59, 0.5); border: 1px solid var(--border-color); border-radius: 8px; padding: 14px 18px; margin-bottom: 20px; font-size: 12px; line-height: 1.6; color: var(--text-secondary);">
+            <div style="font-weight: 600; color: #fff; margin-bottom: 4px; display: flex; align-items: center; gap: 8px;">
+              <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: #3b82f6;"></span>
+              Identical Traffic Ingestion Architecture
+            </div>
+            The identical PCAP/PCAPNG input stream is evaluated simultaneously by Suricata 8.0.8 (signature/rule inspection producing EVE JSON) and Smart AI-NIDS (streaming 5-tuple flow aggregation into 46-feature telemetry, routed to the 5 specialist ML models).
+            Note: Suricata operates strictly on Layer 3/4/7 signatures; Layer 2 threats such as ARP Spoofing (Class 9) are evaluated exclusively by the AI-NIDS specialist.
+          </div>
+
+          <!-- SIDE-BY-SIDE TABLES -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 24px;">
+            <!-- Suricata Detections -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <span class="soc-card-title">Traditional NIDS (Suricata) Alerts</span>
+                <span class="soc-badge" id="badge-suricata-count" style="background: rgba(245, 158, 11, 0.15); color: #f59e0b;">0 Alerts</span>
+              </div>
+              <div class="soc-card-body" style="padding: 0; max-height: 380px; overflow-y: auto;">
+                <table class="soc-table" style="font-size: 11px;">
+                  <thead>
+                    <tr>
+                      <th>SID / Rule</th>
+                      <th>Category</th>
+                      <th>Source -> Dest</th>
+                      <th style="text-align: right;">Sev</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comp-suricata-tbody">
+                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Click "Run Benchmark PCAP" or upload a file to evaluate</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- AI-NIDS Detections -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <span class="soc-card-title">Smart AI-NIDS Inferences</span>
+                <span class="soc-badge" id="badge-ai-count" style="background: rgba(16, 185, 129, 0.15); color: #10b981;">0 Threats</span>
+              </div>
+              <div class="soc-card-body" style="padding: 0; max-height: 380px; overflow-y: auto;">
+                <table class="soc-table" style="font-size: 11px;">
+                  <thead>
+                    <tr>
+                      <th>Flow (5-Tuple)</th>
+                      <th>Predicted Attack</th>
+                      <th>Specialist</th>
+                      <th style="text-align: right;">Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody id="comp-ai-tbody">
+                    <tr><td colspan="4" style="text-align: center; color: var(--text-muted); padding: 24px;">Click "Run Benchmark PCAP" or upload a file to evaluate</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- CANONICAL 13-CLASS TAXONOMY COVERAGE MATRIX -->
+          <div class="soc-card">
+            <div class="soc-card-header">
+              <span class="soc-card-title">Taxonomy Coverage &amp; Architectural Comparison (Frozen 13 Classes)</span>
+            </div>
+            <div class="soc-card-body" style="padding: 0;">
+              <table class="soc-table" style="font-size: 12px;">
+                <thead>
+                  <tr>
+                    <th style="width: 80px;">Class ID</th>
+                    <th style="width: 170px;">Canonical Attack Class</th>
+                    <th style="width: 250px;">Traditional NIDS (Suricata)</th>
+                    <th>Smart AI-NIDS Specialist Model</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td><code>0</code></td>
+                    <td><strong>Benign Traffic</strong></td>
+                    <td><span class="tag-status green">Pass-through</span> Default (No alert fired)</td>
+                    <td><span class="tag-status blue">All 5 Specialists</span> High baseline precision</td>
+                  </tr>
+                  <tr>
+                    <td><code>1</code></td>
+                    <td><strong>DDoS</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> ET DoS / Threshold / Flow bit rules</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Packet rate &amp; flow size features</td>
+                  </tr>
+                  <tr>
+                    <td><code>2</code></td>
+                    <td><strong>DoS</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> SYN flood, Slowloris, ICMP flood rules</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Inter-arrival time &amp; TCP flags</td>
+                  </tr>
+                  <tr>
+                    <td><code>3</code></td>
+                    <td><strong>Botnet</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> ET C2 IP reputation &amp; IRC command signatures</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Periodic beaconing &amp; state transitions</td>
+                  </tr>
+                  <tr>
+                    <td><code>4</code></td>
+                    <td><strong>Infiltration</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> Exploit payload patterns, post-exploitation</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Protocol anomalies &amp; payload metrics</td>
+                  </tr>
+                  <tr>
+                    <td><code>5</code></td>
+                    <td><strong>Brute Force</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> SSH / FTP / HTTP login attempt thresholds</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Connection burst rate &amp; session entropy</td>
+                  </tr>
+                  <tr>
+                    <td><code>6</code></td>
+                    <td><strong>Web Attack</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> SQLi, XSS, Path Traversal regex rules</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Header lengths, request sizes &amp; rates</td>
+                  </tr>
+                  <tr>
+                    <td><code>7</code></td>
+                    <td><strong>DNS Spoofing</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> DNS anomalous ID matching &amp; reply mismatches</td>
+                    <td><span class="tag-status blue">CICIoT2023 / DNS_Tunneling</span> Transaction ID entropy &amp; TTL drift</td>
+                  </tr>
+                  <tr>
+                    <td><code>8</code></td>
+                    <td><strong>IP Spoofing</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> RFC 1918 egress / Martian address inspection</td>
+                    <td><span class="tag-status blue">IP_Spoofing Specialist</span> Header checksum, TTL anomaly classifier</td>
+                  </tr>
+                  <tr style="background: rgba(239, 68, 68, 0.05);">
+                    <td><code>9</code></td>
+                    <td><strong>ARP Spoofing</strong></td>
+                    <td><span class="tag-status red">Unsupported</span> Suricata rule language operates strictly L3-L7</td>
+                    <td><span class="tag-status green">ARP_Spoofing Specialist</span> Full Layer 2 ARP cache poison detection</td>
+                  </tr>
+                  <tr>
+                    <td><code>10</code></td>
+                    <td><strong>Recon / Port Scan</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> Nmap scan signatures &amp; SYN sweep thresholds</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Destination port entropy &amp; SYN-ACK ratios</td>
+                  </tr>
+                  <tr>
+                    <td><code>11</code></td>
+                    <td><strong>MITM</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> SSL certificate mismatch &amp; rogue gateway alerts</td>
+                    <td><span class="tag-status blue">CICIoT2023 / IDS2018</span> Flow asymmetry &amp; route change indicators</td>
+                  </tr>
+                  <tr>
+                    <td><code>12</code></td>
+                    <td><strong>DNS Tunneling</strong></td>
+                    <td><span class="tag-status yellow">Signatures</span> Long label length &amp; high volume TXT query rules</td>
+                    <td><span class="tag-status blue">DNS_Tunneling Specialist</span> Character entropy, label depth &amp; Shannon entropy</td>
+                  </tr>
                 </tbody>
               </table>
             </div>

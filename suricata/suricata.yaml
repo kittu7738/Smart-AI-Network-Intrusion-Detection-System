@@ -1,0 +1,107 @@
+%YAML 1.1
+---
+# ==============================================================================
+# SMART AI-NIDS - SURICATA TRADITIONAL NIDS CONFIGURATION
+# High-performance configuration for offline PCAP evaluation & sensor streaming
+# ==============================================================================
+
+# Default logging directory
+default-log-dir: /tmp/suricata-logs
+
+# Statistics configuration
+stats:
+  enabled: yes
+  interval: 8
+
+# Output configuration (EVE JSON Engine)
+outputs:
+  - fast:
+      enabled: yes
+      filename: fast.log
+      append: yes
+
+  - eve-log:
+      enabled: yes
+      filetype: regular
+      filename: eve.json
+      pcap-file: false
+      community-id: true
+      community-id-seed: 0
+      types:
+        - alert:
+            payload: yes
+            payload-buffer: yes
+            payload-printable: yes
+            packet: yes
+            metadata: yes
+            tagged-packets: yes
+        - anomaly:
+            enabled: yes
+            types:
+              decode: yes
+              stream: yes
+              applayer: yes
+        - flow
+        - dns:
+            query: yes
+            answer: yes
+        - http:
+            extended: yes
+        - tls:
+            extended: yes
+        - files:
+            force-magic: no
+        - drop:
+            alerts: yes
+
+# Application layer protocol decoders
+app-layer:
+  protocols:
+    dns:
+      tcp:
+        enabled: yes
+        detection-ports:
+          dp: 53
+      udp:
+        enabled: yes
+        detection-ports:
+          dp: 53
+    http:
+      enabled: yes
+    tls:
+      enabled: yes
+    smtp:
+      enabled: yes
+    ssh:
+      enabled: yes
+    ftp:
+      enabled: yes
+
+# Engine configuration
+detect:
+  profile: medium
+  custom-values:
+    toclient-groups: 3
+    toserver-groups: 25
+  sgh-mpm-context: auto
+  inspection-recursion-limit: 3000
+
+# Stream engine for reassembly and tracking
+stream:
+  memcap: 64mb
+  checksum-validation: no
+  inline: no
+  reassembly:
+    memcap: 128mb
+    depth: 1mb
+    toserver-chunk-size: 2560
+    toclient-chunk-size: 2560
+
+# Default rule search path
+default-rule-path: ./suricata/rules
+
+rule-files:
+  - canonical_threats.rules
+
+classification-file: ./suricata/rules/classification.config
+reference-config-file: /opt/homebrew/share/suricata/reference.config

@@ -1,0 +1,89 @@
+# ==============================================================================
+# SMART AI-NIDS - CANONICAL THREAT RULESET FOR SURICATA (TRADITIONAL NIDS)
+# Documented signatures mapped directly to the 13-Class Canonical Taxonomy
+# Rule SID range: 9000001 - 9000100
+# ==============================================================================
+
+# ------------------------------------------------------------------------------
+# Class 1: DDoS (Distributed Denial of Service)
+# ------------------------------------------------------------------------------
+alert tcp any any -> any any (flags:S; threshold:type both, track by_dst, count 50, seconds 1; msg:"SURICATA T-NIDS [Class 1: DDoS] Inbound High-Rate SYN Flood Detected"; classtype:denial-of-service; sid:9000010; rev:1;)
+alert udp any 123 -> any any (msg:"SURICATA T-NIDS [Class 1: DDoS] NTP Monlist Reflection Amplification DDoS"; content:"|17 00 03 2a|"; offset:0; depth:4; classtype:denial-of-service; sid:9000011; rev:1;)
+alert udp any 1900 -> any any (msg:"SURICATA T-NIDS [Class 1: DDoS] SSDP Amplification DDoS Reflection"; content:"HTTP/1.1 200 OK"; classtype:denial-of-service; sid:9000012; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 2: DoS (Denial of Service)
+# ------------------------------------------------------------------------------
+alert tcp any any -> any any (flags:R; threshold:type both, track by_src, count 30, seconds 1; msg:"SURICATA T-NIDS [Class 2: DoS] TCP RST Stream Flood Detected"; classtype:denial-of-service; sid:9000020; rev:1;)
+alert tcp any any -> any 80 (flow:to_server; content:"POST"; http_method; content:"Content-Length: 1000000"; http_header; msg:"SURICATA T-NIDS [Class 2: DoS] Slowloris / R-U-Dead-Yet HTTP Slow Body DoS"; classtype:denial-of-service; sid:9000021; rev:1;)
+alert icmp any any -> any any (itype:8; threshold:type both, track by_dst, count 40, seconds 1; msg:"SURICATA T-NIDS [Class 2: DoS] High-Volume ICMP Echo Flood"; classtype:denial-of-service; sid:9000022; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 3: Botnet
+# ------------------------------------------------------------------------------
+alert tcp any any -> any 6667 (flow:to_server; content:"NICK "; content:"JOIN #"; msg:"SURICATA T-NIDS [Class 3: Botnet] IRC-Based Botnet Channel Joining Activity"; classtype:trojan-activity; sid:9000030; rev:1;)
+alert tcp any any -> any [23,2323] (flow:to_server; content:"mirai"; nocase; msg:"SURICATA T-NIDS [Class 3: Botnet] Mirai Botnet Telnet Probing Signature"; classtype:trojan-activity; sid:9000031; rev:1;)
+alert http any any -> any any (flow:to_server; http.uri; content:"/submit.php?id="; http.header; content:"User-Agent: Mozi"; msg:"SURICATA T-NIDS [Class 3: Botnet] Mozi P2P Botnet C2 Beaconing"; classtype:trojan-activity; sid:9000032; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 4: Infiltration
+# ------------------------------------------------------------------------------
+alert tcp any any -> any any (flow:established; content:"meterpreter"; nocase; msg:"SURICATA T-NIDS [Class 4: Infiltration] Metasploit Meterpreter Reverse Stager Infiltration"; classtype:successful-recon-limited; sid:9000040; rev:1;)
+alert tcp any any -> any 4444 (flow:established; msg:"SURICATA T-NIDS [Class 4: Infiltration] Inbound Metasploit Default Port 4444 Infiltration Tunnel"; classtype:successful-recon-limited; sid:9000041; rev:1;)
+alert tcp any any -> any any (flow:established; content:"powershell -enc "; nocase; msg:"SURICATA T-NIDS [Class 4: Infiltration] Base64 Encoded PowerShell Payload Execution"; classtype:successful-recon-limited; sid:9000042; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 5: Brute Force
+# ------------------------------------------------------------------------------
+alert tcp any any -> any 22 (flags:S; threshold:type both, track by_src, count 10, seconds 5; msg:"SURICATA T-NIDS [Class 5: Brute Force] SSH Authentication Brute Force Threshold Exceeded"; classtype:attempted-admin; sid:9000050; rev:1;)
+alert tcp any any -> any 21 (flow:to_server; content:"USER "; content:"PASS "; threshold:type both, track by_src, count 8, seconds 5; msg:"SURICATA T-NIDS [Class 5: Brute Force] FTP Login Brute Force Attempt"; classtype:attempted-admin; sid:9000051; rev:1;)
+alert http any any -> any any (flow:to_server; http.method; content:"POST"; http.uri; content:"/login"; threshold:type both, track by_src, count 10, seconds 5; msg:"SURICATA T-NIDS [Class 5: Brute Force] HTTP Web Form Login Password Spraying"; classtype:attempted-admin; sid:9000052; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 6: Web Attack
+# ------------------------------------------------------------------------------
+alert http any any -> any any (flow:to_server; http.uri; content:"UNION"; nocase; content:"SELECT"; nocase; msg:"SURICATA T-NIDS [Class 6: Web Attack] SQL Injection (UNION SELECT) Exploitation Attempt"; classtype:web-application-attack; sid:9000060; rev:1;)
+alert http any any -> any any (flow:to_server; http.uri; content:"<script>"; nocase; msg:"SURICATA T-NIDS [Class 6: Web Attack] Cross-Site Scripting (XSS) Tag Injection"; classtype:web-application-attack; sid:9000061; rev:1;)
+alert http any any -> any any (flow:to_server; http.uri; content:"/../../"; msg:"SURICATA T-NIDS [Class 6: Web Attack] Directory Traversal (Dot-Dot-Slash) Attack"; classtype:web-application-attack; sid:9000062; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 7: DNS Spoofing
+# ------------------------------------------------------------------------------
+alert dns any 53 -> any any (msg:"SURICATA T-NIDS [Class 7: DNS Spoofing] Rogue DNS Poisoning Authoritative Reply Mismatch"; dns.opcode:0; dns.rcode:noerror; threshold:type both, track by_dst, count 5, seconds 2; classtype:bad-unknown; sid:9000070; rev:1;)
+alert udp any 53 -> any any (content:"|81 80|"; offset:2; depth:2; content:"|00 01 00 01|"; offset:4; depth:4; threshold:type both, track by_src, count 10, seconds 1; msg:"SURICATA T-NIDS [Class 7: DNS Spoofing] Rapid Unsolicited DNS Answers Burst (Kaminsky Style)"; classtype:bad-unknown; sid:9000071; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 8: IP Spoofing
+# ------------------------------------------------------------------------------
+alert ip any any -> any any (sameip; msg:"SURICATA T-NIDS [Class 8: IP Spoofing] Land Attack - Source and Destination IP Identical"; classtype:bad-unknown; sid:9000080; rev:1;)
+alert ip 127.0.0.0/8 any -> any any (msg:"SURICATA T-NIDS [Class 8: IP Spoofing] Inbound Traffic with Loopback Source IP"; classtype:bad-unknown; sid:9000081; rev:1;)
+alert ip 0.0.0.0 any -> any any (msg:"SURICATA T-NIDS [Class 8: IP Spoofing] Source IP 0.0.0.0 from External Flow"; classtype:bad-unknown; sid:9000082; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 9: ARP Spoofing
+# ------------------------------------------------------------------------------
+# NOTE: Suricata operates on Layer 3/4/7 and does not evaluate raw Layer-2 ARP signatures.
+# This represents a documented architectural limitation of Traditional NIDS, successfully
+# covered by the Smart AI-NIDS ARP specialist model.
+
+
+# ------------------------------------------------------------------------------
+# Class 10: Recon / Port Scan
+# ------------------------------------------------------------------------------
+alert tcp any any -> any any (flags:FPU; msg:"SURICATA T-NIDS [Class 10: Recon / Port Scan] Nmap Xmas Tree Port Scan Probe"; classtype:attempted-recon; sid:9000100; rev:1;)
+alert tcp any any -> any any (flags:0; msg:"SURICATA T-NIDS [Class 10: Recon / Port Scan] Nmap NULL Port Scan Probe"; classtype:attempted-recon; sid:9000101; rev:1;)
+alert tcp any any -> any any (flags:SF; msg:"SURICATA T-NIDS [Class 10: Recon / Port Scan] SYN-FIN Port Scan Probe"; classtype:attempted-recon; sid:9000102; rev:1;)
+alert tcp any any -> any any (flags:S; threshold:type both, track by_src, count 25, seconds 3; msg:"SURICATA T-NIDS [Class 10: Recon / Port Scan] High-Rate Horizontal Port Scan Sweep"; classtype:attempted-recon; sid:9000103; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 11: MITM (Man-in-the-Middle)
+# ------------------------------------------------------------------------------
+alert http any any -> any any (flow:to_server; http.header; content:"Upgrade-Insecure-Requests: 0"; msg:"SURICATA T-NIDS [Class 11: MITM] SSLStrip / HTTP Downgrade Interception Attempt"; classtype:bad-unknown; sid:9000110; rev:1;)
+alert tls any any -> any any (msg:"SURICATA T-NIDS [Class 11: MITM] TLS Certificate Mismatch / Self-Signed Interception Proxy"; tls.cert_issuer; content:"PortSwigger"; nocase; classtype:bad-unknown; sid:9000111; rev:1;)
+
+# ------------------------------------------------------------------------------
+# Class 12: DNS Tunneling
+# ------------------------------------------------------------------------------
+alert dns any any -> any 53 (msg:"SURICATA T-NIDS [Class 12: DNS Tunneling] Exceptionally Long DNS Query Subdomain (Exfiltration / Tunnel)"; dns.query; pcre:"/^[a-zA-Z0-9_-]{45,}\./"; classtype:bad-unknown; sid:9000120; rev:1;)
+alert dns any any -> any 53 (msg:"SURICATA T-NIDS [Class 12: DNS Tunneling] Known DNS Tunneling Domain (iodine/dnscat2 signature)"; dns.query; content:"tunnel"; nocase; classtype:bad-unknown; sid:9000121; rev:1;)
+alert dns any any -> any 53 (msg:"SURICATA T-NIDS [Class 12: DNS Tunneling] Base64 DNS Subdomain Tunneling Pattern"; dns.query; pcre:"/([a-zA-Z0-9+\/]{16,}\.){2,}/"; classtype:bad-unknown; sid:9000122; rev:1;)

@@ -22,6 +22,16 @@ class ApiService {
    */
   getBaseUrl() {
     if (typeof window !== "undefined") {
+      // If deployed in an all-in-one environment (e.g. Render / Railway serving both frontend & backend)
+      if (window.location && window.location.origin && window.location.protocol.startsWith("http")) {
+        const host = window.location.hostname;
+        if (!host.includes("localhost") && !host.includes("127.0.0.1") && !host.includes("vercel.app")) {
+          const stored = localStorage.getItem("VITE_API_BASE_URL");
+          if (stored && stored.trim()) return stored.trim().replace(/\/+$/, "");
+          return window.location.origin;
+        }
+      }
+
       if (window.ENV && window.ENV.VITE_API_BASE_URL) {
         return window.ENV.VITE_API_BASE_URL.replace(/\/+$/, "");
       }

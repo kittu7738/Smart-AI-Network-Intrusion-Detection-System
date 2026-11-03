@@ -281,3 +281,12 @@ def predict_batch(request_data: Union[BatchPredictionRequest, List[Dict[str, Any
         specialist=detected_spec,
         predictions=predictions,
     )
+
+
+# Mount static frontend files if present (enables all-in-one single server deployment on Render, Railway, or VPS)
+REPO_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+frontend_dir = os.path.join(REPO_ROOT, "frontend", "public")
+if os.path.exists(frontend_dir):
+    from fastapi.staticfiles import StaticFiles
+    app.mount("/", StaticFiles(directory=frontend_dir, html=True), name="static")
+

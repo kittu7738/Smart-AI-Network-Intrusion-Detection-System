@@ -173,6 +173,23 @@ class ApiService {
   }
 
   /**
+   * GET /sensor/status
+   * Retrieve operational status and telemetry counters of the live network sensor.
+   */
+  async getSensorStatus() {
+    return this._request("/sensor/status", { method: "GET" }, 5000);
+  }
+
+  /**
+   * GET /sensor/events
+   * Retrieve stream of live network flows and alerts captured by the sensor.
+   * @param {number} limit 
+   */
+  async getSensorEvents(limit = 50) {
+    return this._request(`/sensor/events?limit=${limit}`, { method: "GET" }, 5000);
+  }
+
+  /**
    * GET /compare/metrics
    * Retrieve full verified comparative evaluation artifacts and reconciled metrics.
    */

@@ -6,6 +6,7 @@ single/batch flow classification into the frozen 13-class canonical taxonomy.
 """
 
 import os
+import time
 from contextlib import asynccontextmanager
 from typing import Any, Dict, List, Optional, Union
 
@@ -411,6 +412,155 @@ def get_comparative_metrics():
             data["ai_summary"] = ai_full.get("ground_truth_benchmark", {})
 
     return data
+
+
+# --------------------------------------------------------------------------
+# SENSOR AGENT INGESTION & STATE MANAGEMENT
+# --------------------------------------------------------------------------
+import secrets
+
+SENSOR_API_KEY = os.environ.get("SENSOR_API_KEY", "sai-sensor-secret-key-prod-2026")
+
+_live_sensor_state = {
+    "status": "OFFLINE",
+    "sensor_id": None,
+    "interface": None,
+    "last_heartbeat": 0.0,
+    "registered_at": 0.0,
+    "packets_captured": 0,
+    "flows_processed": 0,
+    "threats_detected": 0,
+    "benign_classified": 0,
+    "suricata_alerts": 0,
+    "suricata_live_enabled": False
+}
+_live_sensor_events: List[Dict[str, Any]] = []
+
+
+def verify_sensor_auth(request: Request, body_key: Optional[str] = None):
+    """Enforce API key authentication for sensor telemetry endpoints."""
+    header_key = request.headers.get("X-Sensor-Key") or request.headers.get("Authorization")
+    if header_key and header_key.startswith("Bearer "):
+        header_key = header_key[7:].strip()
+
+    provided_key = header_key or body_key
+    if not provided_key or provided_key != SENSOR_API_KEY:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Sensor authentication required. Provide valid X-Sensor-Key header."
+        )
+
+
+@app.post("/sensor/register")
+async def register_sensor(request: Request):
+    """Authenticate and register a local network sensor."""
+    data = await request.json()
+    verify_sensor_auth(request, data.get("api_key"))
+
+    sensor_id = data.get("sensor_id", "sensor-local")
+    meta = data.get("metadata", {})
+
+    now = time.time()
+    _live_sensor_state["status"] = "ONLINE"
+    _live_sensor_state["sensor_id"] = sensor_id
+    _live_sensor_state["interface"] = meta.get("interface", "lo0")
+    _live_sensor_state["suricata_live_enabled"] = meta.get("suricata_enabled", False)
+    _live_sensor_state["registered_at"] = now
+    _live_sensor_state["last_heartbeat"] = now
+
+    token = secrets.token_hex(16)
+    return {
+        "status": "registered",
+        "sensor_id": sensor_id,
+        "session_token": token,
+        "server_time": now
+    }
+
+
+@app.post("/sensor/ingest")
+async def ingest_sensor_telemetry(request: Request):
+    """Receive and evaluate micro-batches of live sensor flows and Suricata alerts."""
+    data = await request.json()
+    verify_sensor_auth(request, data.get("api_key"))
+
+    now = time.time()
+    _live_sensor_state["status"] = "ONLINE"
+    _live_sensor_state["last_heartbeat"] = now
+
+    events = data.get("events", [])
+    engine = get_engine()
+
+    processed_events = []
+    for ev in events:
+        ev_type = ev.get("event_type", "FLOW_RECORD")
+
+        if ev_type in ("FLOW_RECORD", "ARP_FRAME", "DNS_QUERY"):
+            feats = ev.get("features", {})
+            spec = ev.get("specialist", "auto")
+
+            try:
+                pred = engine.predict(feats, specialist=spec)
+                if isinstance(pred, list):
+                    pred = pred[0]
+
+                ev["canonical_id"] = pred["canonical_id"]
+                ev["class_name"] = pred["class_name"]
+                ev["specialist"] = pred["specialist"]
+                ev["confidence"] = pred["confidence"]
+                ev["probabilities"] = pred.get("probabilities", [])
+
+                _live_sensor_state["flows_processed"] += 1
+                if pred["canonical_id"] == 0:
+                    _live_sensor_state["benign_classified"] += 1
+                else:
+                    _live_sensor_state["threats_detected"] += 1
+            except Exception as e:
+                ev["status"] = "INCOMPLETE_FEATURES"
+                ev["error"] = str(e)
+
+        elif ev_type == "SURICATA_ALERT":
+            _live_sensor_state["suricata_alerts"] += 1
+
+        processed_events.append(ev)
+        _live_sensor_events.append(ev)
+
+    # Keep circular buffer to last 500 events
+    while len(_live_sensor_events) > 500:
+        _live_sensor_events.pop(0)
+
+    return {
+        "status": "ingested",
+        "batch_size": len(events),
+        "total_flows_processed": _live_sensor_state["flows_processed"],
+        "threats_detected": _live_sensor_state["threats_detected"]
+    }
+
+
+@app.get("/sensor/status")
+def get_sensor_status():
+    """Retrieve operational state and telemetry counters of the network sensor."""
+    now = time.time()
+    # If heartbeat is older than 15s, mark sensor as offline
+    is_active = (now - _live_sensor_state["last_heartbeat"] <= 15.0) and (_live_sensor_state["last_heartbeat"] > 0)
+    _live_sensor_state["status"] = "ONLINE" if is_active else "OFFLINE"
+
+    return {
+        **_live_sensor_state,
+        "is_active": is_active,
+        "server_time": now,
+        "buffered_events_count": len(_live_sensor_events)
+    }
+
+
+@app.get("/sensor/events")
+def get_sensor_events(limit: int = 50):
+    """Retrieve recent live events captured by the sensor."""
+    return {
+        "sensor_id": _live_sensor_state["sensor_id"],
+        "sensor_status": _live_sensor_state["status"],
+        "total_events": len(_live_sensor_events),
+        "events": _live_sensor_events[-limit:]
+    }
 
 
 # Mount static frontend files if present (enables all-in-one single server deployment on Render, Railway, or VPS)

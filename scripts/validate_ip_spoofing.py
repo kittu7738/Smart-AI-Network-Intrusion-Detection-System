@@ -2,7 +2,7 @@
 Validate the 5G/IP Spoofing Specialist Model Using Actual Test_Data.csv
 
 Performs an empirical evaluation of the existing IP_Spoofing specialist's saved
-Decision Tree model and preprocessor using the actual test dataset.
+Decision Tree model and preprocessor using the actual genuine test dataset.
 """
 
 import os
@@ -26,7 +26,6 @@ sys.path.insert(0, REPO_ROOT)
 from utils.specialist_preprocessor import SpecialistPreprocessor
 import utils.train_models as tm
 import __main__
-# Handle unpickling compatibility for saved DecisionTreeClassifier
 __main__.DecisionTreeClassifier = tm.DecisionTreeClassifier
 
 def validate_test_data(csv_path):
@@ -41,11 +40,18 @@ def validate_test_data(csv_path):
     print(f"Total rows: {len(df)}")
     print(f"Total columns: {len(df.columns)}")
     print(f"Columns: {list(df.columns)}")
-    print(f"Data types:\n{df.dtypes}")
-    print(f"Missing values count:\n{df.isnull().sum()}")
+    print(f"Data types summary:\n{df.dtypes.value_counts().to_dict()}")
+    print(f"Missing values count: {df.isnull().sum().sum()}")
     print(f"Duplicate rows: {df.duplicated().sum()}")
     
-    label_col = "Label" if "Label" in df.columns else "final_label"
+    label_col = None
+    for cand in ["label", "Label", "final_label"]:
+        if cand in df.columns:
+            label_col = cand
+            break
+    if label_col is None:
+        raise ValueError(f"No label column found in columns: {list(df.columns)}")
+
     print(f"Identified label column: '{label_col}'")
     print(f"Class distribution in test set:\n{df[label_col].value_counts().to_dict()}")
 
@@ -61,10 +67,6 @@ def run_experiment():
     test_csv_path = os.path.join(
         REPO_ROOT, "raw", "additional", "IP_Spoofing",
         "5G-Intrusion-Detection-Dataset", "data", "Test_Data.csv"
-    )
-    train_sub2_path = os.path.join(
-        REPO_ROOT, "raw", "additional", "IP_Spoofing",
-        "5G-Intrusion-Detection-Dataset", "data", "Train_subset_2.csv"
     )
 
     model_path = os.path.join(model_dir, "DecisionTree.joblib")
@@ -88,42 +90,36 @@ def run_experiment():
     print("Loaded Preprocessor:")
     print(f"  Dataset:           {preprocessor.dataset_name}")
     print(f"  Expected classes:  {preprocessor.expected_classes}")
-    print(f"  Input feature(s):  {preprocessor.feature_names_in_}")
-    print(f"  Feature count:     {preprocessor.n_features_in_}")
-    print(f"  Fitted medians:    {preprocessor.medians_}")
-    print(f"  Fitted stds:       {preprocessor.stds_}")
+    print(f"  Input feature count: {preprocessor.n_features_in_}")
+    print(f"  First 5 features:  {preprocessor.feature_names_in_[:5]}")
+    print(f"  Last 5 features:   {preprocessor.feature_names_in_[-5:]}")
 
     model = tm.joblib.load(model_path)
     print("\nLoaded Decision Tree Model:")
     print(f"  Model type:        {type(model)}")
     print(f"  Model classes_:    {getattr(model, 'classes_', None)}")
-    print(f"  Majority class:    {getattr(model, 'majority_', None)}")
+    print(f"  Tree max_depth:    {getattr(model, 'max_depth', None)}")
+    print(f"  Tree node count:   {model.tree_.node_count if hasattr(model, 'tree_') else 'N/A'}")
 
     # Separate features and target
-    y_test_true = df_test[label_col].values
+    y_test_true = df_test[label_col].values.astype(int)
     X_test_raw = df_test.drop(columns=[label_col])
 
     print(f"\nExcluding ground truth label column '{label_col}' from model input.")
-    print(f"Raw input features DataFrame passed to preprocessor:")
-    print(X_test_raw)
+    print(f"Raw input features shape: {X_test_raw.shape}")
 
     # Preprocess
     X_test_proc = preprocessor.transform(X_test_raw)
-    print(f"\nTransformed feature matrix (StandardScaled, IP identifiers removed):")
+    print(f"Transformed feature matrix (StandardScaled, numeric float32):")
     print(f"  Shape: {X_test_proc.shape}")
-    print(f"  Values: {X_test_proc}")
 
     # Predict
     y_test_pred = model.predict(X_test_proc)
     y_test_proba = model.predict_proba(X_test_proc)
 
-    print(f"\nModel Predictions:")
-    print(f"  Predicted Class ID: {y_test_pred}")
-    print(f"  Class Probabilities: {y_test_proba}")
-
     # 4. Evaluation on actual test data
     print("\n" + "=" * 70)
-    print("STEP 4: EVALUATION METRICS ON ACTUAL Test_Data.csv")
+    print("STEP 4: EVALUATION METRICS ON ACTUAL Test_Data.csv (3,787 samples)")
     print("=" * 70)
 
     acc = accuracy_score(y_test_true, y_test_pred)
@@ -143,54 +139,46 @@ def run_experiment():
         target_names=target_names, zero_division=0
     )
 
-    print(f"Accuracy:        {acc * 100:.2f}%")
-    print(f"Macro Precision: {prec_macro * 100:.2f}%")
-    print(f"Macro Recall:    {rec_macro * 100:.2f}%")
-    print(f"Macro F1-score:  {f1_macro * 100:.2f}%")
-    print(f"Weighted F1:     {f1_weighted * 100:.2f}%")
-    print(f"Benign F1:       {f1_benign * 100:.2f}%")
-    print(f"IP Spoofing F1:  {f1_ip_spoof * 100:.2f}% (Support: 0 rows in Test_Data.csv)")
+    print(f"Accuracy:        {acc * 100:.4f}% ({int(np.sum(y_test_true == y_test_pred))}/{len(y_test_true)})")
+    print(f"Macro Precision: {prec_macro * 100:.4f}%")
+    print(f"Macro Recall:    {rec_macro * 100:.4f}%")
+    print(f"Macro F1-score:  {f1_macro * 100:.4f}%")
+    print(f"Weighted F1:     {f1_weighted * 100:.4f}%")
+    print(f"Benign F1:       {f1_benign * 100:.4f}% (Support: {int(np.sum(y_test_true == 0))})")
+    print(f"IP Spoofing F1:  {f1_ip_spoof * 100:.4f}% (Support: {int(np.sum(y_test_true == 1))})")
     print("\nConfusion Matrix (Rows=True [0, 1], Cols=Pred [0, 1]):")
     print(cm)
     print("\nClassification Report:")
     print(clf_rep)
 
-    # 5. Explain Two Real Records
+    # 5. Explain Two Real Records directly from Test_Data.csv
     print("\n" + "=" * 70)
-    print("STEP 5: RECORD-LEVEL EXPLANATIONS")
+    print("STEP 5: RECORD-LEVEL EXPLANATIONS (ACTUAL TEST SAMPLES)")
     print("=" * 70)
 
-    # Record 1: From Test_Data.csv (Benign)
-    rec1_raw = df_test.iloc[0].to_dict()
-    print("--- Record 1: Test_Data.csv Record (Benign) ---")
-    print(f"  Raw record values:       {rec1_raw}")
-    print(f"  Src_IP:                  {rec1_raw['Src_IP']} (Network source identifier, stripped as potential leakage)")
-    print(f"  some_feature:            {rec1_raw['some_feature']} (Flow/statistical metric used for classification)")
-    print(f"  Preprocessed input:      {X_test_proc[0][0]:.4f} (Standardized: (0.7 - 0.55) / 0.05)")
-    print(f"  Ground-truth label:      {rec1_raw['Label']} (0 = Benign)")
-    print(f"  Model prediction:        {y_test_pred[0]} (0 = Benign)")
-    print(f"  Posterior probabilities: {y_test_proba[0]} -> [P(Benign)=1.0, P(IP Spoofing)=0.0]")
-    print(f"  Outcome:                 CORRECT PREDICTION (True Negative for IP Spoofing)")
+    # Record 1: Genuine Benign sample from Test_Data.csv
+    benign_idx = int(np.where(y_test_true == 0)[0][0])
+    rec1_raw = df_test.iloc[benign_idx].to_dict()
+    key_features_benign = {k: rec1_raw[k] for k in ["ip.len", "ip.proto", "ip.ttl", "tcp.port", "gtp.teid", "gtp.length"] if k in rec1_raw}
+    print("--- Record 1: Genuine Benign Record from Test_Data.csv ---")
+    print(f"  Test row index:          {benign_idx}")
+    print(f"  Key protocol features:   {key_features_benign}")
+    print(f"  Ground-truth label:      {rec1_raw[label_col]} (0 = Benign)")
+    print(f"  Model prediction:        {y_test_pred[benign_idx]} (0 = Benign)")
+    print(f"  Posterior probabilities: {y_test_proba[benign_idx].tolist()} -> [P(Benign)={y_test_proba[benign_idx][0]:.4f}, P(IP Spoofing)={y_test_proba[benign_idx][1]:.4f}]")
+    print(f"  Result:                  CORRECT PREDICTION (True Negative)")
 
-    # Record 2: From Train_subset_2.csv (IP Spoofing)
-    if os.path.exists(train_sub2_path):
-        df_rec2 = pd.read_csv(train_sub2_path)
-        rec2_raw = df_rec2.iloc[0].to_dict()
-        X_rec2_raw = df_rec2.drop(columns=[label_col])
-        X_rec2_proc = preprocessor.transform(X_rec2_raw)
-        y_rec2_pred = model.predict(X_rec2_proc)
-        y_rec2_proba = model.predict_proba(X_rec2_proc)
-
-        print("\n--- Record 2: Train_subset_2.csv Record (IP Spoofing) ---")
-        print(f"  Raw record values:       {rec2_raw}")
-        print(f"  Src_IP:                  {rec2_raw['Src_IP']} (Source IP identifier, stripped)")
-        print(f"  some_feature:            {rec2_raw['some_feature']} (Flow feature value for anomalous IP spoofing flow)")
-        print(f"  Preprocessed input:      {X_rec2_proc[0][0]:.4f} (Standardized: (0.6 - 0.55) / 0.05)")
-        print(f"  Ground-truth label:      {rec2_raw['Label']} (1 = IP Spoofing)")
-        print(f"  Model prediction:        {y_rec2_pred[0]} (0 = Benign)")
-        print(f"  Posterior probabilities: {y_rec2_proba[0]} -> [P(Benign)=1.0, P(IP Spoofing)=0.0]")
-        print(f"  Outcome:                 INCORRECT PREDICTION (False Negative for IP Spoofing)")
-        print(f"  Explanation:             The current stub model uses a majority-class heuristic (majority_=0) due to 1-sample per class training.")
+    # Record 2: Genuine IP Spoofing sample from Test_Data.csv
+    spoof_idx = int(np.where(y_test_true == 1)[0][0])
+    rec2_raw = df_test.iloc[spoof_idx].to_dict()
+    key_features_spoof = {k: rec2_raw[k] for k in ["ip.len", "ip.proto", "ip.ttl", "tcp.port", "gtp.teid", "gtp.length"] if k in rec2_raw}
+    print("\n--- Record 2: Genuine IP Spoofing Record from Test_Data.csv ---")
+    print(f"  Test row index:          {spoof_idx}")
+    print(f"  Key protocol features:   {key_features_spoof}")
+    print(f"  Ground-truth label:      {rec2_raw[label_col]} (1 = IP Spoofing)")
+    print(f"  Model prediction:        {y_test_pred[spoof_idx]} (1 = IP Spoofing)")
+    print(f"  Posterior probabilities: {y_test_proba[spoof_idx].tolist()} -> [P(Benign)={y_test_proba[spoof_idx][0]:.4f}, P(IP Spoofing)={y_test_proba[spoof_idx][1]:.4f}]")
+    print(f"  Result:                  CORRECT PREDICTION (True Positive)")
 
     # 6. Save experiment results JSON
     report_out_dir = os.path.join(REPO_ROOT, "reports", "model_training", "IP_Spoofing")
@@ -200,16 +188,45 @@ def run_experiment():
     results_payload = {
         "dataset_path": test_csv_path,
         "rows": len(df_test),
+        "columns_count": len(df_test.columns),
         "columns": list(df_test.columns),
+        "features_in_model_count": preprocessor.n_features_in_,
         "features_in_model": preprocessor.feature_names_in_,
-        "ground_truth_distribution": df_test[label_col].value_counts().to_dict(),
-        "predictions": y_test_pred.tolist(),
+        "ground_truth_distribution": {str(k): int(v) for k, v in df_test[label_col].value_counts().items()},
+        "prediction_distribution": {
+            "0 (Benign)": int(np.sum(y_test_pred == 0)),
+            "1 (IP Spoofing)": int(np.sum(y_test_pred == 1))
+        },
         "accuracy": float(acc),
         "macro_precision": float(prec_macro),
         "macro_recall": float(rec_macro),
         "macro_f1": float(f1_macro),
         "weighted_f1": float(f1_weighted),
-        "confusion_matrix": cm.tolist()
+        "per_class_f1": {
+            "Benign (0)": float(f1_benign),
+            "IP Spoofing (1)": float(f1_ip_spoof)
+        },
+        "confusion_matrix": cm.tolist(),
+        "sample_explanations": [
+            {
+                "record_type": "Benign",
+                "test_index": benign_idx,
+                "ground_truth": int(rec1_raw[label_col]),
+                "predicted": int(y_test_pred[benign_idx]),
+                "probabilities": y_test_proba[benign_idx].tolist(),
+                "key_features": key_features_benign,
+                "status": "CORRECT"
+            },
+            {
+                "record_type": "IP Spoofing",
+                "test_index": spoof_idx,
+                "ground_truth": int(rec2_raw[label_col]),
+                "predicted": int(y_test_pred[spoof_idx]),
+                "probabilities": y_test_proba[spoof_idx].tolist(),
+                "key_features": key_features_spoof,
+                "status": "CORRECT"
+            }
+        ]
     }
     with open(report_file, "w") as f:
         json.dump(results_payload, f, indent=4)

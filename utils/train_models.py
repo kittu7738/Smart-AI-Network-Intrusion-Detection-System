@@ -45,7 +45,6 @@ import numpy as np
 try:
     from sklearn.tree import DecisionTreeClassifier
     from sklearn.ensemble import RandomForestClassifier, ExtraTreesClassifier, HistGradientBoostingClassifier
-    from xgboost import XGBClassifier
     from sklearn.utils.class_weight import compute_class_weight, compute_sample_weight
     SKLEARN_AVAILABLE = True
 except ImportError:
@@ -86,15 +85,20 @@ except ImportError:
     class HistGradientBoostingClassifier(DecisionTreeClassifier):
         pass
 
-    class XGBClassifier(DecisionTreeClassifier):
-        pass
-
     def compute_sample_weight(class_weight, y):
         classes = np.unique(y)
         n_samples = len(y)
         n_classes = len(classes)
         w_dict = {c: float(n_samples / (n_classes * np.sum(y == c))) for c in classes}
         return np.array([w_dict[c] for c in y], dtype=np.float32)
+
+try:
+    from xgboost import XGBClassifier
+    XGBOOST_AVAILABLE = True
+except (ImportError, Exception):
+    XGBOOST_AVAILABLE = False
+    class XGBClassifier(DecisionTreeClassifier):
+        pass
 
 import gc
 from utils.data_preparation import resolve_path, load_config

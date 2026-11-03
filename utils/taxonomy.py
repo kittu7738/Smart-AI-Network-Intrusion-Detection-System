@@ -69,7 +69,8 @@ SPECIALIST_FEATURE_INDICATORS = {
         "tcp_flag_syn", "tcp_flag_rst", "tcp_flag_psh", "tcp_flag_ack"
     ],
     "IP_Spoofing": [
-        "Seq", "GTP", "5G", "some_feature"
+        "gtp.teid", "gtp.length", "gtp.flags", "gtp.message", "ip.proto",
+        "ip.ttl", "ip.len", "tcp.stream", "Seq", "GTP", "5G", "some_feature"
     ],
     "IDS2018": [
         "Flow Duration", "Tot Fwd Pkts", "Tot Bwd Pkts", "TotLen Fwd Pkts",

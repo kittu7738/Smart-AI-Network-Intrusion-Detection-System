@@ -1,13 +1,4 @@
 {
-    "IDS2018": {
-        "Benign": 4972213,
-        "DDoS": 775955,
-        "DoS": 196504,
-        "Botnet": 144318,
-        "Brute Force": 94082,
-        "Infiltration": 92081,
-        "Web Attack": 852
-    },
     "CICIoT2023": {
         "DDoS": 5520800,
         "DoS": 1312503,
@@ -19,5 +10,9 @@
         "Web Attack": 3425,
         "Brute Force": 2063,
         "Infiltration": 561
+    },
+    "5G_NIDD": {
+        "Benign": 26875,
+        "IP Spoofing": 7200
     }
 }

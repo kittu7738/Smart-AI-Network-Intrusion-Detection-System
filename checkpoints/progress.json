@@ -5,7 +5,7 @@
         "label_strategy_analysis_completed": true,
         "data_preparation_completed": true,
         "data_preparation_started": true,
-        "ids2018_preparation_status": "Success",
+        "ids2018_preparation_status": "Skipped",
         "ciciot2023_preparation_status": "Success",
         "leakage_check_completed": true,
         "ids2018_model_training_status": "completed",

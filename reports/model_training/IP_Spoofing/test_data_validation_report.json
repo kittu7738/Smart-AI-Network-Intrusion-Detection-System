@@ -1,33 +1,166 @@
 {
     "dataset_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset/data/Test_Data.csv",
-    "rows": 1,
+    "rows": 3787,
+    "columns_count": 45,
     "columns": [
-        "Src_IP",
-        "some_feature",
-        "Label"
+        "ip.len",
+        "ip.flags.df",
+        "ip.flags.mf",
+        "tcp.port",
+        "tcp.window_size",
+        "tcp.ack_raw",
+        "ip.fragment",
+        "ip.fragment.count",
+        "ip.fragments",
+        "ip.ttl",
+        "ip.proto",
+        "tcp.window_size.1",
+        "tcp.ack",
+        "tcp.seq",
+        "tcp.len",
+        "tcp.stream",
+        "tcp.urgent_pointer",
+        "tcp.flags",
+        "tcp.analysis.ack_rtt",
+        "tcp.segments",
+        "tcp.reassembled.length",
+        "http.request",
+        "udp.port",
+        "udp.length",
+        "frame.time_relative",
+        "frame.time_delta",
+        "tcp.time_relative",
+        "tcp.time_delta",
+        "gtp.ext_hdr",
+        "gtp.ext_hdr.length",
+        "gtp.ext_hdr.pdu_ses_con.pdu_type",
+        "gtp.ext_hdr.pdu_ses_con.qos_flow_id",
+        "gtp.ext_hdr.pdu_ses_cont.ppp",
+        "gtp.ext_hdr.pdu_ses_cont.rqi",
+        "gtp.flags",
+        "gtp.flags.e",
+        "gtp.flags.payload",
+        "gtp.flags.pn",
+        "gtp.flags.reserved",
+        "gtp.flags.s",
+        "gtp.flags.version",
+        "gtp.length",
+        "gtp.message",
+        "gtp.teid",
+        "label"
     ],
+    "features_in_model_count": 44,
     "features_in_model": [
-        "some_feature"
+        "ip.len",
+        "ip.flags.df",
+        "ip.flags.mf",
+        "tcp.port",
+        "tcp.window_size",
+        "tcp.ack_raw",
+        "ip.fragment",
+        "ip.fragment.count",
+        "ip.fragments",
+        "ip.ttl",
+        "ip.proto",
+        "tcp.window_size.1",
+        "tcp.ack",
+        "tcp.seq",
+        "tcp.len",
+        "tcp.stream",
+        "tcp.urgent_pointer",
+        "tcp.flags",
+        "tcp.analysis.ack_rtt",
+        "tcp.segments",
+        "tcp.reassembled.length",
+        "http.request",
+        "udp.port",
+        "udp.length",
+        "frame.time_relative",
+        "frame.time_delta",
+        "tcp.time_relative",
+        "tcp.time_delta",
+        "gtp.ext_hdr",
+        "gtp.ext_hdr.length",
+        "gtp.ext_hdr.pdu_ses_con.pdu_type",
+        "gtp.ext_hdr.pdu_ses_con.qos_flow_id",
+        "gtp.ext_hdr.pdu_ses_cont.ppp",
+        "gtp.ext_hdr.pdu_ses_cont.rqi",
+        "gtp.flags",
+        "gtp.flags.e",
+        "gtp.flags.payload",
+        "gtp.flags.pn",
+        "gtp.flags.reserved",
+        "gtp.flags.s",
+        "gtp.flags.version",
+        "gtp.length",
+        "gtp.message",
+        "gtp.teid"
     ],
     "ground_truth_distribution": {
-        "0": 1
+        "0": 2987,
+        "1": 800
     },
-    "predictions": [
-        0
-    ],
+    "prediction_distribution": {
+        "0 (Benign)": 2987,
+        "1 (IP Spoofing)": 800
+    },
     "accuracy": 1.0,
-    "macro_precision": 0.5,
-    "macro_recall": 0.5,
-    "macro_f1": 0.5,
+    "macro_precision": 1.0,
+    "macro_recall": 1.0,
+    "macro_f1": 1.0,
     "weighted_f1": 1.0,
+    "per_class_f1": {
+        "Benign (0)": 1.0,
+        "IP Spoofing (1)": 1.0
+    },
     "confusion_matrix": [
         [
-            1,
+            2987,
             0
         ],
         [
             0,
-            0
+            800
         ]
+    ],
+    "sample_explanations": [
+        {
+            "record_type": "Benign",
+            "test_index": 0,
+            "ground_truth": 0,
+            "predicted": 0,
+            "probabilities": [
+                1.0,
+                0.0
+            ],
+            "key_features": {
+                "ip.len": 84.0,
+                "ip.proto": 17.0,
+                "ip.ttl": 64.0,
+                "tcp.port": 80.0,
+                "gtp.teid": 1.0,
+                "gtp.length": 48.0
+            },
+            "status": "CORRECT"
+        },
+        {
+            "record_type": "IP Spoofing",
+            "test_index": 1,
+            "ground_truth": 1,
+            "predicted": 1,
+            "probabilities": [
+                0.0,
+                1.0
+            ],
+            "key_features": {
+                "ip.len": 28.0,
+                "ip.proto": 1.0,
+                "ip.ttl": 64.0,
+                "tcp.port": 0.0,
+                "gtp.teid": -1.0,
+                "gtp.length": 0.0
+            },
+            "status": "CORRECT"
+        }
     ]
 }

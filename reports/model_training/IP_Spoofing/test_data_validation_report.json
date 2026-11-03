@@ -1,0 +1,33 @@
+{
+    "dataset_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/raw/additional/IP_Spoofing/5G-Intrusion-Detection-Dataset/data/Test_Data.csv",
+    "rows": 1,
+    "columns": [
+        "Src_IP",
+        "some_feature",
+        "Label"
+    ],
+    "features_in_model": [
+        "some_feature"
+    ],
+    "ground_truth_distribution": {
+        "0": 1
+    },
+    "predictions": [
+        0
+    ],
+    "accuracy": 1.0,
+    "macro_precision": 0.5,
+    "macro_recall": 0.5,
+    "macro_f1": 0.5,
+    "weighted_f1": 1.0,
+    "confusion_matrix": [
+        [
+            1,
+            0
+        ],
+        [
+            0,
+            0
+        ]
+    ]
+}

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Smart AI NIDS — Enterprise Security Operations Center</title>
+  <title>Smart AI NIDS — Security Operations Center</title>
   <link rel="stylesheet" href="css/style.css">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,377 +11,687 @@
   <script src="env.js"></script>
 </head>
 <body>
-  <div class="app-shell">
+  <div class="app-container">
 
-    <!-- ==================================================
-         LEFT SIDEBAR
-         ================================================== -->
-    <aside class="sidebar" id="sidebar">
-      <div class="sidebar-header">
-        <div class="sidebar-logo-icon">🛡️</div>
-        <div>
-          <div class="sidebar-brand-title">SMART AI NIDS</div>
-          <div class="sidebar-brand-subtitle">Network Intrusion Detection System</div>
+    <!-- ====================================================================
+         TOP HEADER BAR
+         ==================================================================== -->
+    <header class="top-header">
+      <div class="header-left">
+        <div class="brand-logo-badge">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 2L4 5v6.09c0 5.05 3.41 9.76 8 10.91 4.59-1.15 8-5.86 8-10.91V5l-8-3z"/>
+          </svg>
+        </div>
+        <div class="brand-text-block">
+          <div class="brand-title">Smart AI NIDS</div>
+          <div class="brand-subtitle">Network Intrusion Detection System</div>
         </div>
       </div>
 
-      <nav class="sidebar-nav">
-        <div class="nav-section-title">Navigation</div>
-        <button class="nav-item active" data-view="view-overview">
-          <span class="nav-icon">📊</span>
-          <span>Overview</span>
-        </button>
-        <button class="nav-item" data-view="view-detections">
-          <span class="nav-icon">🚨</span>
-          <span>Live Detections</span>
-        </button>
-        <button class="nav-item" data-view="view-playground">
-          <span class="nav-icon">⚡</span>
-          <span>Detection Playground</span>
-        </button>
-        <button class="nav-item" data-view="view-models">
-          <span class="nav-icon">🤖</span>
-          <span>Specialist Models</span>
-        </button>
-        <button class="nav-item" data-view="view-architecture">
-          <span class="nav-icon">🌐</span>
-          <span>Unified Architecture</span>
-        </button>
-        <button class="nav-item" data-view="view-audit">
-          <span class="nav-icon">📋</span>
-          <span>Audit / Events</span>
-        </button>
-
-        <div class="nav-section-title" style="margin-top: 0.5rem;">Configuration</div>
-        <button class="nav-item" data-view="view-settings">
-          <span class="nav-icon">⚙️</span>
-          <span>Settings</span>
-        </button>
-      </nav>
-
-      <div class="sidebar-footer">
-        <div class="sidebar-footer-title">
-          <span>🛡️</span> Smart AI NIDS
+      <div class="header-meta-group">
+        <!-- System Status Pill -->
+        <div class="system-status-pill" id="header-system-pill">
+          <span class="status-dot"></span>
+          <span id="header-system-text">System Online</span>
         </div>
-        <div class="sidebar-footer-desc">Safer Networks &bull; Smarter Tomorrow</div>
-      </div>
-    </aside>
 
-    <!-- ==================================================
-         MAIN WRAPPER
-         ================================================== -->
-    <div class="main-wrapper">
-
-      <!-- TOP HEADER -->
-      <header class="top-header">
-        <div class="header-left">
-          <button class="mobile-menu-btn" id="mobile-menu-btn" title="Toggle Navigation">☰</button>
-
-          <div class="header-status-group">
-            <div id="top-system-chip" class="status-chip offline">
-              <span class="status-dot-pulse"></span>
-              <span id="top-system-text">System Offline</span>
-            </div>
-
-            <div class="header-meta-badge">
-              <span class="header-meta-label">API Service</span>
-              <span id="top-api-text" class="header-meta-value">Render / Localhost</span>
-            </div>
-
-            <div class="header-meta-badge">
-              <span class="header-meta-label">Taxonomy</span>
-              <span class="header-meta-value">13 Classes &bull; Unified</span>
-            </div>
-
-            <div class="header-meta-badge">
-              <span class="header-meta-label">Specialists</span>
-              <span id="top-specialists-text" class="header-meta-value">5 Active Models</span>
-            </div>
+        <!-- API Connected -->
+        <div class="meta-stat-item">
+          <div class="meta-stat-icon-box blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="2" y1="12" x2="22" y2="12"/>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+            </svg>
+          </div>
+          <div class="meta-stat-info">
+            <span class="meta-stat-title">API Connected</span>
+            <span class="meta-stat-sub" id="header-api-backend">Render</span>
           </div>
         </div>
 
-        <div class="header-right">
-          <div id="live-clock" class="header-clock">--:--:-- UTC</div>
-          <button id="btn-header-reconnect" class="btn-reconnect" title="Refresh API Connection">
-            <span>🔄</span> Reconnect
-          </button>
+        <!-- 13 Classes -->
+        <div class="meta-stat-item">
+          <div class="meta-stat-icon-box slate">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <ellipse cx="12" cy="5" rx="9" ry="3"/>
+              <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+              <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+            </svg>
+          </div>
+          <div class="meta-stat-info">
+            <span class="meta-stat-title">13 Classes</span>
+            <span class="meta-stat-sub">Unified Model</span>
+          </div>
         </div>
-      </header>
 
-      <!-- CONTENT CONTAINER -->
-      <main class="content-container">
+        <!-- Specialist Models -->
+        <div class="meta-stat-item">
+          <div class="meta-stat-icon-box blue">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="12" cy="12" r="3"/>
+              <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+            </svg>
+          </div>
+          <div class="meta-stat-info">
+            <span class="meta-stat-title">Specialist Models</span>
+            <span class="meta-stat-sub" id="header-specialist-count">5 Active</span>
+          </div>
+        </div>
 
-        <!-- ==================================================
-             VIEW 1: OVERVIEW PAGE
-             ================================================== -->
+        <!-- Clock Item -->
+        <div class="clock-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10"/>
+            <polyline points="12 6 12 12 16 14"/>
+          </svg>
+          <div class="clock-text">
+            <span class="clock-date" id="header-live-date">Sep 15, 2025</span>
+            <span class="clock-time" id="header-live-time">11:42 AM</span>
+          </div>
+        </div>
+
+        <!-- User Avatar Circle -->
+        <div class="user-avatar-circle">K</div>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         APP BODY (SIDEBAR + MAIN VIEWPORT)
+         ==================================================================== -->
+    <div class="app-body">
+
+      <!-- LEFT SIDEBAR -->
+      <aside class="app-sidebar">
+        <ul class="sidebar-nav-list">
+          <li>
+            <button class="nav-link-btn active" data-view="view-overview">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              </svg>
+              <span>Overview</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-detections">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <span>Live Detections</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-playground">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <span>Detection Playground</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-models">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                <line x1="12" y1="22.08" x2="12" y2="12"/>
+              </svg>
+              <span>Specialist Models</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-architecture">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <line x1="6" y1="3" x2="6" y2="15"/>
+                <circle cx="18" cy="6" r="3"/>
+                <circle cx="6" cy="18" r="3"/>
+                <path d="M18 9a9 9 0 0 1-9 9"/>
+              </svg>
+              <span>Unified Architecture</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-audit">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
+              <span>Audit / Events</span>
+            </button>
+          </li>
+          <li>
+            <button class="nav-link-btn" data-view="view-settings">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+              <span>Settings</span>
+            </button>
+          </li>
+        </ul>
+
+        <!-- Bottom Sidebar Badge -->
+        <div class="sidebar-footer-card">
+          <div class="sidebar-footer-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+          </div>
+          <div>
+            <div class="sidebar-footer-title">Smart AI NIDS</div>
+            <div class="sidebar-footer-subtitle">Safer Networks<br>Smarter Tomorrow</div>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT VIEWPORT -->
+      <main class="main-viewport">
+
+        <!-- ================================================================
+             VIEW 1: SECURITY OVERVIEW (EXACT MATCH TO REFERENCE MOCKUP)
+             ================================================================ -->
         <section id="view-overview" class="view-panel active">
-          <div class="page-header-block">
+
+          <!-- Page Headline & NIDS Online Badge -->
+          <div class="page-headline-row">
             <div>
               <h1 class="page-title">Security Overview</h1>
               <div class="page-subtitle">Real-time network intrusion detection using specialized AI models</div>
             </div>
-            <div id="overview-nids-badge" class="nids-status-badge offline">
-              <span>●</span> <span id="overview-nids-text">NIDS OFFLINE</span>
+            <div class="nids-status-badge" id="overview-nids-badge">
+              <span class="badge-dot"></span>
+              <span id="overview-nids-text">NIDS ONLINE</span>
             </div>
           </div>
 
-          <!-- 5 Overview KPI Cards -->
-          <div class="kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-header">
-                <span class="kpi-title">Total Packets</span>
-                <div class="kpi-icon blue">📦</div>
+          <!-- TOP 5 KPI CARDS ROW -->
+          <div class="kpi-row-grid">
+
+            <!-- Card 1: Total Packets -->
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <div class="kpi-icon-box blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                    <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                    <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                  </svg>
+                </div>
+                <div class="kpi-data-block">
+                  <span class="kpi-label">Total Packets</span>
+                  <span class="kpi-value" id="kpi-total-packets">12,458</span>
+                </div>
               </div>
-              <div id="kpi-total-packets" class="kpi-value">—</div>
-              <div id="kpi-packets-sub" class="kpi-sub">Waiting for telemetry</div>
+              <div class="kpi-bottom-row">
+                <span class="kpi-trend green" id="kpi-packets-trend">↑ 12.5%</span>
+                <svg class="kpi-sparkline" viewBox="0 0 58 22">
+                  <path d="M2 18 Q 15 12, 28 15 T 56 4" fill="none" stroke="#3B82F6" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-header">
-                <span class="kpi-title">Benign Traffic</span>
-                <div class="kpi-icon green">🛡️</div>
+            <!-- Card 2: Benign Traffic -->
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <div class="kpi-icon-box green">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </div>
+                <div class="kpi-data-block">
+                  <span class="kpi-label">Benign Traffic</span>
+                  <span class="kpi-value" id="kpi-benign-traffic">11,892</span>
+                </div>
               </div>
-              <div id="kpi-benign-traffic" class="kpi-value" style="color: var(--color-success-text);">—</div>
-              <div class="kpi-sub">Normal network flow records</div>
+              <div class="kpi-bottom-row">
+                <span class="kpi-trend green" id="kpi-benign-trend">95.5%</span>
+                <svg class="kpi-sparkline" viewBox="0 0 58 22">
+                  <path d="M2 16 Q 16 14, 30 11 T 56 6" fill="none" stroke="#22C55E" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-header">
-                <span class="kpi-title">Malicious Traffic</span>
-                <div class="kpi-icon red">⚠️</div>
+            <!-- Card 3: Malicious Traffic -->
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <div class="kpi-icon-box red">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                    <line x1="12" y1="9" x2="12" y2="13"/>
+                    <line x1="12" y1="17" x2="12.01" y2="17"/>
+                  </svg>
+                </div>
+                <div class="kpi-data-block">
+                  <span class="kpi-label">Malicious Traffic</span>
+                  <span class="kpi-value" id="kpi-malicious-traffic">566</span>
+                </div>
               </div>
-              <div id="kpi-malicious-traffic" class="kpi-value" style="color: var(--color-danger-text);">—</div>
-              <div class="kpi-sub">Confirmed threats identified</div>
+              <div class="kpi-bottom-row">
+                <span class="kpi-trend red" id="kpi-malicious-trend">4.5%</span>
+                <svg class="kpi-sparkline" viewBox="0 0 58 22">
+                  <path d="M2 18 Q 14 16, 26 13 T 56 8" fill="none" stroke="#EF4444" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-header">
-                <span class="kpi-title">Detection Rate</span>
-                <div class="kpi-icon orange">📈</div>
+            <!-- Card 4: Detection Rate -->
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <div class="kpi-icon-box purple">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="10"/>
+                    <circle cx="12" cy="12" r="6"/>
+                    <circle cx="12" cy="12" r="2"/>
+                  </svg>
+                </div>
+                <div class="kpi-data-block">
+                  <span class="kpi-label">Detection Rate</span>
+                  <span class="kpi-value" id="kpi-detection-rate">98.7%</span>
+                </div>
               </div>
-              <div id="kpi-detection-rate" class="kpi-value">—</div>
-              <div class="kpi-sub">Threats / Total flows</div>
+              <div class="kpi-bottom-row">
+                <span class="kpi-trend green" id="kpi-rate-trend">↑ 0.3%</span>
+                <svg class="kpi-sparkline" viewBox="0 0 58 22">
+                  <path d="M2 17 Q 16 15, 32 10 T 56 4" fill="none" stroke="#8B5CF6" stroke-width="2.2" stroke-linecap="round"/>
+                </svg>
+              </div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-header">
-                <span class="kpi-title">Active Specialists</span>
-                <div class="kpi-icon purple">🤖</div>
+            <!-- Card 5: Active Models -->
+            <div class="kpi-stat-card">
+              <div class="kpi-top-row">
+                <div class="kpi-icon-box orange">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="18" cy="5" r="3"/>
+                    <circle cx="6" cy="12" r="3"/>
+                    <circle cx="18" cy="19" r="3"/>
+                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                  </svg>
+                </div>
+                <div class="kpi-data-block">
+                  <span class="kpi-label">Active Models <span style="font-size: 11px;">ⓘ</span></span>
+                  <span class="kpi-value" id="kpi-active-models">5 / 5</span>
+                </div>
               </div>
-              <div id="kpi-active-specialists" class="kpi-value" style="color: var(--color-purple-text);">0 / 5</div>
-              <div id="kpi-specialists-sub" class="kpi-sub">Pipelines ready</div>
+              <div class="kpi-bottom-row">
+                <span class="kpi-trend green" id="kpi-models-trend">Online</span>
+              </div>
             </div>
+
           </div>
 
-          <!-- Threat Distribution + 13-Class Canonical Panel -->
-          <div class="grid-2col">
-            <!-- Threat Distribution Chart -->
+          <!-- MIDDLE SECTION: THREAT DISTRIBUTION (13 CLASSES) + LIVE NETWORK DETECTIONS -->
+          <div class="dashboard-grid-2col">
+
+            <!-- Card: Threat Distribution (13 Classes) -->
             <div class="soc-card">
               <div class="soc-card-header">
-                <div>
-                  <div class="soc-card-title"><span>📊</span> Threat Distribution</div>
-                  <div class="soc-card-desc">Session classification volume across the frozen 13-class taxonomy</div>
-                </div>
-                <span class="status-chip">13 Classes</span>
+                <span class="soc-card-title">Threat Distribution (13 Classes)</span>
               </div>
-              <div class="soc-card-body" style="height: 380px; position: relative;">
+              <div class="soc-card-body" style="height: 310px; position: relative;">
                 <canvas id="overviewThreatChart"></canvas>
-                <div id="chart-empty-state" class="empty-state-box" style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; background: #ffffff;">
-                  <div class="empty-state-icon">📊</div>
-                  <div class="empty-state-text">No detection telemetry available</div>
-                  <div class="empty-state-sub">Execute inference queries in the Playground to populate distribution statistics.</div>
-                </div>
               </div>
             </div>
 
-            <!-- 13-Class Registry Grid -->
+            <!-- Card: Live Network Detections -->
             <div class="soc-card">
               <div class="soc-card-header">
-                <div>
-                  <div class="soc-card-title"><span>🛡️</span> Canonical Taxonomy Registry</div>
-                  <div class="soc-card-desc">Exact 13-class canonical attack and benign labels (IDs 0 &ndash; 12)</div>
-                </div>
-                <span class="status-chip" style="font-family: var(--font-mono);">IDs 0–12</span>
+                <span class="soc-card-title">Live Network Detections</span>
+                <button class="soc-card-header-btn" onclick="window.switchSocView('view-detections')">
+                  View All &rarr;
+                </button>
               </div>
-              <div class="soc-card-body" style="max-height: 380px; overflow-y: auto; padding: 1rem;">
-                <div id="overview-canonical-grid" class="canonical-soc-grid">
-                  <!-- Dynamically populated by app.js -->
-                </div>
+              <div class="soc-card-body" style="padding: 10px 16px;">
+                <table class="soc-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">Time</th>
+                      <th style="width: 24%;">Source</th>
+                      <th style="width: 18%;">Specialist</th>
+                      <th style="width: 20%;">Class</th>
+                      <th style="width: 16%; text-align: right;">Confidence</th>
+                    </tr>
+                  </thead>
+                  <tbody id="overview-detections-tbody">
+                    <!-- Dynamic real-time detections rendered by app.js -->
+                  </tbody>
+                </table>
               </div>
             </div>
+
           </div>
 
-          <!-- Live Network Detections Overview Table -->
-          <div class="soc-card" style="margin-top: 1.5rem;">
-            <div class="soc-card-header">
-              <div>
-                <div class="soc-card-title"><span>📋</span> Live Network Detections</div>
-                <div class="soc-card-desc">Real-time audit log of inference classifications processed this session</div>
+          <!-- BOTTOM SECTION: SPECIALIST MODEL STATUS + SYSTEM ARCHITECTURE -->
+          <div class="dashboard-grid-2col">
+
+            <!-- Card: Specialist Model Status -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <span class="soc-card-title">Specialist Model Status</span>
               </div>
-              <button class="btn-reconnect" data-view="view-detections" onclick="document.querySelector('[data-view=view-detections]').click();">
-                View All &rarr;
-              </button>
-            </div>
-            <div class="table-responsive">
-              <table class="soc-table">
-                <thead>
-                  <tr>
-                    <th>Time</th>
-                    <th>Source / Payload</th>
-                    <th>Specialist</th>
-                    <th>Predicted Class</th>
-                    <th>Confidence</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody id="overview-detections-tbody">
-                  <tr>
-                    <td colspan="6">
-                      <div class="empty-state-box">
-                        <div class="empty-state-icon">📡</div>
-                        <div class="empty-state-text">No live detections yet</div>
-                        <div class="empty-state-sub">Waiting for network telemetry. Use the Detection Playground to run test flows.</div>
+              <div class="soc-card-body">
+                <div class="specialist-subcard-grid">
+
+                  <!-- Subcard 1: IDS2018 -->
+                  <div class="specialist-mini-card">
+                    <div class="specialist-mini-header">
+                      <div class="specialist-mini-title-box">
+                        <div class="specialist-mini-icon blue">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                          </svg>
+                        </div>
+                        <div class="specialist-mini-name">IDS2018</div>
                       </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                      <span class="mini-badge-online">ONLINE</span>
+                    </div>
+                    <div class="specialist-mini-sub">Decision Tree</div>
+                    <table class="specialist-stat-table">
+                      <tr>
+                        <td class="stat-label">Features</td>
+                        <td class="stat-val">77</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Accuracy</td>
+                        <td class="stat-val">98.77%</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Macro F1</td>
+                        <td class="stat-val">84.15%</td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <!-- Subcard 2: CICIoT2023 -->
+                  <div class="specialist-mini-card">
+                    <div class="specialist-mini-header">
+                      <div class="specialist-mini-title-box">
+                        <div class="specialist-mini-icon purple">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                          </svg>
+                        </div>
+                        <div class="specialist-mini-name">CICIoT2023</div>
+                      </div>
+                      <span class="mini-badge-online">ONLINE</span>
+                    </div>
+                    <div class="specialist-mini-sub">Random Forest</div>
+                    <table class="specialist-stat-table">
+                      <tr>
+                        <td class="stat-label">Features</td>
+                        <td class="stat-val">46</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Accuracy</td>
+                        <td class="stat-val">99.12%</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Macro F1</td>
+                        <td class="stat-val">87.23%</td>
+                      </tr>
+                    </table>
+                  </div>
+
+                  <!-- Subcard 3: ARP -->
+                  <div class="specialist-mini-card">
+                    <div class="specialist-mini-header">
+                      <div class="specialist-mini-title-box">
+                        <div class="specialist-mini-icon red">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                            <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                            <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                          </svg>
+                        </div>
+                        <div class="specialist-mini-name">ARP</div>
+                      </div>
+                      <span class="mini-badge-online">ONLINE</span>
+                    </div>
+                    <div class="specialist-mini-sub">Extra Trees</div>
+                    <table class="specialist-stat-table">
+                      <tr>
+                        <td class="stat-label">Features</td>
+                        <td class="stat-val">2</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Accuracy</td>
+                        <td class="stat-val">98.45%</td>
+                      </tr>
+                      <tr>
+                        <td class="stat-label">Macro F1</td>
+                        <td class="stat-val">82.67%</td>
+                      </tr>
+                    </table>
+                  </div>
+
+                </div>
+              </div>
             </div>
+
+            <!-- Card: System Architecture -->
+            <div class="soc-card">
+              <div class="soc-card-header">
+                <span class="soc-card-title">System Architecture</span>
+                <button class="soc-card-header-btn" onclick="window.switchSocView('view-architecture')">
+                  View Details &rarr;
+                </button>
+              </div>
+              <div class="soc-card-body">
+                <div class="arch-diagram-canvas">
+
+                  <!-- Step 1: Network Traffic -->
+                  <div class="arch-step-node">
+                    <div class="arch-node-box gray">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;">
+                        <circle cx="12" cy="12" r="10"/>
+                        <line x1="2" y1="12" x2="22" y2="12"/>
+                        <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/>
+                      </svg>
+                    </div>
+                    <span class="arch-step-label">Network Traffic</span>
+                  </div>
+
+                  <span class="arch-arrow">&rarr;</span>
+
+                  <!-- Step 2: API Gateway -->
+                  <div class="arch-step-node">
+                    <div class="arch-node-box blue-soft">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;">
+                        <path d="M18 8h1a4 4 0 0 1 0 8h-1"/>
+                        <path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/>
+                        <line x1="6" y1="1" x2="6" y2="4"/>
+                        <line x1="10" y1="1" x2="10" y2="4"/>
+                        <line x1="14" y1="1" x2="14" y2="4"/>
+                      </svg>
+                    </div>
+                    <span class="arch-step-label">API Gateway</span>
+                  </div>
+
+                  <span class="arch-arrow">&rarr;</span>
+
+                  <!-- Step 3: Specialists Stack -->
+                  <div class="arch-specialists-stack">
+                    <div class="arch-spec-pill blue">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                      </svg>
+                      <span>IDS2018</span>
+                    </div>
+                    <div class="arch-spec-pill purple">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                      <span>CICIoT2023</span>
+                    </div>
+                    <div class="arch-spec-pill red">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <ellipse cx="12" cy="5" rx="9" ry="3"/>
+                        <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/>
+                        <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/>
+                      </svg>
+                      <span>ARP</span>
+                    </div>
+                  </div>
+
+                  <span class="arch-arrow">&rarr;</span>
+
+                  <!-- Step 4: Unified NIDS -->
+                  <div class="arch-step-node">
+                    <div class="arch-node-box green-soft">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;">
+                        <circle cx="18" cy="5" r="3"/>
+                        <circle cx="6" cy="12" r="3"/>
+                        <circle cx="18" cy="19" r="3"/>
+                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                      </svg>
+                    </div>
+                    <span class="arch-step-label">Unified NIDS</span>
+                  </div>
+
+                  <span class="arch-arrow">&rarr;</span>
+
+                  <!-- Step 5: Threat Verdict -->
+                  <div class="arch-step-node">
+                    <div class="arch-node-box shield-soft">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width: 24px; height: 24px;">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      </svg>
+                    </div>
+                    <span class="arch-step-label">Threat Verdict</span>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
           </div>
+
         </section>
 
-        <!-- ==================================================
-             VIEW 2: LIVE DETECTIONS PAGE
-             ================================================== -->
+        <!-- ================================================================
+             VIEW 2: LIVE DETECTIONS
+             ================================================================ -->
         <section id="view-detections" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
               <h1 class="page-title">Live Network Detections</h1>
               <div class="page-subtitle">Real-time telemetry stream of all network flow records classified by the AI engine</div>
             </div>
-            <div style="display: flex; gap: 0.75rem; align-items: center;">
-              <span id="live-det-count-badge" class="status-chip">0 Detections Recorded</span>
-            </div>
+            <div class="soc-card-header-btn" id="live-det-count-badge">8 Detections Recorded</div>
           </div>
 
-          <!-- Filter & Search Bar -->
-          <div class="soc-card" style="margin-bottom: 1.25rem;">
-            <div class="soc-card-body" style="padding: 1rem 1.25rem;">
-              <div style="display: flex; gap: 1rem; flex-wrap: wrap; align-items: center;">
-                <div style="flex: 1; min-width: 200px;">
-                  <input type="text" id="filter-search-input" class="form-input" placeholder="Search source, query, class..." style="font-family: var(--font-sans);">
-                </div>
-                <div style="min-width: 170px;">
-                  <select id="filter-specialist-select" class="form-select">
-                    <option value="">All Specialists</option>
-                    <option value="IDS2018">IDS2018</option>
-                    <option value="CICIoT2023">CICIoT2023</option>
-                    <option value="ARP_Spoofing">ARP_Spoofing</option>
-                    <option value="IP_Spoofing">IP_Spoofing</option>
-                    <option value="DNS_Tunneling">DNS_Tunneling</option>
-                  </select>
-                </div>
-                <div style="min-width: 170px;">
-                  <select id="filter-class-select" class="form-select">
-                    <option value="">All Classes (13)</option>
-                    <option value="Benign">Benign</option>
-                    <option value="DDoS">DDoS</option>
-                    <option value="DoS">DoS</option>
-                    <option value="Botnet">Botnet</option>
-                    <option value="Infiltration">Infiltration</option>
-                    <option value="Brute Force">Brute Force</option>
-                    <option value="Web Attack">Web Attack</option>
-                    <option value="DNS Spoofing">DNS Spoofing</option>
-                    <option value="IP Spoofing">IP Spoofing</option>
-                    <option value="ARP Spoofing">ARP Spoofing</option>
-                    <option value="Recon / Port Scan">Recon / Port Scan</option>
-                    <option value="MITM">MITM</option>
-                    <option value="DNS Tunneling">DNS Tunneling</option>
-                  </select>
-                </div>
-                <button id="btn-clear-filters" class="btn-reconnect">Reset</button>
+          <!-- Search & Filter Controls -->
+          <div class="soc-card" style="margin-bottom: 16px;">
+            <div class="soc-card-body" style="padding: 12px 18px;">
+              <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                <input type="text" id="filter-search-input" class="form-input" placeholder="Search source IP, query, class..." style="flex: 1; min-width: 200px; font-family: var(--font-sans);">
+                <select id="filter-specialist-select" class="form-select" style="width: 170px; font-family: var(--font-sans);">
+                  <option value="">All Specialists</option>
+                  <option value="IDS2018">IDS2018</option>
+                  <option value="CICIoT2023">CICIoT2023</option>
+                  <option value="ARP_Spoofing">ARP</option>
+                  <option value="IP_Spoofing">IP_Spoofing</option>
+                  <option value="DNS_Tunneling">DNS_Tunneling</option>
+                </select>
+                <select id="filter-class-select" class="form-select" style="width: 170px; font-family: var(--font-sans);">
+                  <option value="">All Classes (13)</option>
+                  <option value="Benign">Benign</option>
+                  <option value="DDoS">DDoS</option>
+                  <option value="DoS">DoS</option>
+                  <option value="Botnet">Botnet</option>
+                  <option value="Infiltration">Infiltration</option>
+                  <option value="Brute Force">Brute Force</option>
+                  <option value="Web Attack">Web Attack</option>
+                  <option value="DNS Spoofing">DNS Spoofing</option>
+                  <option value="IP Spoofing">IP Spoofing</option>
+                  <option value="ARP Spoofing">ARP Spoofing</option>
+                  <option value="Recon / Port Scan">Recon / Port Scan</option>
+                  <option value="MITM">MITM</option>
+                  <option value="DNS Tunneling">DNS Tunneling</option>
+                </select>
+                <button id="btn-clear-filters" class="soc-card-header-btn" style="padding: 8px 14px;">Reset</button>
               </div>
             </div>
           </div>
 
           <!-- Full Table -->
           <div class="soc-card">
-            <div class="table-responsive">
+            <div class="soc-card-body" style="padding: 12px 18px;">
               <table class="soc-table">
                 <thead>
                   <tr>
-                    <th>Timestamp</th>
+                    <th>Time</th>
                     <th>Source / Query</th>
-                    <th>Specialist Model</th>
+                    <th>Specialist</th>
                     <th>Predicted Class</th>
-                    <th>Canonical ID</th>
                     <th>Confidence</th>
-                    <th>Verdict</th>
+                    <th style="text-align: right;">Status</th>
                   </tr>
                 </thead>
                 <tbody id="live-detections-full-tbody">
-                  <tr>
-                    <td colspan="7">
-                      <div class="empty-state-box">
-                        <div class="empty-state-icon">📡</div>
-                        <div class="empty-state-text">No live detections yet</div>
-                        <div class="empty-state-sub">Waiting for network telemetry... Run queries in the Playground to record live verdicts.</div>
-                      </div>
-                    </td>
-                  </tr>
+                  <!-- Rendered dynamically by app.js -->
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ==================================================
+        <!-- ================================================================
              VIEW 3: DETECTION PLAYGROUND
-             ================================================== -->
+             ================================================================ -->
         <section id="view-playground" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
               <h1 class="page-title">Detection Playground</h1>
               <div class="page-subtitle">Submit raw queries or flow vectors to test automated schema routing and canonical 13-class evaluation</div>
             </div>
           </div>
 
-          <div class="playground-tabs">
-            <button class="pg-tab-btn active" data-tab="tab-dns">DNS Query Mode</button>
-            <button class="pg-tab-btn" data-tab="tab-structured">Structured Features Mode</button>
-            <button class="pg-tab-btn" data-tab="tab-batch">Batch Inference Mode</button>
+          <div class="playground-tabs-bar">
+            <button class="pg-tab-btn active" data-tab="tab-dns">DNS Query Inspection</button>
+            <button class="pg-tab-btn" data-tab="tab-structured">Structured Flow Features</button>
+            <button class="pg-tab-btn" data-tab="tab-batch">Batch Flow Evaluation</button>
           </div>
 
-          <div class="playground-content">
-            <!-- Left Input Column -->
+          <div class="dashboard-grid-2col">
+            <!-- Left: Inputs -->
             <div>
               <!-- Tab 1: DNS Query -->
               <div id="tab-dns" class="pg-pane" style="display: block;">
                 <div class="soc-card">
                   <div class="soc-card-header">
-                    <div class="soc-card-title"><span>📡</span> Raw DNS Query Inspection</div>
-                    <span class="status-chip">Auto &rarr; DNS_Tunneling</span>
+                    <span class="soc-card-title">Raw DNS Query Payload</span>
+                    <span class="mini-badge-online" style="background: #EFF6FF; color: #2563EB;">POST /predict</span>
                   </div>
                   <div class="soc-card-body">
-                    <div class="form-group">
-                      <label class="form-label">Sample Presets:</label>
-                      <div class="preset-chip-group">
-                        <button class="preset-chip" data-dns="tunnel-beacon.exfiltration.malicious-domain.net">🚨 Tunnel Exfiltration</button>
-                        <button class="preset-chip" data-dns="corp-portal.secure-internal.company.com">✅ Benign Corporate</button>
-                        <button class="preset-chip" data-dns="x89fa210bca3.stealth-c2.evil-server.org">🚨 Long Hex Subdomain</button>
-                        <button class="preset-chip" data-dns="mail.google.com">✅ Clean Standard Domain</button>
-                      </div>
+                    <label class="form-label">Presets:</label>
+                    <div class="preset-chip-list">
+                      <button class="preset-chip-btn" data-dns="tunnel-beacon.exfiltration.malicious-domain.net">🚨 Tunnel Exfiltration</button>
+                      <button class="preset-chip-btn" data-dns="corp-portal.secure-internal.company.com">✅ Benign Corporate</button>
+                      <button class="preset-chip-btn" data-dns="x89fa210bca3.stealth-c2.evil-server.org">🚨 Long Hex Subdomain</button>
+                      <button class="preset-chip-btn" data-dns="mail.google.com">✅ Standard Domain</button>
                     </div>
 
                     <div class="form-group">
-                      <label class="form-label" for="dns-query-input">Enter DNS Query String:</label>
-                      <input type="text" id="dns-query-input" class="form-input" placeholder="e.g. data-exfiltration.tunnel.malicious.net" value="tunnel-beacon.exfiltration.malicious-domain.net">
+                      <label class="form-label" for="dns-query-input">Query String:</label>
+                      <input type="text" id="dns-query-input" class="form-input" value="tunnel-beacon.exfiltration.malicious-domain.net">
                     </div>
 
-                    <div id="dns-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+                    <div id="dns-error-box" style="color: var(--color-danger); font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono);"></div>
 
-                    <button id="btn-analyze-dns" class="btn-primary">
-                      <span>⚡</span> ANALYZE QUERY
+                    <button id="btn-analyze-dns" class="btn-primary-action">
+                      Analyze Query
                     </button>
                   </div>
                 </div>
@@ -391,34 +701,32 @@
               <div id="tab-structured" class="pg-pane" style="display: none;">
                 <div class="soc-card">
                   <div class="soc-card-header">
-                    <div class="soc-card-title"><span>⚙️</span> Structured Flow Features</div>
-                    <span class="status-chip">POST /predict</span>
+                    <span class="soc-card-title">Structured Network Flow Features</span>
+                    <span class="mini-badge-online" style="background: #EFF6FF; color: #2563EB;">POST /predict</span>
                   </div>
                   <div class="soc-card-body">
+                    <label class="form-label">Quick Attack Presets:</label>
+                    <div class="preset-chip-list">
+                      <button class="preset-chip-btn" data-struct='{"features": {"arp_opcode": 1.0, "frame_number": 105.0}, "specialist": "ARP_Spoofing"}'>⚡ ARP Spoofing</button>
+                      <button class="preset-chip-btn" data-struct='{"features": {"some_feature": 0.5, "Seq": 12.0, "GTP": 1.0}, "specialist": "IP_Spoofing"}'>🛰️ 5G IP Spoofing</button>
+                      <button class="preset-chip-btn" data-struct='{"features": {"Rate": 25.4, "Srate": 18.2, "Drate": 7.2, "Header_Length": 54.0}, "specialist": "CICIoT2023"}'>🤖 IoT Network Flow</button>
+                      <button class="preset-chip-btn" data-struct='{"features": {"Flow Duration": 15000.0, "Tot Fwd Pkts": 8.0, "Tot Bwd Pkts": 6.0}, "specialist": "IDS2018"}'>🏢 Enterprise Flow</button>
+                    </div>
+
                     <div class="form-group">
-                      <label class="form-label">Target Specialist:</label>
-                      <select id="pg-specialist-select" class="form-select">
-                        <option value="auto">AUTO (Intelligent Schema Routing)</option>
-                        <option value="IDS2018">IDS2018 (Enterprise Flow)</option>
-                        <option value="CICIoT2023">CICIoT2023 (IoT Network)</option>
-                        <option value="ARP_Spoofing">ARP_Spoofing (Layer-2 Packet)</option>
-                        <option value="IP_Spoofing">IP_Spoofing (5G GTP / IP)</option>
-                        <option value="DNS_Tunneling">DNS_Tunneling (DNS Statistical)</option>
+                      <label class="form-label" for="pg-specialist-select">Specialist Routing:</label>
+                      <select id="pg-specialist-select" class="form-select" style="font-family: var(--font-sans);">
+                        <option value="auto">Auto (Intelligent Schema Routing)</option>
+                        <option value="IDS2018">IDS2018</option>
+                        <option value="CICIoT2023">CICIoT2023</option>
+                        <option value="ARP_Spoofing">ARP</option>
+                        <option value="IP_Spoofing">IP_Spoofing</option>
+                        <option value="DNS_Tunneling">DNS_Tunneling</option>
                       </select>
                     </div>
 
                     <div class="form-group">
-                      <label class="form-label">Quick Attack / Flow Presets:</label>
-                      <div class="preset-chip-group">
-                        <button class="preset-chip" data-struct='{"features": {"arp_opcode": 1.0, "frame_number": 105.0}, "specialist": "ARP_Spoofing"}'>⚡ ARP Spoofing</button>
-                        <button class="preset-chip" data-struct='{"features": {"some_feature": 0.5, "Seq": 12.0, "GTP": 1.0}, "specialist": "IP_Spoofing"}'>🛰️ 5G IP Spoofing</button>
-                        <button class="preset-chip" data-struct='{"features": {"Rate": 25.4, "Srate": 18.2, "Drate": 7.2, "Header_Length": 54.0}, "specialist": "CICIoT2023"}'>🤖 IoT Network Flow</button>
-                        <button class="preset-chip" data-struct='{"features": {"Flow Duration": 15000.0, "Tot Fwd Pkts": 8.0, "Tot Bwd Pkts": 6.0}, "specialist": "IDS2018"}'>🏢 Enterprise Flow</button>
-                      </div>
-                    </div>
-
-                    <div class="form-group">
-                      <label class="form-label" for="structured-json-input">JSON Payload Body:</label>
+                      <label class="form-label" for="structured-json-input">JSON Features Body:</label>
                       <textarea id="structured-json-input" class="form-textarea" rows="6">{
   "features": {
     "arp_opcode": 1.0,
@@ -428,10 +736,10 @@
 }</textarea>
                     </div>
 
-                    <div id="struct-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+                    <div id="struct-error-box" style="color: var(--color-danger); font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono);"></div>
 
-                    <button id="btn-run-structured" class="btn-primary">
-                      <span>⚡</span> RUN DETECTION
+                    <button id="btn-run-structured" class="btn-primary-action">
+                      Run Detection
                     </button>
                   </div>
                 </div>
@@ -441,295 +749,195 @@
               <div id="tab-batch" class="pg-pane" style="display: none;">
                 <div class="soc-card">
                   <div class="soc-card-header">
-                    <div class="soc-card-title"><span>📦</span> Batch Network Flow Evaluation</div>
-                    <span class="status-chip">POST /predict/batch</span>
+                    <span class="soc-card-title">Batch Flow Records</span>
+                    <span class="mini-badge-online" style="background: #EFF6FF; color: #2563EB;">POST /predict/batch</span>
                   </div>
                   <div class="soc-card-body">
                     <div class="form-group">
-                      <label class="form-label" for="batch-json-input">JSON Records Array:</label>
-                      <textarea id="batch-json-input" class="form-textarea" rows="6">[
+                      <label class="form-label" for="batch-json-input">JSON Array Records:</label>
+                      <textarea id="batch-json-input" class="form-textarea" rows="7">[
   { "query": "google.com" },
   { "query": "exfiltration.dns-tunnel-attack.net" },
   { "query": "internal-update.corp-portal.company.com" }
 ]</textarea>
                     </div>
 
-                    <div id="batch-error-box" style="color: var(--color-danger); font-size: 0.78rem; margin-bottom: 0.75rem; font-family: var(--font-mono);"></div>
+                    <div id="batch-error-box" style="color: var(--color-danger); font-size: 12px; margin-bottom: 10px; font-family: var(--font-mono);"></div>
 
-                    <button id="btn-execute-batch" class="btn-primary">
-                      <span>📦</span> EXECUTE BATCH INFERENCE
+                    <button id="btn-execute-batch" class="btn-primary-action">
+                      Execute Batch Inference
                     </button>
                   </div>
                 </div>
               </div>
             </div>
 
-            <!-- Right Result Column -->
+            <!-- Right: Verdict Output Card -->
             <div>
-              <div class="verdict-card">
-                <div>
-                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.5rem;">
-                    Inference Verdict Result
-                  </div>
-
-                  <div id="verdict-banner-box" class="verdict-banner">
+              <div class="soc-card">
+                <div class="soc-card-header">
+                  <span class="soc-card-title">Inference Verdict Output</span>
+                  <span class="mini-badge-online" id="verdict-specialist-name">Unified NIDS</span>
+                </div>
+                <div class="soc-card-body">
+                  <div class="verdict-banner-box benign" id="verdict-banner-box">
                     <div>
-                      <div class="verdict-title">CLASSIFICATION VERDICT</div>
-                      <div id="verdict-class-name" class="verdict-class">Waiting for query</div>
+                      <div class="verdict-title-sub">VERDICT</div>
+                      <div class="verdict-class-name" id="verdict-class-name">Benign</div>
                     </div>
-                    <div class="verdict-confidence-badge">
-                      <div id="verdict-conf-value" class="verdict-conf-val">—</div>
+                    <div>
+                      <div class="verdict-conf-val" id="verdict-conf-value">99.1%</div>
                       <div class="verdict-conf-sub">Posterior Confidence</div>
                     </div>
                   </div>
-                </div>
 
-                <div class="verdict-meta-grid">
-                  <div class="verdict-meta-item">
-                    <div class="verdict-meta-label">Dispatched Specialist</div>
-                    <div id="verdict-specialist-name" class="verdict-meta-val">None</div>
-                  </div>
-                  <div class="verdict-meta-item">
-                    <div class="verdict-meta-label">Canonical Class ID</div>
-                    <div id="verdict-canonical-id" class="verdict-meta-val">—</div>
-                  </div>
-                </div>
-
-                <div>
-                  <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); letter-spacing: 0.05em; margin-bottom: 0.6rem;">
+                  <div style="font-size: 11px; font-weight: 700; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; letter-spacing: 0.05em;">
                     13-Class Posterior Distribution
                   </div>
-                  <div id="verdict-prob-list" class="prob-list">
-                    <!-- Populated dynamically with actual 13-class probabilities -->
-                    <div style="font-size: 0.78rem; color: var(--text-muted); padding: 1rem 0; text-align: center;">
-                      No inference executed yet.
-                    </div>
+                  <div id="verdict-prob-list">
+                    <!-- Dynamic probabilities populated by app.js -->
                   </div>
                 </div>
               </div>
-            </div>
-          </div>
-
-          <!-- Batch Results Display Card -->
-          <div id="batch-results-soc-card" class="soc-card" style="display: none; margin-top: 1.5rem;">
-            <div class="soc-card-header">
-              <div>
-                <div class="soc-card-title"><span>📊</span> Batch Prediction Results</div>
-                <div id="batch-summary-subtitle" class="soc-card-desc">0 flows classified</div>
-              </div>
-              <span id="batch-spec-badge" class="status-chip">Specialist: Auto</span>
-            </div>
-            <div class="table-responsive">
-              <table class="soc-table">
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>Class ID</th>
-                    <th>Class Name</th>
-                    <th>Confidence</th>
-                    <th>Specialist</th>
-                    <th>Verdict Status</th>
-                  </tr>
-                </thead>
-                <tbody id="batch-results-tbody">
-                </tbody>
-              </table>
             </div>
           </div>
         </section>
 
-        <!-- ==================================================
-             VIEW 4: SPECIALIST MODELS
-             ================================================== -->
+        <!-- ================================================================
+             VIEW 4: SPECIALIST MODELS CATALOG
+             ================================================================ -->
         <section id="view-models" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
               <h1 class="page-title">Specialist Models Catalog</h1>
               <div class="page-subtitle">5 Domain-specialized machine learning classifiers coordinating unified intrusion detection</div>
             </div>
           </div>
 
-          <div id="specialist-models-catalog-grid" class="specialist-card-grid">
-            <div style="color: var(--text-muted); font-size: 0.85rem;">Loading specialist models catalog from backend...</div>
+          <div class="specialist-subcard-grid" style="grid-template-columns: repeat(3, 1fr); margin-bottom: 16px;" id="specialist-models-catalog-grid">
+            <!-- Populated dynamically -->
           </div>
         </section>
 
-        <!-- ==================================================
+        <!-- ================================================================
              VIEW 5: UNIFIED ARCHITECTURE
-             ================================================== -->
+             ================================================================ -->
         <section id="view-architecture" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
-              <h1 class="page-title">Unified NIDS Architecture</h1>
-              <div class="page-subtitle">Multi-model intelligent schema routing and frozen 13-class canonical decision projection</div>
+              <h1 class="page-title">Unified Architecture</h1>
+              <div class="page-subtitle">End-to-end multi-model intelligent schema routing and frozen 13-class decision projection</div>
             </div>
           </div>
 
           <div class="soc-card">
             <div class="soc-card-header">
-              <div class="soc-card-title"><span>🌐</span> Multi-Specialist Inference Pipeline</div>
-              <span class="status-chip online">Verified Pipeline Contract</span>
+              <span class="soc-card-title">Multi-Specialist Detection Pipeline Contract</span>
+              <span class="mini-badge-online">VERIFIED PIPELINE</span>
             </div>
-            <div class="soc-card-body">
-              <div class="arch-diagram-wrapper">
-
-                <!-- Stage 1 -->
-                <div class="arch-node">
-                  <div>🌐 NETWORK TRAFFIC</div>
-                  <div class="arch-node-desc">Raw PCAP / CSV / DNS Packets / IoT Flows</div>
-                </div>
-
-                <div class="arch-connector-arrow">↓</div>
-
-                <!-- Stage 2 -->
-                <div class="arch-node primary">
-                  <div>🛡️ API &amp; INGRESS GATEWAY</div>
-                  <div class="arch-node-desc">FastAPI / Input Validation / Schema Guard</div>
-                </div>
-
-                <div class="arch-connector-arrow">↓</div>
-
-                <!-- Stage 3 -->
-                <div class="arch-node">
-                  <div>⚡ SPECIALIST SCHEMA ROUTER</div>
-                  <div class="arch-node-desc">Signature Feature Indicator Matching</div>
-                </div>
-
-                <div class="arch-connector-arrow">↓</div>
-
-                <!-- Stage 4: 5 Specialists Row -->
-                <div class="arch-specialist-row">
-                  <div class="arch-spec-box">
-                    <div class="arch-spec-title">IDS2018</div>
-                    <div class="arch-spec-sub">Enterprise 77-Features</div>
+            <div class="soc-card-body" style="padding: 30px;">
+              <div class="arch-diagram-canvas" style="justify-content: space-around;">
+                <div class="arch-step-node">
+                  <div class="arch-node-box gray" style="width: 54px; height: 54px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/></svg>
                   </div>
-                  <div class="arch-spec-box">
-                    <div class="arch-spec-title">CICIoT2023</div>
-                    <div class="arch-spec-sub">IoT 46-Features</div>
-                  </div>
-                  <div class="arch-spec-box">
-                    <div class="arch-spec-title">ARP_Spoofing</div>
-                    <div class="arch-spec-sub">Layer-2 Protocol</div>
-                  </div>
-                  <div class="arch-spec-box">
-                    <div class="arch-spec-title">IP_Spoofing</div>
-                    <div class="arch-spec-sub">5G-NIDD GTP Metric</div>
-                  </div>
-                  <div class="arch-spec-box">
-                    <div class="arch-spec-title">DNS_Tunneling</div>
-                    <div class="arch-spec-sub">Raw Query Statistical</div>
-                  </div>
+                  <span class="arch-step-label">Network Traffic</span>
                 </div>
-
-                <div class="arch-connector-arrow">↓</div>
-
-                <!-- Stage 5 -->
-                <div class="arch-node primary">
-                  <div>🤖 UNIFIED NIDS AI CORE</div>
-                  <div class="arch-node-desc">In-Memory Specialists &bull; Threshold Calibration &bull; Canonical Projection</div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-step-node">
+                  <div class="arch-node-box blue-soft" style="width: 54px; height: 54px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8h1a4 4 0 0 1 0 8h-1"/><path d="M2 8h16v9a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4V8z"/></svg>
+                  </div>
+                  <span class="arch-step-label">API Gateway</span>
                 </div>
-
-                <div class="arch-connector-arrow">↓</div>
-
-                <!-- Stage 6 -->
-                <div class="arch-node success">
-                  <div>🎯 13-CLASS CANONICAL VERDICT</div>
-                  <div class="arch-node-desc">Frozen IDs 0 &ndash; 12 &bull; Dimension-13 Normalized Posterior Vector</div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-specialists-stack">
+                  <div class="arch-spec-pill blue">IDS2018 (77 Features)</div>
+                  <div class="arch-spec-pill purple">CICIoT2023 (46 Features)</div>
+                  <div class="arch-spec-pill red">ARP (2 Features)</div>
+                  <div class="arch-spec-pill" style="background:#FFF7ED; color:#C2410C; border-color:#FFEDD5;">IP_Spoofing (12 Features)</div>
+                  <div class="arch-spec-pill" style="background:#F0FDFA; color:#0F766E; border-color:#CCFBF1;">DNS_Tunneling (12 Features)</div>
                 </div>
-
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-step-node">
+                  <div class="arch-node-box green-soft" style="width: 54px; height: 54px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/></svg>
+                  </div>
+                  <span class="arch-step-label">Unified NIDS</span>
+                </div>
+                <span class="arch-arrow">&rarr;</span>
+                <div class="arch-step-node">
+                  <div class="arch-node-box shield-soft" style="width: 54px; height: 54px;">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </div>
+                  <span class="arch-step-label">13-Class Threat Verdict</span>
+                </div>
               </div>
             </div>
           </div>
         </section>
 
-        <!-- ==================================================
+        <!-- ================================================================
              VIEW 6: AUDIT / EVENTS
-             ================================================== -->
+             ================================================================ -->
         <section id="view-audit" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
               <h1 class="page-title">Audit / Events Log</h1>
               <div class="page-subtitle">Operational events, system telemetry, and inference transactions recorded during this session</div>
             </div>
-            <button id="btn-clear-audit" class="btn-reconnect">Clear Audit</button>
+            <button id="btn-clear-audit" class="soc-card-header-btn">Clear Audit</button>
           </div>
 
           <div class="soc-card">
-            <div class="table-responsive">
+            <div class="soc-card-body" style="padding: 12px 18px;">
               <table class="soc-table">
                 <thead>
                   <tr>
                     <th>Timestamp</th>
                     <th>Category</th>
                     <th>Event Details</th>
-                    <th>Status</th>
+                    <th style="text-align: right;">Status</th>
                   </tr>
                 </thead>
                 <tbody id="audit-events-tbody">
-                  <tr>
-                    <td colspan="4">
-                      <div class="empty-state-box">
-                        <div class="empty-state-icon">📋</div>
-                        <div class="empty-state-text">No audit events available</div>
-                        <div class="empty-state-sub">Events will record automatically as API transactions occur.</div>
-                      </div>
-                    </td>
-                  </tr>
+                  <!-- Rendered dynamically -->
                 </tbody>
               </table>
             </div>
           </div>
         </section>
 
-        <!-- ==================================================
+        <!-- ================================================================
              VIEW 7: SETTINGS
-             ================================================== -->
+             ================================================================ -->
         <section id="view-settings" class="view-panel">
-          <div class="page-header-block">
+          <div class="page-headline-row">
             <div>
-              <h1 class="page-title">System Settings</h1>
+              <h1 class="page-title">Settings</h1>
               <div class="page-subtitle">Configure backend connection parameters and environment integration</div>
             </div>
           </div>
 
           <div class="soc-card">
             <div class="soc-card-header">
-              <div class="soc-card-title"><span>⚙️</span> FastAPI Backend Configuration</div>
+              <span class="soc-card-title">FastAPI Backend Connection</span>
             </div>
             <div class="soc-card-body">
-              <div class="settings-form-grid">
-                <div class="form-group">
-                  <label class="form-label" for="settings-api-url-input">FastAPI Base URL (VITE_API_BASE_URL):</label>
-                  <input type="text" id="settings-api-url-input" class="form-input" value="http://localhost:8000">
-                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem;">
-                    Default local port is 8000. In production, provide the HTTPS Render service URL.
-                  </div>
-                </div>
-
-                <div style="display: flex; gap: 0.75rem; margin-top: 1rem;">
-                  <button id="btn-settings-test" class="btn-reconnect" style="padding: 0.65rem 1rem;">
-                    🧪 Test Connection
-                  </button>
-                  <button id="btn-settings-save" class="btn-primary" style="width: auto; padding: 0.65rem 1.5rem;">
-                    Save &amp; Reconnect
-                  </button>
-                </div>
-
-                <div id="settings-test-banner" style="display: none;" class="connection-status-banner">
-                </div>
-
-                <hr style="border: none; border-top: 1px solid var(--border-subtle); margin: 2rem 0;">
-
-                <div class="form-group">
-                  <label class="form-label">Theme Interface:</label>
-                  <div style="font-size: 0.85rem; font-weight: 600; color: var(--text-primary);">
-                    Enterprise White SOC UI (Default)
-                  </div>
-                  <div style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.2rem;">
-                    Clean minimal light security operations theme with blue primary accent.
-                  </div>
+              <div class="form-group" style="max-width: 540px;">
+                <label class="form-label" for="settings-api-url-input">FastAPI Base URL (VITE_API_BASE_URL):</label>
+                <input type="text" id="settings-api-url-input" class="form-input" value="http://localhost:8000">
+                <div style="font-size: 11px; color: var(--text-muted); margin-top: 5px;">
+                  Default local port is 8000. In production, provide the HTTPS Render service URL.
                 </div>
               </div>
+
+              <div style="display: flex; gap: 10px; margin-top: 14px;">
+                <button id="btn-settings-test" class="soc-card-header-btn" style="padding: 8px 16px;">Test Connection</button>
+                <button id="btn-settings-save" class="btn-primary-action" style="padding: 8px 20px;">Save &amp; Reconnect</button>
+              </div>
+
+              <div id="settings-test-banner" style="display: none; margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: var(--font-mono);"></div>
             </div>
           </div>
         </section>
@@ -738,7 +946,7 @@
     </div>
   </div>
 
-  <!-- Vendor Scripts (Chart.js only, no heavy 3D dependency required) -->
+  <!-- Vendor Scripts -->
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->

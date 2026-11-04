@@ -404,7 +404,7 @@ class EnterpriseSocApp {
       });
     }
 
-    // 3. Attack-Class Distribution Bar Chart (13 Canonical Classes)
+    // 3. Attack-Class Distribution Bar Chart (13 Canonical Classes - Clean Horizontal Bars)
     const ctxAttack = document.getElementById("overview-attack-chart");
     if (ctxAttack) {
       const labels = this.canonicalTaxonomy.map(c => `${c.id}: ${c.name}`);
@@ -418,10 +418,13 @@ class EnterpriseSocApp {
             label: "Records",
             data: new Array(13).fill(0),
             backgroundColor: colors,
-            borderRadius: 4
+            borderRadius: 4,
+            barPercentage: 0.75,
+            categoryPercentage: 0.85
           }]
         },
         options: {
+          indexAxis: "y",
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
@@ -429,18 +432,19 @@ class EnterpriseSocApp {
             tooltip: {
               backgroundColor: "#0F172A",
               titleColor: "#FFFFFF",
-              bodyColor: "#CBD5E1"
+              bodyColor: "#CBD5E1",
+              borderWidth: 0
             }
           },
           scales: {
             x: {
-              grid: { display: false },
-              ticks: { color: "#64748B", font: { ...commonFont, size: 9 }, maxRotation: 45, minRotation: 0 }
-            },
-            y: {
               beginAtZero: true,
               grid: { color: "#F1F5F9" },
               ticks: { color: "#64748B", font: { ...commonFont, size: 10 }, precision: 0 }
+            },
+            y: {
+              grid: { display: false },
+              ticks: { color: "#334155", font: { ...commonFont, size: 10.5, weight: "500" } }
             }
           }
         }
@@ -1025,10 +1029,14 @@ class EnterpriseSocApp {
         this.trendChart.update();
       }
 
-      // 2. Update Distribution Chart (Benign vs Malicious)
+      // 2. Update Distribution Chart (Benign vs Malicious) & Center Count
       if (this.distChart) {
         this.distChart.data.datasets[0].data = [benign, threats];
         this.distChart.update();
+      }
+      const distCenterCount = document.getElementById("dist-center-count");
+      if (distCenterCount) {
+        distCenterCount.textContent = total.toLocaleString();
       }
 
       // 3. Update Attack-Class Distribution Chart (13 Canonical Classes)
@@ -1066,10 +1074,9 @@ class EnterpriseSocApp {
   }
 
   getSeverityForClass(cid) {
-    if (cid === 0) return "BENIGN";
-    if ([1, 2, 3, 4, 11].includes(cid)) return "CRITICAL";
-    if ([5, 6, 8, 9, 12].includes(cid)) return "HIGH";
-    return "MEDIUM";
+    if (cid === 0) return "Low";
+    if ([1, 2, 3, 4, 5, 6, 8, 9, 11, 12].includes(cid)) return "High";
+    return "Medium";
   }
 
   /* ========================================================================

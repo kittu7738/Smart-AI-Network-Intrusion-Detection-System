@@ -169,6 +169,9 @@ class EnterpriseSocApp {
     });
 
     window.switchSocView = switchView;
+
+    // Explicitly synchronize initial view and sidebar highlight to Security Overview
+    switchView("view-overview");
   }
 
   /* ========================================================================
@@ -978,11 +981,11 @@ class EnterpriseSocApp {
       if (detRateEl) detRateEl.textContent = ((threats / total) * 100).toFixed(1) + "%";
       if (detRateSubEl) detRateSubEl.textContent = `Based on ${total} session flows`;
     } else {
-      if (sessionStatus) sessionStatus.textContent = "No flows analysed yet";
-      if (benignPctEl) benignPctEl.textContent = "0.0% clean pass-through";
-      if (threatPctEl) threatPctEl.textContent = "0.0% threat ratio";
+      if (sessionStatus) sessionStatus.textContent = "—";
+      if (benignPctEl) benignPctEl.textContent = "—";
+      if (threatPctEl) threatPctEl.textContent = "—";
       if (detRateEl) detRateEl.textContent = "—";
-      if (detRateSubEl) detRateSubEl.textContent = "Awaiting traffic ingestion";
+      if (detRateSubEl) detRateSubEl.textContent = "—";
     }
 
     // Toggle Empty States vs Render Charts

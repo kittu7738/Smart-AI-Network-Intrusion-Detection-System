@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=2.4.0">
+  <link rel="stylesheet" href="css/style.css?v=2.5.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,14 +33,14 @@
         <ul class="nav-links-list">
           <!-- 1. Security Overview -->
           <li>
-            <button class="nav-item-btn active" data-view="view-overview">
+            <button class="nav-item-btn" data-view="view-overview">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
               <span>Security Overview</span>
             </button>
           </li>
           <!-- 2. Traffic Analysis -->
           <li>
-            <button class="nav-item-btn" data-view="view-traffic">
+            <button class="nav-item-btn active" data-view="view-traffic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span>Traffic Analysis</span>
             </button>
@@ -345,80 +345,37 @@
           <div class="page-title-row">
             <div>
               <h1 class="page-heading">Network Traffic Ingestion &amp; Analysis</h1>
-              <div class="page-description">Ingest offline packet streams (.pcap, .pcapng), structured flow records (.csv), and single-flow JSON into Smart AI-NIDS</div>
+              <div class="page-description">Upload PCAP/PCAPNG or CSV flow data to analyse network traffic.</div>
             </div>
           </div>
 
-          <!-- Capabilities Callout Box -->
-          <div class="callout-box">
-            <strong>Supported Offline Traffic Modes:</strong>
-            <span class="tag tag-benign" style="margin-left: 8px;">Single Flow JSON</span>
-            <span class="tag tag-benign" style="margin-left: 4px;">CSV Dataset Upload</span>
-            <span class="tag tag-benign" style="margin-left: 4px;">Offline PCAP/PCAPNG Dual Stream</span>
-          </div>
-
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <!-- INGESTION METHOD 1: SINGLE FLOW INFERENCE -->
-            <div class="card">
+          <!-- ROW 1: UPLOAD & SUMMARY (2 COLUMNS) -->
+          <div class="traffic-top-grid">
+            <!-- CARD A: UPLOAD & ANALYZE TRAFFIC FILE -->
+            <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
-                <span class="card-title">Single Flow Inference (Interactive Form)</span>
-                <span class="tag tag-info">JSON / Manual</span>
+                <span class="card-title">Upload &amp; Analyze Traffic File</span>
+                <span class="tag tag-benign">Ready</span>
               </div>
               <div class="card-body">
-                <div class="form-group">
-                  <label class="form-label">Pre-configured Test Attack Scenario:</label>
-                  <select class="form-select" id="traffic-preset-select">
-                    <option value="0">Class 0: Benign Normal Web Traffic</option>
-                    <option value="1">Class 1: DDoS Volumetric Flood (CICIoT2023)</option>
-                    <option value="2">Class 2: DoS Slowloris Inter-Arrival Attack</option>
-                    <option value="3">Class 3: Botnet C2 Beaconing (CICIoT2023)</option>
-                    <option value="4">Class 4: Infiltration Protocol Anomaly</option>
-                    <option value="5">Class 5: Brute Force SSH/FTP Burst</option>
-                    <option value="6">Class 6: Web Attack SQLi / XSS Payload</option>
-                    <option value="7">Class 7: DNS Spoofing Poisoned Response</option>
-                    <option value="8">Class 8: IP Spoofing 5G Martian Header</option>
-                    <option value="9">Class 9: ARP Spoofing Layer-2 Poisoning</option>
-                    <option value="10">Class 10: Recon / Port Scan SYN Sweep</option>
-                    <option value="11">Class 11: MITM SSLStrip Asymmetric Session</option>
-                    <option value="12">Class 12: DNS Tunneling Exfiltration Query</option>
-                  </select>
+                <!-- Large drag-and-drop upload area -->
+                <div class="traffic-dropzone" id="traffic-dropzone">
+                  <div class="dropzone-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
+                  </div>
+                  <div class="dropzone-title">Drag and drop capture or dataset file here</div>
+                  <div class="dropzone-subtitle">Supported formats: CSV, PCAP and PCAPNG</div>
+                  <div style="margin-top: 6px;">
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-traffic-choose-file">Choose File</button>
+                    <input type="file" id="traffic-file-input" accept=".pcap,.pcapng,.csv" style="display: none;">
+                  </div>
+                  <div id="traffic-selected-file-info" style="display: none; margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--color-primary); font-family: var(--font-mono);"></div>
                 </div>
 
-                <div class="form-group">
-                  <label class="form-label">Feature Payload (JSON):</label>
-                  <textarea class="form-textarea" id="traffic-single-json" rows="7"></textarea>
-                </div>
-
-                <div style="display: flex; gap: 10px;">
-                  <button class="btn btn-primary" id="btn-traffic-predict-single">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                    Execute Inference
-                  </button>
-                  <button class="btn btn-secondary" id="btn-traffic-reset-single">Reset Schema</button>
-                </div>
-              </div>
-            </div>
-
-            <!-- INGESTION METHOD 2: CSV / PCAP DATASET UPLOAD -->
-            <div class="card">
-              <div class="card-header">
-                <span class="card-title">Offline Capture &amp; Dataset Ingestion</span>
-                <span class="tag tag-benign">CSV / PCAP</span>
-              </div>
-              <div class="card-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px;">
-                  Upload genuine network packet captures (<code>.pcap</code>, <code>.pcapng</code>) or statistical flow records (<code>.csv</code>).
-                  Packet captures are evaluated simultaneously through Suricata Traditional NIDS and Smart AI-NIDS flow extractor.
-                </p>
-
-                <div class="form-group">
-                  <label class="form-label">Select File to Analyze:</label>
-                  <input type="file" class="form-input" id="traffic-file-input" accept=".pcap,.pcapng,.csv,.json">
-                </div>
-
-                <div id="traffic-upload-progress" style="display: none; margin-bottom: 12px;">
+                <!-- Upload Progress -->
+                <div id="traffic-upload-progress" style="display: none; margin-top: 12px; margin-bottom: 6px;">
                   <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
-                    <span id="traffic-progress-text">Ingesting capture file...</span>
+                    <span id="traffic-progress-text">Ingesting traffic file...</span>
                     <span id="traffic-progress-pct">0%</span>
                   </div>
                   <div style="width: 100%; height: 6px; background-color: var(--bg-card-hover); border-radius: 3px; overflow: hidden;">
@@ -426,7 +383,8 @@
                   </div>
                 </div>
 
-                <div style="display: flex; gap: 10px;">
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 10px; margin-top: 14px;">
                   <button class="btn btn-primary" id="btn-traffic-upload">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Upload &amp; Analyze
@@ -437,48 +395,162 @@
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- TRAFFIC SUMMARY AREA (DYNAMIC) -->
-          <div id="traffic-summary-card" class="card" style="display: none;">
-            <div class="card-header">
-              <span class="card-title">Traffic Analysis Summary</span>
-              <span class="tag tag-benign" id="traffic-summary-status">Completed</span>
-            </div>
-            <div class="card-body">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
-                <div>
-                  <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Source File</div>
-                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-filename">—</div>
+            <!-- CARD B: ANALYSIS SUMMARY -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header">
+                <span class="card-title">Analysis Summary</span>
+                <span class="tag tag-benign" id="traffic-summary-status">Idle</span>
+              </div>
+              <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
+                <!-- 4 compact metric cards -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
+                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
+                    <div class="kpi-top" style="margin-bottom: 4px;">
+                      <span class="kpi-label">Total Flows</span>
+                      <div class="kpi-icon-box blue" style="width: 26px; height: 26px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                      </div>
+                    </div>
+                    <div class="kpi-value" id="traffic-sum-flows" style="font-size: 20px;">0</div>
+                  </div>
+
+                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
+                    <div class="kpi-top" style="margin-bottom: 4px;">
+                      <span class="kpi-label">Unique Source IPs</span>
+                      <div class="kpi-icon-box cyan" style="width: 26px; height: 26px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                      </div>
+                    </div>
+                    <div class="kpi-value" id="traffic-sum-src-ips" style="font-size: 20px;">0</div>
+                  </div>
+
+                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
+                    <div class="kpi-top" style="margin-bottom: 4px;">
+                      <span class="kpi-label">Unique Destination IPs</span>
+                      <div class="kpi-icon-box green" style="width: 26px; height: 26px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                      </div>
+                    </div>
+                    <div class="kpi-value" id="traffic-sum-dest-ips" style="font-size: 20px;">0</div>
+                  </div>
+
+                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
+                    <div class="kpi-top" style="margin-bottom: 4px;">
+                      <span class="kpi-label">Protocols</span>
+                      <div class="kpi-icon-box amber" style="width: 26px; height: 26px;">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                      </div>
+                    </div>
+                    <div class="kpi-value" id="traffic-sum-protocols" style="font-size: 20px;">0</div>
+                  </div>
                 </div>
-                <div>
-                  <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Total Flows / Packets</div>
-                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-total">0</div>
+
+                <!-- Empty state message before analysis -->
+                <div id="traffic-summary-empty-msg" class="soc-empty-state" style="padding: 12px 10px; min-height: auto;">
+                  <h4 class="empty-state-title">No file analysed yet</h4>
+                  <p class="empty-state-desc">Upload a CSV or PCAP file to view traffic summary and analysis results.</p>
                 </div>
-                <div>
-                  <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Threats Detected</div>
-                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px; color: var(--color-critical);" id="traffic-summary-threats">0</div>
-                </div>
-                <div>
-                  <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Processing Duration</div>
-                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-duration">—</div>
+
+                <!-- Analysis metadata bar (shown when analyzed) -->
+                <div id="traffic-summary-meta" style="display: none; justify-content: space-between; align-items: center; padding: 10px 12px; background-color: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11.5px; color: var(--text-secondary);">
+                  <div>File: <strong id="traffic-summary-filename" style="color: var(--text-primary); font-family: var(--font-mono);">—</strong></div>
+                  <div>Duration: <strong id="traffic-summary-duration" style="color: var(--text-primary);">—</strong></div>
+                  <div>Threats: <strong id="traffic-summary-threats" style="color: var(--color-critical);">0</strong></div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- INGESTION RESULTS TABLE -->
+          <!-- ROW 2: TRAFFIC INSIGHTS (3 CARDS) -->
+          <div class="traffic-insights-grid">
+            <!-- INSIGHT 1: PROTOCOL DISTRIBUTION -->
+            <div class="traffic-insight-card">
+              <div class="card-header">
+                <span class="card-title">Protocol Distribution</span>
+              </div>
+              <div class="card-body">
+                <div id="traffic-proto-empty" class="soc-empty-state">
+                  <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                  </div>
+                  <h4 class="empty-state-title">No protocol data available</h4>
+                </div>
+                <div id="traffic-proto-container" style="display: none; height: 160px; position: relative;">
+                  <canvas id="traffic-proto-chart"></canvas>
+                </div>
+              </div>
+            </div>
+
+            <!-- INSIGHT 2: TOP SOURCE IPS -->
+            <div class="traffic-insight-card">
+              <div class="card-header">
+                <span class="card-title">Top Source IPs</span>
+              </div>
+              <div class="card-body" style="padding: 0; justify-content: flex-start;">
+                <div id="traffic-srcip-empty" class="soc-empty-state" style="padding: 24px 16px;">
+                  <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                  </div>
+                  <h4 class="empty-state-title">No source IP data</h4>
+                </div>
+                <div id="traffic-srcip-container" style="display: none; width: 100%; max-height: 200px; overflow-y: auto;">
+                  <table class="soc-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 45px;">Rank</th>
+                        <th>Source IP</th>
+                        <th style="text-align: right;">Flow Count</th>
+                        <th style="text-align: right;">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody id="traffic-srcip-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+
+            <!-- INSIGHT 3: TOP DESTINATION IPS -->
+            <div class="traffic-insight-card">
+              <div class="card-header">
+                <span class="card-title">Top Destination IPs</span>
+              </div>
+              <div class="card-body" style="padding: 0; justify-content: flex-start;">
+                <div id="traffic-destip-empty" class="soc-empty-state" style="padding: 24px 16px;">
+                  <div class="empty-state-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                  </div>
+                  <h4 class="empty-state-title">No destination IP data</h4>
+                </div>
+                <div id="traffic-destip-container" style="display: none; width: 100%; max-height: 200px; overflow-y: auto;">
+                  <table class="soc-table">
+                    <thead>
+                      <tr>
+                        <th style="width: 45px;">Rank</th>
+                        <th>Destination IP</th>
+                        <th style="text-align: right;">Flow Count</th>
+                        <th style="text-align: right;">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody id="traffic-destip-tbody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- ROW 3: TELEMETRY ANALYSIS RESULTS TABLE -->
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Telemetry Ingestion Results</span>
+              <span class="card-title">Telemetry Analysis Results</span>
               <div style="display: flex; gap: 8px;">
                 <button class="btn btn-secondary btn-sm" id="btn-traffic-export-json">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                  Export JSON
+                  Export Results
                 </button>
               </div>
             </div>
-            <div class="card-body" style="padding: 0; max-height: 380px; overflow-y: auto;">
+            <div class="card-body" style="padding: 0; max-height: 420px; overflow-y: auto;">
               <table class="soc-table">
                 <thead>
                   <tr>
@@ -486,14 +558,25 @@
                     <th>Source &rarr; Destination</th>
                     <th>Protocol</th>
                     <th>Predicted Class</th>
-                    <th>Canonical ID</th>
+                    <th>Class ID</th>
                     <th>Specialist Model</th>
                     <th>Confidence</th>
-                    <th style="text-align: right;">Verdict</th>
+                    <th>Verdict</th>
+                    <th style="text-align: right;">Details</th>
                   </tr>
                 </thead>
                 <tbody id="traffic-results-tbody">
-                  <tr><td colspan="8" class="soc-table-empty">Execute a single inference or upload a file to display telemetry classifications.</td></tr>
+                  <tr>
+                    <td colspan="9">
+                      <div class="soc-empty-state" style="padding: 28px 16px;">
+                        <div class="empty-state-icon">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                        </div>
+                        <h4 class="empty-state-title">No telemetry results yet</h4>
+                        <p class="empty-state-desc">Upload and analyse a traffic file to view classification results.</p>
+                      </div>
+                    </td>
+                  </tr>
                 </tbody>
               </table>
             </div>
@@ -1291,11 +1374,24 @@
     </div>
   </div>
 
+  <!-- Telemetry Record Details Modal -->
+  <div id="traffic-record-modal" class="soc-modal-backdrop" style="display: none;">
+    <div class="soc-modal-card">
+      <div class="soc-modal-header">
+        <div class="soc-modal-title">Telemetry Record Details</div>
+        <button class="soc-modal-close" id="btn-traffic-modal-close" aria-label="Close">&times;</button>
+      </div>
+      <div class="soc-modal-body" id="traffic-modal-content">
+        <!-- Populated dynamically -->
+      </div>
+    </div>
+  </div>
+
   <!-- Vendor Scripts -->
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/api.js?v=2.4.0"></script>
-  <script src="js/app.js?v=2.4.0"></script>
+  <script src="js/api.js?v=2.5.0"></script>
+  <script src="js/app.js?v=2.5.0"></script>
 </body>
 </html>

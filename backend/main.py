@@ -48,7 +48,7 @@ def get_engine() -> UnifiedNIDS:
     """Retrieve or initialize the centralized UnifiedNIDS inference engine."""
     global _engine
     if _engine is None:
-        _engine = UnifiedNIDS()
+        _engine = UnifiedNIDS(eager_load=True)
         # If CICIoT2023 artifacts are not present locally (e.g. trained in external environment),
         # initialize candidate registration to support local testing and development.
         if not _engine.is_specialist_loaded("CICIoT2023"):

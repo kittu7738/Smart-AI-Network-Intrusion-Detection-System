@@ -1004,12 +1004,9 @@
              SECTION 5: SURICATA VS AI-NIDS (COMPARATIVE EVALUATION)
              ============================================================== -->
         <section id="view-comparison" class="view-panel active">
-          <div class="page-title-row">
-            <div>
-              <h1 class="page-heading">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
-              <div class="page-description">Empirical evaluation comparing Suricata (signature/rule-based) against Unified 5-specialist ML models on identical network traffic.</div>
-            </div>
-            <div style="display: flex; gap: 10px;">
+          <div class="page-title-row" style="margin-bottom: 20px;">
+            <h1 class="page-heading" style="margin: 0;">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
+            <div style="display: flex; gap: 10px; align-items: center;">
               <button class="btn btn-primary" id="btn-comp-run-sample">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
                 <span>Run PCAP Benchmark</span>
@@ -1022,13 +1019,8 @@
             </div>
           </div>
 
-          <!-- Ground Truth Benchmark Notice -->
-          <div class="ground-truth-banner">
-            <strong>Ground Truth Benchmark:</strong> Evaluated on 650 network flows across all 13 canonical attack classes under identical network conditions.
-          </div>
-
           <!-- KPI 4-Card Comparison Row -->
-          <div class="comp-stat-grid">
+          <div class="comp-stat-grid" style="margin-bottom: 20px;">
             <div class="comp-stat-card">
               <div class="comp-stat-title">Overall Accuracy</div>
               <div class="comp-stat-body">

@@ -258,10 +258,11 @@ a:hover {
 }
 
 .nav-item-btn.active {
-  background-color: var(--color-primary-bg);
+  background-color: #EFF6FF;
   color: var(--color-primary);
-  border-color: var(--color-primary-border);
+  border: 1.5px solid var(--color-primary);
   font-weight: 600;
+  border-radius: 8px;
 }
 
 .nav-item-btn.active svg {
@@ -365,41 +366,50 @@ a:hover {
   gap: 10px;
 }
 
-.header-stat-chip {
+.header-stat-chip,
+.top-status-pill {
   display: flex;
   align-items: center;
   gap: 8px;
-  background-color: var(--bg-app);
-  border: 1px solid var(--border-subtle);
-  padding: 5px 12px;
-  border-radius: 6px;
-  font-size: 12px;
-}
-
-.header-stat-chip .chip-label {
-  color: var(--text-muted);
+  background-color: #ECFDF5;
+  border: 1px solid #BBF7D0;
+  padding: 5px 14px;
+  border-radius: 9999px;
+  font-size: 12.5px;
+  color: #0F172A;
   font-weight: 500;
 }
 
-.header-stat-chip .chip-val {
-  font-weight: 600;
-  color: var(--text-primary);
+.header-stat-chip .chip-label,
+.top-status-pill .pill-label {
+  color: #0F172A;
+  font-weight: 500;
 }
 
-.chip-status-dot {
+.header-stat-chip .chip-val,
+.top-status-pill .pill-val {
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.chip-status-dot,
+.pill-dot {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background-color: var(--color-benign);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  background-color: #10B981;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+  flex-shrink: 0;
 }
 
-.chip-status-dot.offline {
+.chip-status-dot.offline,
+.pill-dot.offline {
   background-color: var(--color-critical);
   box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.2);
 }
 
-.chip-status-dot.warning {
+.chip-status-dot.warning,
+.pill-dot.warning {
   background-color: var(--color-medium);
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
 }
@@ -486,20 +496,20 @@ a:hover {
 /* KPI METRIC CARDS ROW */
 .kpi-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
-  gap: 14px;
-  margin-bottom: 16px;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
 }
 
 .kpi-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-card);
-  border-radius: 8px;
-  padding: 14px 16px;
-  box-shadow: var(--shadow-card);
+  border-radius: 12px;
+  padding: 18px 20px;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.04);
   display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
   transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
 }
 
@@ -508,76 +518,266 @@ a:hover {
   box-shadow: var(--shadow-md);
 }
 
-.kpi-top {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 8px;
-}
-
-.kpi-label {
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-secondary);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
 .kpi-icon-box {
-  width: 30px;
-  height: 30px;
-  border-radius: 6px;
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-shrink: 0;
 }
 
 .kpi-icon-box.blue {
-  background: var(--color-primary-bg);
-  color: var(--color-primary);
-  border: 1px solid var(--color-primary-border);
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
 }
 .kpi-icon-box.green {
-  background: var(--color-benign-bg);
-  color: var(--color-benign);
-  border: 1px solid var(--color-benign-border);
+  background: #ECFDF5;
+  color: #10B981;
+  border: 1px solid #A7F3D0;
 }
 .kpi-icon-box.red {
-  background: var(--color-critical-bg);
-  color: var(--color-critical);
-  border: 1px solid var(--color-critical-border);
-}
-.kpi-icon-box.amber {
-  background: var(--color-medium-bg);
-  color: var(--color-medium);
-  border: 1px solid var(--color-medium-border);
+  background: #FEF2F2;
+  color: #EF4444;
+  border: 1px solid #FECACA;
 }
 .kpi-icon-box.cyan {
-  background: var(--color-cyan-bg);
-  color: var(--color-cyan);
-  border: 1px solid var(--color-cyan-border);
+  background: #EFF6FF;
+  color: #2563EB;
+  border: 1px solid #BFDBFE;
 }
 
 .kpi-icon-box svg {
-  width: 16px;
-  height: 16px;
+  width: 26px;
+  height: 26px;
+}
+
+.kpi-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.kpi-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.1px;
 }
 
 .kpi-value {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 26px;
+  font-weight: 800;
   color: var(--text-primary);
   letter-spacing: -0.5px;
-  font-family: var(--font-mono);
-  margin-bottom: 4px;
+  font-family: var(--font-sans);
+  line-height: 1.15;
 }
 
 .kpi-bottom {
-  font-size: 11px;
+  font-size: 12px;
   color: var(--text-muted);
   display: flex;
   align-items: center;
+  gap: 4px;
+}
+
+.kpi-bottom .trend-green {
+  color: #10B981;
+  font-weight: 600;
+}
+
+/* MIDDLE 3-CARD GRID */
+.overview-middle-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.95fr 1.15fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* ATTACK BARS COMPACT LIST */
+.attack-bars-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  padding: 4px 0;
+}
+
+.attack-bar-row {
+  display: flex;
+  align-items: center;
+  font-size: 11px;
+}
+
+.attack-bar-label {
+  width: 110px;
+  font-weight: 500;
+  color: #0F172A;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  flex-shrink: 0;
+}
+
+.attack-bar-track {
+  flex: 1;
+  height: 7px;
+  background-color: #F1F5F9;
+  border-radius: 4px;
+  margin: 0 10px;
+  overflow: hidden;
+}
+
+.attack-bar-fill {
+  height: 100%;
+  background-color: #2563EB;
+  border-radius: 4px;
+  transition: width 0.3s ease;
+}
+
+.attack-bar-count {
+  width: 44px;
+  text-align: right;
+  font-weight: 600;
+  color: #0F172A;
+  flex-shrink: 0;
+}
+
+/* BOTTOM 2-CARD GRID */
+.overview-bottom-grid {
+  display: grid;
+  grid-template-columns: 1.8fr 1.2fr;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+/* CLEAN ALERTS TABLE */
+.soc-table-clean {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+.soc-table-clean th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0F172A;
+  border-bottom: 1px solid var(--border-subtle);
+  background: #FFFFFF;
+}
+
+.soc-table-clean td {
+  padding: 10px 12px;
+  border-bottom: 1px solid #F1F5F9;
+  color: #0F172A;
+  vertical-align: middle;
+}
+
+.soc-table-clean tr:last-child td {
+  border-bottom: none;
+}
+
+.pill-severity {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-align: center;
+}
+
+.pill-severity.high {
+  background-color: #FEE2E2;
+  color: #DC2626;
+}
+
+.pill-severity.medium {
+  background-color: #FEF3C7;
+  color: #D97706;
+}
+
+.pill-severity.low {
+  background-color: #DCFCE7;
+  color: #16A34A;
+}
+
+/* CLEAN SYSTEM HEALTH LIST */
+.health-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 0;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.health-row:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.health-item-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.health-icon-box {
+  width: 36px;
+  height: 36px;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  background-color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #0F172A;
+  flex-shrink: 0;
+}
+
+.health-icon-box svg {
+  width: 18px;
+  height: 18px;
+}
+
+.health-title {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #0F172A;
+}
+
+.health-badge-pill {
+  display: inline-flex;
+  align-items: center;
   gap: 6px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  background-color: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.health-badge-pill.warning {
+  background-color: #FEF3C7;
+  color: #D97706;
+  border: 1px solid #FDE68A;
+}
+
+.health-badge-pill.offline {
+  background-color: #FEE2E2;
+  color: #DC2626;
+  border: 1px solid #FECACA;
+}
+
+.health-badge-pill svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3;
 }
 
 /* ==========================================================================

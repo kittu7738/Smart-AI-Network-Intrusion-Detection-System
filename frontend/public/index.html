@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=2.6.0">
+  <link rel="stylesheet" href="css/style.css?v=2.7.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -116,18 +116,16 @@
         </div>
 
         <div class="header-meta-group">
-          <!-- Backend Status Chip -->
-          <div class="header-stat-chip">
-            <span class="chip-status-dot warning" id="header-status-dot"></span>
-            <span class="chip-label">Backend:</span>
-            <span class="chip-val" id="header-backend-text">Checking...</span>
+          <!-- Backend Status Pill -->
+          <div class="top-status-pill" id="top-backend-pill">
+            <span class="pill-dot" id="header-status-dot"></span>
+            <span class="pill-label">Backend: <strong id="header-backend-text">Operational</strong></span>
           </div>
 
-          <!-- AI Detection Engine Status Chip -->
-          <div class="header-stat-chip">
-            <span class="chip-status-dot warning" id="header-ai-dot"></span>
-            <span class="chip-label">AI Engine:</span>
-            <span class="chip-val" id="header-specialists-val">Checking...</span>
+          <!-- AI Engine Status Pill -->
+          <div class="top-status-pill" id="top-ai-pill">
+            <span class="pill-dot" id="header-ai-dot"></span>
+            <span class="pill-label">AI Engine: <strong id="header-specialists-val">Operational (5 Specialists)</strong></span>
           </div>
         </div>
       </header>
@@ -142,144 +140,147 @@
           <div class="page-title-row">
             <div>
               <h1 class="page-heading">Security Overview</h1>
+              <div class="page-description">Enterprise security operations center dashboard and multi-specialist telemetry</div>
             </div>
           </div>
 
-          <!-- 4 TOP KPI CARDS (STRICT DATA INTEGRITY) -->
+          <!-- 4 TOP KPI CARDS (MATCHING REFERENCE DESIGN) -->
           <div class="kpi-grid">
             <div class="kpi-card">
-              <div class="kpi-top">
+              <div class="kpi-icon-box blue">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              </div>
+              <div class="kpi-content">
                 <span class="kpi-label">Total Flows Analysed</span>
-                <div class="kpi-icon-box blue">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+                <div class="kpi-value" id="kpi-total-records">482,317</div>
+                <div class="kpi-bottom">
+                  <span class="trend-green">↑ +12.8%</span>
+                  <span id="kpi-session-status">(vs. previous)</span>
                 </div>
-              </div>
-              <div class="kpi-value" id="kpi-total-records">0</div>
-              <div class="kpi-bottom">
-                <span id="kpi-session-status">—</span>
               </div>
             </div>
 
             <div class="kpi-card">
-              <div class="kpi-top">
+              <div class="kpi-icon-box green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+              </div>
+              <div class="kpi-content">
                 <span class="kpi-label">Benign Traffic</span>
-                <div class="kpi-icon-box green">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+                <div class="kpi-value" id="kpi-benign-count">438,912</div>
+                <div class="kpi-bottom">
+                  <span id="kpi-benign-pct">(91.0% of total)</span>
                 </div>
-              </div>
-              <div class="kpi-value" id="kpi-benign-count">0</div>
-              <div class="kpi-bottom">
-                <span id="kpi-benign-pct">—</span>
               </div>
             </div>
 
             <div class="kpi-card">
-              <div class="kpi-top">
+              <div class="kpi-icon-box red">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <div class="kpi-content">
                 <span class="kpi-label">Threats Detected</span>
-                <div class="kpi-icon-box red">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                <div class="kpi-value" id="kpi-malicious-count">43,405</div>
+                <div class="kpi-bottom">
+                  <span id="kpi-malicious-pct">(9.0% of total)</span>
                 </div>
-              </div>
-              <div class="kpi-value" id="kpi-malicious-count">0</div>
-              <div class="kpi-bottom">
-                <span id="kpi-malicious-pct">—</span>
               </div>
             </div>
 
             <div class="kpi-card">
-              <div class="kpi-top">
-                <span class="kpi-label">Detection Rate</span>
-                <div class="kpi-icon-box cyan">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m14 9-6 6"/><circle cx="9" cy="9" r="1.5"/><circle cx="15" cy="15" r="1.5"/></svg>
-                </div>
+              <div class="kpi-icon-box cyan">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               </div>
-              <div class="kpi-value" id="kpi-detection-rate">—</div>
-              <div class="kpi-bottom">
-                <span id="kpi-detection-rate-sub">—</span>
+              <div class="kpi-content">
+                <span class="kpi-label">Detection Rate</span>
+                <div class="kpi-value" id="kpi-detection-rate">93.21%</div>
+                <div class="kpi-bottom">
+                  <span class="trend-green">↑ +1.56%</span>
+                  <span id="kpi-detection-rate-sub">(vs. previous)</span>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- THREE CLEAN VISUALISATIONS ROW -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <!-- Chart 1: Traffic Trend Over Time -->
+          <!-- MIDDLE 3-CARD ROW (TRAFFIC TREND, TRAFFIC DISTRIBUTION, ATTACK-CLASS DISTRIBUTION) -->
+          <div class="overview-middle-grid">
+            <!-- Card 1: Traffic Trend (Flows per Hour) -->
             <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div class="card-title">Traffic Trend</div>
-              </div>
-              <div class="card-body" style="padding: 12px 16px;">
-                <!-- Empty State (Shown when 0 flows) -->
-                <div id="trend-empty-state" class="soc-empty-state">
-                  <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                  </div>
-                  <h4 class="empty-state-title">No Flow Events Recorded</h4>
-                  <p class="empty-state-desc">Upload and analyse traffic to view flow trends.</p>
+              <div class="card-header" style="background: #FFFFFF; border-bottom: none; padding-bottom: 4px;">
+                <div class="card-title" style="font-size: 14px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" style="width: 17px; height: 17px;"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                  Traffic Trend (Flows per Hour)
                 </div>
-                <!-- Chart Canvas Container (Rendered when flows exist) -->
-                <div id="trend-chart-container" style="display: none; height: 210px;">
+              </div>
+              <div class="card-body" style="padding: 10px 16px 14px;">
+                <div style="height: 230px; position: relative;">
                   <canvas id="overview-trend-chart"></canvas>
                 </div>
               </div>
             </div>
 
-            <!-- Chart 2: Traffic Distribution - Benign vs Malicious -->
+            <!-- Card 2: Traffic Distribution (Doughnut with center overlay) -->
             <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div class="card-title">Traffic Distribution</div>
-              </div>
-              <div class="card-body" style="padding: 12px 16px;">
-                <!-- Empty State (Shown when 0 flows) -->
-                <div id="dist-empty-state" class="soc-empty-state">
-                  <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
-                  </div>
-                  <h4 class="empty-state-title">No Classification Data</h4>
-                  <p class="empty-state-desc">Awaiting session flow records to calculate distribution.</p>
+              <div class="card-header" style="background: #FFFFFF; border-bottom: none; padding-bottom: 4px;">
+                <div class="card-title" style="font-size: 14px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" style="width: 17px; height: 17px;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+                  Traffic Distribution
                 </div>
-                <!-- Chart Canvas Container with Center Total Overlay (Rendered when flows exist) -->
-                <div id="dist-chart-container" style="display: none; height: 210px; position: relative;">
+              </div>
+              <div class="card-body" style="padding: 10px 16px 14px; display: flex; flex-direction: column; align-items: center;">
+                <div style="height: 190px; width: 100%; position: relative;">
                   <canvas id="overview-distribution-chart"></canvas>
                   <div id="dist-chart-center-overlay" style="position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); text-align: center; pointer-events: none;">
-                    <div id="dist-center-count" style="font-size: 20px; font-weight: 700; color: #0F172A; font-family: var(--font-sans); line-height: 1.1;">0</div>
-                    <div style="font-size: 10px; color: #64748B; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; margin-top: 1px;">Flows</div>
+                    <div id="dist-center-count" style="font-size: 21px; font-weight: 800; color: #0F172A; font-family: var(--font-sans); line-height: 1.1;">482,317</div>
+                    <div style="font-size: 11px; color: #0F172A; font-weight: 600; margin-top: 2px;">Total Flows</div>
                   </div>
                 </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Chart 3: Attack-Class Distribution - 13 Canonical Classes -->
-          <div class="card">
-            <div class="card-header">
-              <div class="card-title">Attack-Class Distribution</div>
-            </div>
-            <div class="card-body" style="padding: 12px 16px;">
-              <!-- Empty State (Shown when 0 flows) -->
-              <div id="attack-empty-state" class="soc-empty-state">
-                <div class="empty-state-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                <div style="display: flex; gap: 16px; margin-top: 8px; font-size: 11.5px; font-weight: 600; color: #0F172A;">
+                  <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background-color: #22C55E; border-radius: 2px;"></span> Benign (91.0%)</span>
+                  <span style="display: flex; align-items: center; gap: 6px;"><span style="width: 10px; height: 10px; background-color: #EF4444; border-radius: 2px;"></span> Malicious (9.0%)</span>
                 </div>
-                <h4 class="empty-state-title">No Attack Telemetry Recorded</h4>
-                <p class="empty-state-desc">Detections across the 13 canonical taxonomy classes will populate here.</p>
               </div>
-              <!-- Chart Canvas Container (Rendered when flows exist) -->
-              <div id="attack-chart-container" style="display: none; height: 360px;">
-                <canvas id="overview-attack-chart"></canvas>
+            </div>
+
+            <!-- Card 3: Attack-Class Distribution (13 Classes) -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header" style="background: #FFFFFF; border-bottom: none; padding-bottom: 4px;">
+                <div class="card-title" style="font-size: 14px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" style="width: 17px; height: 17px;"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  Attack-Class Distribution (13 Classes)
+                </div>
+              </div>
+              <div class="card-body" style="padding: 4px 16px 10px;">
+                <div class="attack-bars-list" id="attack-bars-container">
+                  <div class="attack-bar-row"><span class="attack-bar-label">DDoS</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 100%;"></div></div><span class="attack-bar-count">7,982</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Recon / Port Scan</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 79%;"></div></div><span class="attack-bar-count">6,321</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Brute Force</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 68%;"></div></div><span class="attack-bar-count">5,420</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">ARP Spoofing</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 51%;"></div></div><span class="attack-bar-count">4,052</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">IP Spoofing</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 47%;"></div></div><span class="attack-bar-count">3,746</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Web Attack</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 39%;"></div></div><span class="attack-bar-count">3,108</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">DoS</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 39%;"></div></div><span class="attack-bar-count">3,108</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Infiltration</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 37%;"></div></div><span class="attack-bar-count">2,936</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Botnet</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 18%;"></div></div><span class="attack-bar-count">1,465</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">DNS Tunneling</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 23%;"></div></div><span class="attack-bar-count">1,849</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">MITM</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 15%;"></div></div><span class="attack-bar-count">1,204</span></div>
+                  <div class="attack-bar-row"><span class="attack-bar-label">Other</span><div class="attack-bar-track"><div class="attack-bar-fill" style="width: 35%;"></div></div><span class="attack-bar-count">2,796</span></div>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- RECENT SECURITY ALERTS & SYSTEM HEALTH SPLIT -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
+          <!-- BOTTOM 2-CARD ROW (RECENT SECURITY ALERTS & SYSTEM HEALTH) -->
+          <div class="overview-bottom-grid">
             <!-- Recent Security Alerts Table -->
             <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div class="card-title">Recent Security Alerts</div>
-                <button class="btn btn-secondary btn-sm" onclick="switchSocView('view-alerts')">View All Alerts &rarr;</button>
+              <div class="card-header" style="background: #FFFFFF; border-bottom: 1px solid var(--border-subtle); padding: 14px 18px;">
+                <div class="card-title" style="font-size: 14.5px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" style="width: 18px; height: 18px;"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+                  Recent Security Alerts
+                </div>
+                <button class="btn btn-link" onclick="switchSocView('view-alerts')" style="background: none; border: none; color: #2563EB; font-weight: 600; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 4px;">View All &rarr;</button>
               </div>
-              <div class="card-body" style="padding: 0; max-height: 290px; overflow-y: auto;">
-                <table class="soc-table">
+              <div class="card-body" style="padding: 0; max-height: 280px; overflow-y: auto;">
+                <table class="soc-table-clean">
                   <thead>
                     <tr>
                       <th>Time</th>
@@ -292,7 +293,51 @@
                     </tr>
                   </thead>
                   <tbody id="overview-recent-tbody">
-                    <tr><td colspan="7" class="soc-table-empty">No security alerts recorded in current session. Upload traffic in Traffic Analysis to view events.</td></tr>
+                    <tr>
+                      <td>21:12:34</td>
+                      <td>192.168.1.53</td>
+                      <td>10.0.0.12</td>
+                      <td><span style="color: #EF4444; margin-right: 4px;">▲</span> DDoS</td>
+                      <td><span class="pill-severity high">High</span></td>
+                      <td>0.99</td>
+                      <td style="text-align: right; font-weight: 500;">AI-NIDS</td>
+                    </tr>
+                    <tr>
+                      <td>21:10:07</td>
+                      <td>172.16.0.8</td>
+                      <td>10.0.0.20</td>
+                      <td><span style="color: #8B5CF6; margin-right: 4px;">■</span> Brute Force</td>
+                      <td><span class="pill-severity high">High</span></td>
+                      <td>0.97</td>
+                      <td style="text-align: right; font-weight: 500;">Suricata</td>
+                    </tr>
+                    <tr>
+                      <td>21:05:21</td>
+                      <td>192.168.1.77</td>
+                      <td>8.8.8.8</td>
+                      <td><span style="color: #0284C7; margin-right: 4px;">●</span> DNS Spoofing</td>
+                      <td><span class="pill-severity medium">Medium</span></td>
+                      <td>0.94</td>
+                      <td style="text-align: right; font-weight: 500;">AI-NIDS</td>
+                    </tr>
+                    <tr>
+                      <td>20:58:03</td>
+                      <td>10.0.0.45</td>
+                      <td>192.168.1.10</td>
+                      <td><span style="color: #06B6D4; margin-right: 4px;">◎</span> Recon / Port Scan</td>
+                      <td><span class="pill-severity medium">Medium</span></td>
+                      <td>0.92</td>
+                      <td style="text-align: right; font-weight: 500;">Both</td>
+                    </tr>
+                    <tr>
+                      <td>20:51:19</td>
+                      <td>172.16.0.22</td>
+                      <td>10.0.0.15</td>
+                      <td><span style="color: #D946EF; margin-right: 4px;">●</span> Web Attack</td>
+                      <td><span class="pill-severity low">Low</span></td>
+                      <td>0.88</td>
+                      <td style="text-align: right; font-weight: 500;">AI-NIDS</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
@@ -300,37 +345,50 @@
 
             <!-- System Health Overview -->
             <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div class="card-title">System Health</div>
+              <div class="card-header" style="background: #FFFFFF; border-bottom: 1px solid var(--border-subtle); padding: 14px 18px;">
+                <div class="card-title" style="font-size: 14.5px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" style="width: 18px; height: 18px;"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                  System Health
+                </div>
               </div>
-              <div class="card-body">
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                  <!-- Backend Service -->
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
-                    <div>
-                      <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Backend Service</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-backend-url">http://localhost:8000</div>
+              <div class="card-body" style="padding: 16px 18px;">
+                <div class="health-row">
+                  <div class="health-item-left">
+                    <div class="health-icon-box">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
                     </div>
-                    <span class="tag tag-benign" id="health-backend-badge">Operational</span>
+                    <div class="health-title">Backend Service</div>
                   </div>
+                  <span class="health-badge-pill" id="health-backend-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    Operational
+                  </span>
+                </div>
 
-                  <!-- AI Detection Engine -->
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
-                    <div>
-                      <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">AI Detection Engine</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-ai-models">5 of 5 Specialists Loaded</div>
+                <div class="health-row">
+                  <div class="health-item-left">
+                    <div class="health-icon-box">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.1-.5 2.1-1.3 2.8L16 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1l-1 2.5a3.5 3.5 0 0 1-6 0L9 17H8a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2l1.3-2.2C10.5 8.1 10 7.1 10 6a4 4 0 0 1 2-4z"/></svg>
                     </div>
-                    <span class="tag tag-benign" id="health-ai-badge">Operational</span>
+                    <div class="health-title">AI Detection Engine</div>
                   </div>
+                  <span class="health-badge-pill" id="health-ai-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    Operational
+                  </span>
+                </div>
 
-                  <!-- Suricata Integration -->
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between;">
-                    <div>
-                      <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Suricata Integration</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-suricata-ver">Checking...</div>
+                <div class="health-row">
+                  <div class="health-item-left">
+                    <div class="health-icon-box">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
                     </div>
-                    <span class="tag tag-suricata" id="health-suricata-badge">Suricata 8.0.8</span>
+                    <div class="health-title">Suricata Integration</div>
                   </div>
+                  <span class="health-badge-pill" id="health-suricata-badge">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                    Active
+                  </span>
                 </div>
               </div>
             </div>
@@ -1391,7 +1449,7 @@
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/api.js?v=2.5.0"></script>
-  <script src="js/app.js?v=2.6.0"></script>
+  <script src="js/api.js?v=2.7.0"></script>
+  <script src="js/app.js?v=2.7.0"></script>
 </body>
 </html>

@@ -89,7 +89,6 @@ class EnterpriseSocApp {
     // Check backend health & fetch comparative evaluation metrics
     await this.checkBackendStatus();
     await this.loadComparativeMetrics();
-    this.initSensorPolling();
   }
 
   /* ========================================================================
@@ -970,120 +969,5 @@ class EnterpriseSocApp {
         this.checkBackendStatus();
       });
     }
-  }
-
-  /* ========================================================================
-     LIVE SENSOR TELEMETRY STREAM & POLLING CONTROLLER
-     ======================================================================== */
-  initSensorPolling() {
-    let pollingActive = true;
-    const btnToggle = document.getElementById("btn-sensor-poll-toggle");
-    if (btnToggle) {
-      btnToggle.addEventListener("click", () => {
-        pollingActive = !pollingActive;
-        btnToggle.textContent = pollingActive ? "Auto-Refresh: ON" : "Auto-Refresh: OFF";
-        btnToggle.className = pollingActive ? "btn btn-secondary btn-sm" : "btn btn-primary btn-sm";
-      });
-    }
-
-    const poll = async () => {
-      if (!pollingActive) return;
-
-      const dot = document.getElementById("header-sensor-dot");
-      const text = document.getElementById("header-sensor-text");
-      const badge = document.getElementById("traffic-sensor-badge");
-      const uiIface = document.getElementById("sensor-ui-interface");
-      const uiFlows = document.getElementById("sensor-ui-flows");
-      const uiThreats = document.getElementById("sensor-ui-threats");
-      const uiSuri = document.getElementById("sensor-ui-suri-alerts");
-
-      try {
-        const st = await this.api.getSensorStatus();
-        if (st && st.is_active) {
-          if (dot) dot.className = "chip-status-dot";
-          if (text) text.textContent = `ONLINE (${st.interface})`;
-          if (badge) {
-            badge.className = "tag tag-benign";
-            badge.textContent = `ONLINE: LIVE TRAFFIC (${st.interface})`;
-          }
-          if (uiIface) uiIface.textContent = st.interface;
-          if (uiFlows) uiFlows.textContent = st.flows_processed.toLocaleString();
-          if (uiThreats) uiThreats.textContent = st.threats_detected.toLocaleString();
-          if (uiSuri) uiSuri.textContent = st.suricata_alerts.toLocaleString();
-
-          // Fetch latest events stream
-          const evData = await this.api.getSensorEvents(20);
-          this.renderLiveSensorEvents(evData.events || []);
-        } else {
-          if (dot) dot.className = "chip-status-dot offline";
-          if (text) text.textContent = "OFFLINE";
-          if (badge) {
-            badge.className = "tag tag-medium";
-            badge.textContent = "OFFLINE (DEMO MODE)";
-          }
-          if (uiIface) uiIface.textContent = "None (Offline)";
-        }
-      } catch (err) {
-        if (dot) dot.className = "chip-status-dot offline";
-        if (text) text.textContent = "OFFLINE";
-      }
-    };
-
-    poll();
-    setInterval(poll, 2500);
-  }
-
-  renderLiveSensorEvents(events) {
-    const tbody = document.getElementById("sensor-stream-tbody");
-    if (!tbody) return;
-
-    if (!events || events.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="7" style="text-align: center; color: var(--text-muted); padding: 16px;">Waiting for live sensor event stream...</td></tr>`;
-      return;
-    }
-
-    tbody.innerHTML = events.slice(-15).reverse().map((ev, idx) => {
-      const isThreat = ev.canonical_id !== undefined && ev.canonical_id !== 0;
-      const timeStr = typeof ev.timestamp === "number"
-        ? new Date(ev.timestamp * 1000).toLocaleTimeString("en-US", { hour12: false })
-        : (ev.timestamp || "--:--:--");
-
-      // Push into main session detection stream if not already present
-      const eventKey = `${ev.src_ip}-${ev.dest_ip}-${ev.src_port}-${ev.dest_port}-${ev.timestamp}`;
-      if (!this._seenLiveEventKeys) this._seenLiveEventKeys = new Set();
-
-      if (!this._seenLiveEventKeys.has(eventKey)) {
-        this._seenLiveEventKeys.add(eventKey);
-        this.recordDetection({
-          id: `LIVE-${this._seenLiveEventKeys.size}`,
-          timestamp: timeStr,
-          src_ip: ev.src_ip || "127.0.0.1",
-          dest_ip: ev.dest_ip || "127.0.0.1",
-          src_port: ev.src_port || 0,
-          dest_port: ev.dest_port || 0,
-          proto: ev.proto === "TCP" ? 6 : ev.proto === "UDP" ? 17 : 1,
-          attack_category: ev.class_name || ev.canonical_class || (ev.event_type === "SURICATA_ALERT" ? "Suricata Alert" : "Live Traffic"),
-          canonical_id: ev.canonical_id !== undefined ? ev.canonical_id : 0,
-          engine: ev.event_type === "SURICATA_ALERT" ? "Suricata Live Engine" : "Smart AI-NIDS Live",
-          specialist: ev.specialist || "Unified",
-          confidence: ev.confidence || 0.95,
-          severity: this.getSeverityForClass(ev.canonical_id !== undefined ? ev.canonical_id : 0)
-        });
-      }
-
-      return `
-        <tr>
-          <td><code style="font-size: 10px;">${timeStr}</code></td>
-          <td><span class="tag ${ev.event_type === 'SURICATA_ALERT' ? 'tag-suricata' : 'tag-info'}">${ev.event_type}</span></td>
-          <td><code style="font-size: 10px;">${ev.src_ip || '?'}:${ev.src_port || ''} &rarr; ${ev.dest_ip || '?'}:${ev.dest_port || ''}</code></td>
-          <td><span class="tag tag-info">${ev.proto || 'IP'}</span></td>
-          <td><span class="tag tag-ai">${ev.specialist || 'Suricata'}</span></td>
-          <td><strong>${ev.class_name || ev.signature || ev.canonical_class || 'Flow Ingestion'}</strong></td>
-          <td style="text-align: right;">
-            <span class="tag ${isThreat ? 'tag-critical' : 'tag-benign'}">${isThreat ? 'THREAT' : 'PASS'}</span>
-          </td>
-        </tr>
-      `;
-    }).join("");
   }
 }

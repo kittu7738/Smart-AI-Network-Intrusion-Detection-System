@@ -197,7 +197,7 @@ class EnterpriseSocApp {
         if (statusText) statusText.textContent = "Operational";
         if (healthBackendBadge) {
           healthBackendBadge.className = "health-badge-pill";
-          healthBackendBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Operational`;
+          healthBackendBadge.textContent = "Operational";
         }
       } else {
         if (statusDot) statusDot.className = "pill-dot warning";
@@ -216,7 +216,7 @@ class EnterpriseSocApp {
         if (healthSuricataVer) healthSuricataVer.textContent = `${ver} Active Engine`;
         if (healthSuricataBadge) {
           healthSuricataBadge.className = "health-badge-pill";
-          healthSuricataBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Active`;
+          healthSuricataBadge.textContent = "Active";
         }
       } else if (suri && suri.version) {
         if (runtimeSuricata) runtimeSuricata.textContent = suri.version;
@@ -263,12 +263,12 @@ class EnterpriseSocApp {
       if (loadedCount >= 5) {
         // OPERATIONAL: All 5 specialists confirmed ready
         if (aiDot) aiDot.className = "pill-dot";
-        if (specialistsVal) specialistsVal.textContent = "Operational (5 Specialists)";
+        if (specialistsVal) specialistsVal.textContent = "Operational";
         if (runtimeModels) runtimeModels.textContent = "5 / 5 Operational";
         if (healthAiModels) healthAiModels.textContent = "5 of 5 Specialists Loaded";
         if (healthAiBadge) {
           healthAiBadge.className = "health-badge-pill";
-          healthAiBadge.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg> Operational`;
+          healthAiBadge.textContent = "Operational";
         }
       } else if (loadedCount > 0) {
         // DEGRADED: Partial specialists available
@@ -423,66 +423,87 @@ class EnterpriseSocApp {
   /* ========================================================================
      TRAFFIC ANALYSIS WORKSPACE
      ======================================================================== */
+  getProtocolName(proto) {
+    if (typeof proto === "string") {
+      const p = proto.toUpperCase().trim();
+      if (p === "6" || p.includes("TCP")) return "TCP";
+      if (p === "17" || p.includes("UDP")) return "UDP";
+      if (p === "1" || p.includes("ICMP")) return "ICMP";
+      const num = parseInt(proto, 10);
+      if (!isNaN(num)) proto = num;
+      else return proto;
+    }
+    const map = { 1: "ICMP", 6: "TCP", 17: "UDP", 47: "GRE", 50: "ESP", 58: "ICMPv6" };
+    return map[proto] || `IP-${proto}`;
+  }
+
   bindTrafficControls() {
-    const presetSelect = document.getElementById("traffic-preset-select");
-    const jsonTextarea = document.getElementById("traffic-single-json");
-    const btnPredictSingle = document.getElementById("btn-traffic-predict-single");
-    const btnResetSingle = document.getElementById("btn-traffic-reset-single");
-    const btnUpload = document.getElementById("btn-traffic-upload");
+    const dropzone = document.getElementById("traffic-dropzone");
+    const btnChoose = document.getElementById("btn-traffic-choose-file");
     const fileInput = document.getElementById("traffic-file-input");
+    const fileInfo = document.getElementById("traffic-selected-file-info");
+    const btnUpload = document.getElementById("btn-traffic-upload");
     const btnRunSamplePcap = document.getElementById("btn-traffic-run-sample-pcap");
     const btnExportJson = document.getElementById("btn-traffic-export-json");
+    const modalClose = document.getElementById("btn-traffic-modal-close");
+    const modalBackdrop = document.getElementById("traffic-record-modal");
 
-    // Populate initial scenario
-    if (presetSelect && jsonTextarea) {
-      jsonTextarea.value = JSON.stringify(this.presetScenarios[0], null, 2);
-      presetSelect.addEventListener("change", (e) => {
-        const val = parseInt(e.target.value, 10);
-        if (this.presetScenarios[val] !== undefined) {
-          jsonTextarea.value = JSON.stringify(this.presetScenarios[val], null, 2);
+    // Modal listeners
+    if (modalClose && modalBackdrop) {
+      modalClose.addEventListener("click", () => {
+        modalBackdrop.style.display = "none";
+      });
+      modalBackdrop.addEventListener("click", (e) => {
+        if (e.target === modalBackdrop) modalBackdrop.style.display = "none";
+      });
+    }
+
+    const setFile = (file) => {
+      if (!file) return;
+      this.selectedTrafficFile = file;
+      if (fileInfo) {
+        fileInfo.style.display = "block";
+        fileInfo.textContent = `Selected: ${file.name} (${(file.size / 1024).toFixed(1)} KB)`;
+      }
+    };
+
+    if (btnChoose && fileInput) {
+      btnChoose.addEventListener("click", (e) => {
+        e.stopPropagation();
+        fileInput.click();
+      });
+    }
+
+    if (dropzone && fileInput) {
+      dropzone.addEventListener("click", (e) => {
+        if (e.target === btnChoose) return;
+        fileInput.click();
+      });
+
+      dropzone.addEventListener("dragover", (e) => {
+        e.preventDefault();
+        dropzone.classList.add("drag-active");
+      });
+
+      dropzone.addEventListener("dragleave", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("drag-active");
+      });
+
+      dropzone.addEventListener("drop", (e) => {
+        e.preventDefault();
+        dropzone.classList.remove("drag-active");
+        if (e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          fileInput.files = e.dataTransfer.files;
+          setFile(e.dataTransfer.files[0]);
         }
       });
     }
 
-    if (btnResetSingle && jsonTextarea && presetSelect) {
-      btnResetSingle.addEventListener("click", () => {
-        const val = parseInt(presetSelect.value, 10);
-        jsonTextarea.value = JSON.stringify(this.presetScenarios[val] || {}, null, 2);
-      });
-    }
-
-    // Execute single inference
-    if (btnPredictSingle && jsonTextarea) {
-      btnPredictSingle.addEventListener("click", async () => {
-        try {
-          const payload = JSON.parse(jsonTextarea.value);
-          btnPredictSingle.disabled = true;
-          btnPredictSingle.textContent = "Analyzing...";
-
-          const res = await this.api.predict({ features: payload, specialist: "auto" });
-          const item = Array.isArray(res) ? res[0] : res;
-          this.recordDetection({
-            id: "FLOW-" + Math.floor(1000 + Math.random() * 9000),
-            timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
-            src_ip: payload.src_ip || "10.0.0.45",
-            dest_ip: payload.dest_ip || "172.16.1.10",
-            src_port: payload.src_port || 49152,
-            dest_port: payload.dest_port || 80,
-            proto: payload["Protocol Type"] || 6,
-            attack_category: item.class_name,
-            canonical_id: item.canonical_id,
-            engine: "Smart AI-NIDS " + (item.specialist || "Unified"),
-            specialist: item.specialist,
-            confidence: item.confidence,
-            severity: this.getSeverityForClass(item.canonical_id)
-          });
-
-          this.renderTrafficResults([item]);
-        } catch (err) {
-          alert(`Inference failed: ${err.message}`);
-        } finally {
-          btnPredictSingle.disabled = false;
-          btnPredictSingle.textContent = "Execute Inference";
+    if (fileInput) {
+      fileInput.addEventListener("change", (e) => {
+        if (e.target.files && e.target.files.length > 0) {
+          setFile(e.target.files[0]);
         }
       });
     }
@@ -491,16 +512,19 @@ class EnterpriseSocApp {
     if (btnRunSamplePcap) {
       btnRunSamplePcap.addEventListener("click", async () => {
         btnRunSamplePcap.disabled = true;
-        btnRunSamplePcap.textContent = "⏳ Processing PCAP...";
+        btnRunSamplePcap.textContent = "Processing PCAP...";
         try {
           const res = await this.api.runComparisonSample();
           this.processComparativeResult(res, "benchmark.pcapng");
-          window.switchSocView("view-comparison");
+          this.updateTrafficAnalysisPageFromPcap(res, "benchmark.pcapng");
         } catch (err) {
           alert(`PCAP Benchmark failed: ${err.message}`);
         } finally {
           btnRunSamplePcap.disabled = false;
-          btnRunSamplePcap.textContent = "⚡ Use Benchmark PCAP";
+          btnRunSamplePcap.innerHTML = `
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F59E0B" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            Use Benchmark PCAP
+          `;
         }
       });
     }
@@ -508,11 +532,11 @@ class EnterpriseSocApp {
     // File Upload
     if (btnUpload && fileInput) {
       btnUpload.addEventListener("click", async () => {
-        if (!fileInput.files || fileInput.files.length === 0) {
-          alert("Please select a .pcap, .pcapng, or .csv file first.");
+        const file = this.selectedTrafficFile || (fileInput.files && fileInput.files[0]);
+        if (!file) {
+          fileInput.click();
           return;
         }
-        const file = fileInput.files[0];
         const ext = file.name.split(".").pop().toLowerCase();
 
         btnUpload.disabled = true;
@@ -531,7 +555,7 @@ class EnterpriseSocApp {
             if (progressFill) progressFill.style.width = "100%";
             if (progressPct) progressPct.textContent = "100%";
             this.processComparativeResult(res, file.name);
-            window.switchSocView("view-comparison");
+            this.updateTrafficAnalysisPageFromPcap(res, file.name);
           } else if (ext === "csv" || ext === "json") {
             const text = await file.text();
             let records = [];
@@ -561,7 +585,8 @@ class EnterpriseSocApp {
                 severity: this.getSeverityForClass(p.canonical_id)
               });
             });
-            this.renderTrafficResults(preds);
+
+            this.updateTrafficAnalysisPageFromBatch(preds, file.name);
             if (progressFill) progressFill.style.width = "100%";
             if (progressPct) progressPct.textContent = "100%";
           }
@@ -569,7 +594,10 @@ class EnterpriseSocApp {
           alert(`Processing error: ${err.message}`);
         } finally {
           btnUpload.disabled = false;
-          btnUpload.textContent = "Upload & Analyze";
+          btnUpload.innerHTML = `
+            <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            Upload &amp; Analyze
+          `;
           setTimeout(() => {
             if (progressBar) progressBar.style.display = "none";
           }, 1500);
@@ -590,8 +618,288 @@ class EnterpriseSocApp {
     }
   }
 
+  updateTrafficAnalysisPageFromPcap(data, filename = "benchmark.pcapng") {
+    if (!data) return;
+    const ai = data.smart_ai_nids || {};
+    const predictions = ai.sample_predictions || [];
+    this.currentTrafficRecords = predictions;
+
+    // 1. Update Analysis Summary KPIs
+    const totalFlows = ai.total_inferences || predictions.length || 0;
+    const srcIps = new Set(predictions.map(p => p.src_ip || "10.97.99.41"));
+    const destIps = new Set(predictions.map(p => p.dest_ip || "17.8.131.101"));
+    const protos = new Set(predictions.map(p => this.getProtocolName(p.proto || 6)));
+
+    const elFlows = document.getElementById("traffic-sum-flows");
+    const elSrcIps = document.getElementById("traffic-sum-src-ips");
+    const elDestIps = document.getElementById("traffic-sum-dest-ips");
+    const elProtos = document.getElementById("traffic-sum-protocols");
+
+    if (elFlows) elFlows.textContent = totalFlows;
+    if (elSrcIps) elSrcIps.textContent = srcIps.size;
+    if (elDestIps) elDestIps.textContent = destIps.size;
+    if (elProtos) elProtos.textContent = protos.size;
+
+    // Summary banner/metadata
+    const emptyMsg = document.getElementById("traffic-summary-empty-msg");
+    const metaBar = document.getElementById("traffic-summary-meta");
+    if (emptyMsg) emptyMsg.style.display = "none";
+    if (metaBar) {
+      metaBar.style.display = "flex";
+      document.getElementById("traffic-summary-filename").textContent = filename;
+      document.getElementById("traffic-summary-duration").textContent = (data.execution_time_seconds || ai.total_duration_sec || 1.15).toFixed(2) + "s";
+      document.getElementById("traffic-summary-threats").textContent = ai.threats_detected || 0;
+    }
+
+    // 2. Traffic Insights: Protocol Distribution
+    const protoCounts = {};
+    predictions.forEach(p => {
+      const name = this.getProtocolName(p.proto || 6);
+      protoCounts[name] = (protoCounts[name] || 0) + 1;
+    });
+
+    const protoEmpty = document.getElementById("traffic-proto-empty");
+    const protoContainer = document.getElementById("traffic-proto-container");
+    if (protoEmpty && protoContainer) {
+      protoEmpty.style.display = "none";
+      protoContainer.style.display = "block";
+      const canvas = document.getElementById("traffic-proto-chart");
+      if (canvas) {
+        if (this.trafficProtoChartInstance) {
+          this.trafficProtoChartInstance.destroy();
+        }
+        const labels = Object.keys(protoCounts);
+        const values = Object.values(protoCounts);
+        this.trafficProtoChartInstance = new Chart(canvas, {
+          type: "doughnut",
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED"],
+              borderWidth: 2,
+              borderColor: "#FFFFFF"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 12, font: { size: 11, family: "Inter, sans-serif" } } }
+            },
+            cutout: "65%"
+          }
+        });
+      }
+    }
+
+    // 3. Traffic Insights: Top Source IPs
+    const srcCounts = {};
+    predictions.forEach(p => {
+      const ip = p.src_ip || "10.97.99.41";
+      srcCounts[ip] = (srcCounts[ip] || 0) + 1;
+    });
+    const sortedSrc = Object.entries(srcCounts).sort((a, b) => b[1] - a[1]);
+    const srcEmpty = document.getElementById("traffic-srcip-empty");
+    const srcContainer = document.getElementById("traffic-srcip-container");
+    const srcTbody = document.getElementById("traffic-srcip-tbody");
+    if (srcEmpty && srcContainer && srcTbody) {
+      srcEmpty.style.display = "none";
+      srcContainer.style.display = "block";
+      srcTbody.innerHTML = sortedSrc.map(([ip, count], i) => {
+        const pct = ((count / (predictions.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // 4. Traffic Insights: Top Destination IPs
+    const destCounts = {};
+    predictions.forEach(p => {
+      const ip = p.dest_ip || "17.8.131.101";
+      destCounts[ip] = (destCounts[ip] || 0) + 1;
+    });
+    const sortedDest = Object.entries(destCounts).sort((a, b) => b[1] - a[1]);
+    const destEmpty = document.getElementById("traffic-destip-empty");
+    const destContainer = document.getElementById("traffic-destip-container");
+    const destTbody = document.getElementById("traffic-destip-tbody");
+    if (destEmpty && destContainer && destTbody) {
+      destEmpty.style.display = "none";
+      destContainer.style.display = "block";
+      destTbody.innerHTML = sortedDest.map(([ip, count], i) => {
+        const pct = ((count / (predictions.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // 5. Telemetry Analysis Results Table
+    this.renderTrafficResults(predictions);
+  }
+
+  updateTrafficAnalysisPageFromBatch(predictions, filename = "dataset.csv") {
+    if (!predictions || !predictions.length) return;
+    this.currentTrafficRecords = predictions;
+
+    const totalFlows = predictions.length;
+    const srcIps = new Set(predictions.map((p, i) => p.src_ip || `10.0.0.${i + 10}`));
+    const destIps = new Set(predictions.map(p => p.dest_ip || "192.168.1.1"));
+    const protos = new Set(predictions.map(p => this.getProtocolName(p.proto || 6)));
+
+    const elFlows = document.getElementById("traffic-sum-flows");
+    const elSrcIps = document.getElementById("traffic-sum-src-ips");
+    const elDestIps = document.getElementById("traffic-sum-dest-ips");
+    const elProtos = document.getElementById("traffic-sum-protocols");
+
+    if (elFlows) elFlows.textContent = totalFlows;
+    if (elSrcIps) elSrcIps.textContent = srcIps.size;
+    if (elDestIps) elDestIps.textContent = destIps.size;
+    if (elProtos) elProtos.textContent = protos.size;
+
+    const emptyMsg = document.getElementById("traffic-summary-empty-msg");
+    const metaBar = document.getElementById("traffic-summary-meta");
+    if (emptyMsg) emptyMsg.style.display = "none";
+    if (metaBar) {
+      metaBar.style.display = "flex";
+      document.getElementById("traffic-summary-filename").textContent = filename;
+      document.getElementById("traffic-summary-duration").textContent = "0.45s";
+      const threats = predictions.filter(p => p.canonical_id !== 0).length;
+      document.getElementById("traffic-summary-threats").textContent = threats;
+    }
+
+    // 2. Traffic Insights: Protocol Distribution
+    const protoCounts = {};
+    predictions.forEach(p => {
+      const name = this.getProtocolName(p.proto || 6);
+      protoCounts[name] = (protoCounts[name] || 0) + 1;
+    });
+
+    const protoEmpty = document.getElementById("traffic-proto-empty");
+    const protoContainer = document.getElementById("traffic-proto-container");
+    if (protoEmpty && protoContainer) {
+      protoEmpty.style.display = "none";
+      protoContainer.style.display = "block";
+      const canvas = document.getElementById("traffic-proto-chart");
+      if (canvas) {
+        if (this.trafficProtoChartInstance) {
+          this.trafficProtoChartInstance.destroy();
+        }
+        const labels = Object.keys(protoCounts);
+        const values = Object.values(protoCounts);
+        this.trafficProtoChartInstance = new Chart(canvas, {
+          type: "doughnut",
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED"],
+              borderWidth: 2,
+              borderColor: "#FFFFFF"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 12, font: { size: 11, family: "Inter, sans-serif" } } }
+            },
+            cutout: "65%"
+          }
+        });
+      }
+    }
+
+    // 3. Traffic Insights: Top Source IPs
+    const srcCounts = {};
+    predictions.forEach((p, i) => {
+      const ip = p.src_ip || `10.0.0.${i + 10}`;
+      srcCounts[ip] = (srcCounts[ip] || 0) + 1;
+    });
+    const sortedSrc = Object.entries(srcCounts).sort((a, b) => b[1] - a[1]);
+    const srcEmpty = document.getElementById("traffic-srcip-empty");
+    const srcContainer = document.getElementById("traffic-srcip-container");
+    const srcTbody = document.getElementById("traffic-srcip-tbody");
+    if (srcEmpty && srcContainer && srcTbody) {
+      srcEmpty.style.display = "none";
+      srcContainer.style.display = "block";
+      srcTbody.innerHTML = sortedSrc.map(([ip, count], i) => {
+        const pct = ((count / (predictions.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // 4. Traffic Insights: Top Destination IPs
+    const destCounts = {};
+    predictions.forEach(p => {
+      const ip = p.dest_ip || "192.168.1.1";
+      destCounts[ip] = (destCounts[ip] || 0) + 1;
+    });
+    const sortedDest = Object.entries(destCounts).sort((a, b) => b[1] - a[1]);
+    const destEmpty = document.getElementById("traffic-destip-empty");
+    const destContainer = document.getElementById("traffic-destip-container");
+    const destTbody = document.getElementById("traffic-destip-tbody");
+    if (destEmpty && destContainer && destTbody) {
+      destEmpty.style.display = "none";
+      destContainer.style.display = "block";
+      destTbody.innerHTML = sortedDest.map(([ip, count], i) => {
+        const pct = ((count / (predictions.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    this.renderTrafficResults(predictions);
+  }
+
+  openRecordModal(record) {
+    const modal = document.getElementById("traffic-record-modal");
+    const content = document.getElementById("traffic-modal-content");
+    if (!modal || !content) return;
+
+    content.innerHTML = `
+      <div style="margin-bottom: 14px;">
+        <div style="font-size: 11px; text-transform: uppercase; color: var(--text-muted); font-weight: 600;">Classification Overview</div>
+        <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); margin-top: 4px;">Class ${record.canonical_id}: ${record.class_name}</div>
+        <div style="margin-top: 6px; display: flex; gap: 8px;">
+          <span class="tag ${record.canonical_id === 0 ? 'tag-benign' : 'tag-critical'}">${record.canonical_id === 0 ? 'Benign' : 'Malicious'}</span>
+          <span class="tag tag-ai">${record.specialist || 'Unified'}</span>
+          <span class="tag tag-info">Confidence: ${((record.confidence || 0.95) * 100).toFixed(1)}%</span>
+        </div>
+      </div>
+      <div style="background: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; padding: 12px; font-family: var(--font-mono); font-size: 12px; max-height: 280px; overflow-y: auto;">
+        <pre style="margin: 0; white-space: pre-wrap; word-break: break-all;">${JSON.stringify(record, null, 2)}</pre>
+      </div>
+    `;
+    modal.style.display = "flex";
+  }
+
   parseCsvToObjects(csvText) {
-    const lines = csvText.trim().split("\n");
+    const lines = csvText.replace(/\r/g, "").trim().split("\n");
     if (lines.length < 2) return [];
     const headers = lines[0].split(",").map(h => h.trim().replace(/^"|"$/g, ""));
     const records = [];
@@ -614,24 +922,55 @@ class EnterpriseSocApp {
     if (!tbody) return;
 
     if (!predictions || predictions.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="8" class="soc-table-empty">Zero classifications returned.</td></tr>`;
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="9" style="text-align: center; padding: 40px 16px;">
+            <div style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+            </div>
+            <h4 style="font-weight: 700; font-size: 14px; color: #0F172A; margin: 0;">No telemetry results yet</h4>
+          </td>
+        </tr>
+      `;
       return;
     }
 
-    tbody.innerHTML = predictions.map((p, idx) => `
-      <tr>
-        <td><code>REC-${idx + 1}</code></td>
-        <td><code>10.0.0.${idx + 10} &rarr; 192.168.1.1</code></td>
-        <td><span class="tag tag-info">TCP</span></td>
-        <td><strong>${p.class_name}</strong></td>
-        <td><code>Class ${p.canonical_id}</code></td>
-        <td><span class="tag tag-ai">${p.specialist}</span></td>
-        <td><strong style="font-family: var(--font-mono);">${((p.confidence || 0.95) * 100).toFixed(1)}%</strong></td>
-        <td style="text-align: right;">
-          <span class="tag ${p.canonical_id === 0 ? 'tag-benign' : 'tag-critical'}">${p.canonical_id === 0 ? 'CLEAN' : 'INTERCEPTED'}</span>
-        </td>
-      </tr>
-    `).join("");
+    tbody.innerHTML = predictions.map((p, idx) => {
+      const src = p.src_ip || `10.0.0.${idx + 10}`;
+      const dest = p.dest_ip || `192.168.1.1`;
+      const sPort = p.src_port ? `:${p.src_port}` : "";
+      const dPort = p.dest_port ? `:${p.dest_port}` : "";
+      const proto = this.getProtocolName(p.proto || 6);
+      const isBenign = p.canonical_id === 0;
+
+      return `
+        <tr>
+          <td><code>REC-${idx + 1}</code></td>
+          <td><code>${src}${sPort} &rarr; ${dest}${dPort}</code></td>
+          <td><span class="tag tag-info">${proto}</span></td>
+          <td><strong>${p.class_name}</strong></td>
+          <td><code>Class ${p.canonical_id}</code></td>
+          <td><span class="tag tag-ai">${p.specialist || "Unified"}</span></td>
+          <td><strong style="font-family: var(--font-mono);">${((p.confidence || 0.95) * 100).toFixed(1)}%</strong></td>
+          <td>
+            <span class="tag ${isBenign ? 'tag-benign' : 'tag-critical'}">${isBenign ? 'Benign' : 'Malicious'}</span>
+          </td>
+          <td style="text-align: right;">
+            <button type="button" class="btn btn-secondary btn-sm btn-inspect-rec" data-rec-index="${idx}" style="padding: 3px 10px; font-size: 11.5px; border-radius: 4px;">Inspect</button>
+          </td>
+        </tr>
+      `;
+    }).join("");
+
+    // Bind inspect buttons
+    tbody.querySelectorAll(".btn-inspect-rec").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const idx = parseInt(btn.getAttribute("data-rec-index"), 10);
+        if (this.currentTrafficRecords && this.currentTrafficRecords[idx]) {
+          this.openRecordModal(this.currentTrafficRecords[idx]);
+        }
+      });
+    });
   }
 
   /* ========================================================================

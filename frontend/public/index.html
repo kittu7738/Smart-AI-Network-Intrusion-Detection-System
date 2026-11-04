@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=2.9.0">
+  <link rel="stylesheet" href="css/style.css?v=3.0.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,14 +33,14 @@
         <ul class="nav-links-list">
           <!-- 1. Security Overview -->
           <li>
-            <button class="nav-item-btn" data-view="view-overview">
+            <button class="nav-item-btn active" data-view="view-overview">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
               <span>Security Overview</span>
             </button>
           </li>
           <!-- 2. Traffic Analysis -->
           <li>
-            <button class="nav-item-btn active" data-view="view-traffic">
+            <button class="nav-item-btn" data-view="view-traffic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span>Traffic Analysis</span>
             </button>
@@ -125,7 +125,7 @@
           <!-- AI Engine Status Pill -->
           <div class="top-status-pill" id="top-ai-pill">
             <span class="pill-dot" id="header-ai-dot"></span>
-            <span class="pill-label">AI Engine: <strong id="header-specialists-val">Operational (5 Specialists)</strong></span>
+            <span class="pill-label">AI Engine: <strong id="header-specialists-val">Operational</strong></span>
           </div>
         </div>
       </header>
@@ -352,42 +352,18 @@
               </div>
               <div class="card-body" style="padding: 16px 18px;">
                 <div class="health-row">
-                  <div class="health-item-left">
-                    <div class="health-icon-box">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-                    </div>
-                    <div class="health-title">Backend Service</div>
-                  </div>
-                  <span class="health-badge-pill" id="health-backend-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    Operational
-                  </span>
+                  <div class="health-title">Backend Service</div>
+                  <span class="health-badge-pill" id="health-backend-badge">Operational</span>
                 </div>
 
                 <div class="health-row">
-                  <div class="health-item-left">
-                    <div class="health-icon-box">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 1 4 4c0 1.1-.5 2.1-1.3 2.8L16 11h2a2 2 0 0 1 2 2v2a2 2 0 0 1-2 2h-1l-1 2.5a3.5 3.5 0 0 1-6 0L9 17H8a2 2 0 0 1-2-2v-2a2 2 0 0 1 2-2h2l1.3-2.2C10.5 8.1 10 7.1 10 6a4 4 0 0 1 2-4z"/></svg>
-                    </div>
-                    <div class="health-title">AI Detection Engine</div>
-                  </div>
-                  <span class="health-badge-pill" id="health-ai-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    Operational
-                  </span>
+                  <div class="health-title">AI Detection Engine</div>
+                  <span class="health-badge-pill" id="health-ai-badge">Operational</span>
                 </div>
 
                 <div class="health-row">
-                  <div class="health-item-left">
-                    <div class="health-icon-box">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                    </div>
-                    <div class="health-title">Suricata Integration</div>
-                  </div>
-                  <span class="health-badge-pill" id="health-suricata-badge">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                    Active
-                  </span>
+                  <div class="health-title">Suricata Integration</div>
+                  <span class="health-badge-pill" id="health-suricata-badge">Active</span>
                 </div>
               </div>
             </div>
@@ -401,8 +377,8 @@
         <section id="view-traffic" class="view-panel">
           <div class="page-title-row">
             <div>
-              <h1 class="page-heading">Network Traffic Ingestion &amp; Analysis</h1>
-              <div class="page-description">Upload PCAP/PCAPNG or CSV flow data to analyse network traffic.</div>
+              <h1 class="page-heading">Traffic Analysis</h1>
+              <div class="page-description">Offline network traffic analysis</div>
             </div>
           </div>
 
@@ -411,19 +387,24 @@
             <!-- CARD A: UPLOAD & ANALYZE TRAFFIC FILE -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
-                <span class="card-title">Upload &amp; Analyze Traffic File</span>
-                <span class="tag tag-benign">Ready</span>
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  Upload &amp; Analyze Traffic File
+                </div>
               </div>
               <div class="card-body">
                 <!-- Large drag-and-drop upload area -->
                 <div class="traffic-dropzone" id="traffic-dropzone">
                   <div class="dropzone-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
+                    <svg viewBox="0 0 24 24" width="46" height="46" fill="none" stroke="#2563EB" stroke-width="2"><path d="M17.5 19H9a7 7 0 1 1 6.71-9h1.79a4.5 4.5 0 1 1 0 9Z"/><path d="M12 12v6"/><path d="m15 15-3-3-3 3"/></svg>
                   </div>
-                  <div class="dropzone-title">Drag and drop capture or dataset file here</div>
-                  <div class="dropzone-subtitle">Supported formats: CSV, PCAP and PCAPNG</div>
+                  <div class="dropzone-title">Drag and drop a CSV or PCAP file</div>
+                  <div class="dropzone-subtitle">Supported formats: CSV, PCAP, PCAPNG</div>
                   <div style="margin-top: 6px;">
-                    <button type="button" class="btn btn-secondary btn-sm" id="btn-traffic-choose-file">Choose File</button>
+                    <button type="button" class="btn btn-secondary btn-sm" id="btn-traffic-choose-file" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #0F172A; font-weight: 600; padding: 6px 16px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px;">
+                      <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#2563EB" stroke-width="2"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg>
+                      Choose File
+                    </button>
                     <input type="file" id="traffic-file-input" accept=".pcap,.pcapng,.csv" style="display: none;">
                   </div>
                   <div id="traffic-selected-file-info" style="display: none; margin-top: 6px; font-size: 12px; font-weight: 600; color: var(--color-primary); font-family: var(--font-mono);"></div>
@@ -442,12 +423,13 @@
 
                 <!-- Action Buttons -->
                 <div style="display: flex; gap: 10px; margin-top: 14px;">
-                  <button class="btn btn-primary" id="btn-traffic-upload">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                  <button class="btn btn-primary" id="btn-traffic-upload" style="display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                     Upload &amp; Analyze
                   </button>
-                  <button class="btn btn-secondary" id="btn-traffic-run-sample-pcap">
-                    ⚡ Use Benchmark PCAP
+                  <button class="btn btn-secondary" id="btn-traffic-run-sample-pcap" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #0F172A; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                    <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="#F59E0B" stroke-width="2.2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                    Use Benchmark PCAP
                   </button>
                 </div>
               </div>
@@ -456,61 +438,63 @@
             <!-- CARD B: ANALYSIS SUMMARY -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
-                <span class="card-title">Analysis Summary</span>
-                <span class="tag tag-benign" id="traffic-summary-status">Idle</span>
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                  Analysis Summary
+                </div>
               </div>
               <div class="card-body" style="display: flex; flex-direction: column; justify-content: space-between;">
                 <!-- 4 compact metric cards -->
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 12px;">
-                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
-                    <div class="kpi-top" style="margin-bottom: 4px;">
-                      <span class="kpi-label">Total Flows</span>
-                      <div class="kpi-icon-box blue" style="width: 26px; height: 26px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-                      </div>
+                <div class="traffic-summary-grid">
+                  <div class="traffic-metric-box">
+                    <div class="traffic-metric-icon blue">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2.2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                     </div>
-                    <div class="kpi-value" id="traffic-sum-flows" style="font-size: 20px;">0</div>
+                    <div class="traffic-metric-info">
+                      <span class="traffic-metric-label">Total Flows</span>
+                      <span class="traffic-metric-value" id="traffic-sum-flows">0</span>
+                    </div>
                   </div>
 
-                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
-                    <div class="kpi-top" style="margin-bottom: 4px;">
-                      <span class="kpi-label">Unique Source IPs</span>
-                      <div class="kpi-icon-box cyan" style="width: 26px; height: 26px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
-                      </div>
+                  <div class="traffic-metric-box">
+                    <div class="traffic-metric-icon green">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#16A34A" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
                     </div>
-                    <div class="kpi-value" id="traffic-sum-src-ips" style="font-size: 20px;">0</div>
+                    <div class="traffic-metric-info">
+                      <span class="traffic-metric-label">Unique Source IPs</span>
+                      <span class="traffic-metric-value" id="traffic-sum-src-ips">0</span>
+                    </div>
                   </div>
 
-                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
-                    <div class="kpi-top" style="margin-bottom: 4px;">
-                      <span class="kpi-label">Unique Destination IPs</span>
-                      <div class="kpi-icon-box green" style="width: 26px; height: 26px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-                      </div>
+                  <div class="traffic-metric-box">
+                    <div class="traffic-metric-icon purple">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#9333EA" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
                     </div>
-                    <div class="kpi-value" id="traffic-sum-dest-ips" style="font-size: 20px;">0</div>
+                    <div class="traffic-metric-info">
+                      <span class="traffic-metric-label">Unique Destination IPs</span>
+                      <span class="traffic-metric-value" id="traffic-sum-dest-ips">0</span>
+                    </div>
                   </div>
 
-                  <div class="kpi-card" style="padding: 10px 12px; margin-bottom: 0;">
-                    <div class="kpi-top" style="margin-bottom: 4px;">
-                      <span class="kpi-label">Protocols</span>
-                      <div class="kpi-icon-box amber" style="width: 26px; height: 26px;">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
-                      </div>
+                  <div class="traffic-metric-box">
+                    <div class="traffic-metric-icon amber">
+                      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#D97706" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                     </div>
-                    <div class="kpi-value" id="traffic-sum-protocols" style="font-size: 20px;">0</div>
+                    <div class="traffic-metric-info">
+                      <span class="traffic-metric-label">Protocols</span>
+                      <span class="traffic-metric-value" id="traffic-sum-protocols">0</span>
+                    </div>
                   </div>
                 </div>
 
                 <!-- Empty state message before analysis -->
-                <div id="traffic-summary-empty-msg" class="soc-empty-state" style="padding: 12px 10px; min-height: auto;">
-                  <h4 class="empty-state-title">No file analysed yet</h4>
-                  <p class="empty-state-desc">Upload a CSV or PCAP file to view traffic summary and analysis results.</p>
+                <div id="traffic-summary-empty-msg" class="traffic-empty-strip">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                  <span>No file analysed yet</span>
                 </div>
 
                 <!-- Analysis metadata bar (shown when analyzed) -->
-                <div id="traffic-summary-meta" style="display: none; justify-content: space-between; align-items: center; padding: 10px 12px; background-color: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11.5px; color: var(--text-secondary);">
+                <div id="traffic-summary-meta" style="display: none; justify-content: space-between; align-items: center; padding: 10px 12px; background-color: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11.5px; color: var(--text-secondary); margin-top: 10px;">
                   <div>File: <strong id="traffic-summary-filename" style="color: var(--text-primary); font-family: var(--font-mono);">—</strong></div>
                   <div>Duration: <strong id="traffic-summary-duration" style="color: var(--text-primary);">—</strong></div>
                   <div>Threats: <strong id="traffic-summary-threats" style="color: var(--color-critical);">0</strong></div>
@@ -524,14 +508,17 @@
             <!-- INSIGHT 1: PROTOCOL DISTRIBUTION -->
             <div class="traffic-insight-card">
               <div class="card-header">
-                <span class="card-title">Protocol Distribution</span>
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  Protocol Distribution
+                </div>
               </div>
               <div class="card-body">
-                <div id="traffic-proto-empty" class="soc-empty-state">
-                  <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+                <div id="traffic-proto-empty" class="soc-empty-state" style="padding: 28px 16px;">
+                  <div class="empty-state-icon" style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
                   </div>
-                  <h4 class="empty-state-title">No protocol data available</h4>
+                  <h4 class="empty-state-title" style="font-weight: 700; font-size: 13.5px; color: #0F172A; margin: 0;">No protocol data</h4>
                 </div>
                 <div id="traffic-proto-container" style="display: none; height: 160px; position: relative;">
                   <canvas id="traffic-proto-chart"></canvas>
@@ -542,14 +529,17 @@
             <!-- INSIGHT 2: TOP SOURCE IPS -->
             <div class="traffic-insight-card">
               <div class="card-header">
-                <span class="card-title">Top Source IPs</span>
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+                  Top Source IPs
+                </div>
               </div>
               <div class="card-body" style="padding: 0; justify-content: flex-start;">
-                <div id="traffic-srcip-empty" class="soc-empty-state" style="padding: 24px 16px;">
-                  <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+                <div id="traffic-srcip-empty" class="soc-empty-state" style="padding: 28px 16px;">
+                  <div class="empty-state-icon" style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
                   </div>
-                  <h4 class="empty-state-title">No source IP data</h4>
+                  <h4 class="empty-state-title" style="font-weight: 700; font-size: 13.5px; color: #0F172A; margin: 0;">No source IP data</h4>
                 </div>
                 <div id="traffic-srcip-container" style="display: none; width: 100%; max-height: 200px; overflow-y: auto;">
                   <table class="soc-table">
@@ -570,14 +560,17 @@
             <!-- INSIGHT 3: TOP DESTINATION IPS -->
             <div class="traffic-insight-card">
               <div class="card-header">
-                <span class="card-title">Top Destination IPs</span>
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><rect x="9" y="3" width="6" height="6" rx="1"/><rect x="2" y="15" width="6" height="6" rx="1"/><rect x="16" y="15" width="6" height="6" rx="1"/><path d="M12 9v3"/><path d="M5 12h14"/><path d="M5 12v3"/><path d="M19 12v3"/></svg>
+                  Top Destination IPs
+                </div>
               </div>
               <div class="card-body" style="padding: 0; justify-content: flex-start;">
-                <div id="traffic-destip-empty" class="soc-empty-state" style="padding: 24px 16px;">
-                  <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                <div id="traffic-destip-empty" class="soc-empty-state" style="padding: 28px 16px;">
+                  <div class="empty-state-icon" style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                    <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
                   </div>
-                  <h4 class="empty-state-title">No destination IP data</h4>
+                  <h4 class="empty-state-title" style="font-weight: 700; font-size: 13.5px; color: #0F172A; margin: 0;">No destination IP data</h4>
                 </div>
                 <div id="traffic-destip-container" style="display: none; width: 100%; max-height: 200px; overflow-y: auto;">
                   <table class="soc-table">
@@ -599,10 +592,13 @@
           <!-- ROW 3: TELEMETRY ANALYSIS RESULTS TABLE -->
           <div class="card">
             <div class="card-header">
-              <span class="card-title">Telemetry Analysis Results</span>
+              <div class="card-title" style="display: flex; align-items: center; gap: 8px;">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="#2563EB" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="9" x2="9" y2="21"/><line x1="15" y1="9" x2="15" y2="21"/></svg>
+                Telemetry Analysis Results
+              </div>
               <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary btn-sm" id="btn-traffic-export-json">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <button class="btn btn-secondary btn-sm" id="btn-traffic-export-json" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #0F172A; font-weight: 600; display: inline-flex; align-items: center; gap: 6px;">
+                  <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
                   Export Results
                 </button>
               </div>
@@ -624,14 +620,11 @@
                 </thead>
                 <tbody id="traffic-results-tbody">
                   <tr>
-                    <td colspan="9">
-                      <div class="soc-empty-state" style="padding: 28px 16px;">
-                        <div class="empty-state-icon">
-                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
-                        </div>
-                        <h4 class="empty-state-title">No telemetry results yet</h4>
-                        <p class="empty-state-desc">Upload and analyse a traffic file to view classification results.</p>
+                    <td colspan="9" style="text-align: center; padding: 40px 16px;">
+                      <div style="width: 44px; height: 44px; border-radius: 50%; background: #EFF6FF; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px;">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#2563EB" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                       </div>
+                      <h4 style="font-weight: 700; font-size: 14px; color: #0F172A; margin: 0;">No telemetry results yet</h4>
                     </td>
                   </tr>
                 </tbody>
@@ -1448,7 +1441,7 @@
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/api.js?v=2.9.0"></script>
-  <script src="js/app.js?v=2.9.0"></script>
+  <script src="js/api.js?v=3.0.0"></script>
+  <script src="js/app.js?v=3.0.0"></script>
 </body>
 </html>

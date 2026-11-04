@@ -209,8 +209,8 @@ class EnterpriseSocApp {
       const suri = await this.api.getSuricataStatus().catch(() => null);
       if (suri && (suri.available || suri.installed)) {
         const ver = suri.version || "Suricata 8.0.8";
-        if (runtimeSuricata) runtimeSuricata.textContent = `${ver} (Active)`;
-        if (healthSuricataVer) healthSuricataVer.textContent = `${ver} (Active Engine)`;
+        if (runtimeSuricata) runtimeSuricata.textContent = `${ver} Active`;
+        if (healthSuricataVer) healthSuricataVer.textContent = `${ver} Active Engine`;
         if (healthSuricataBadge) {
           healthSuricataBadge.className = "tag tag-suricata";
           healthSuricataBadge.textContent = "Suricata Active";
@@ -258,9 +258,9 @@ class EnterpriseSocApp {
       const loadedCount = verifiedSpecs.length;
 
       if (loadedCount >= 5) {
-        // OPERATIONAL: All 5 specialists confirmed ready
+        // OPERATIONAL: All 5 specialists confirmed ready (no parentheses in UI status)
         if (aiDot) aiDot.className = "chip-status-dot";
-        if (specialistsVal) specialistsVal.textContent = "Operational (5 Specialists)";
+        if (specialistsVal) specialistsVal.textContent = "Operational";
         if (runtimeModels) runtimeModels.textContent = "5 / 5 Operational";
         if (healthAiModels) healthAiModels.textContent = "5 of 5 Specialists Loaded";
         if (healthAiBadge) {
@@ -268,9 +268,9 @@ class EnterpriseSocApp {
           healthAiBadge.textContent = "Operational";
         }
       } else if (loadedCount > 0) {
-        // DEGRADED: Partial specialists available
+        // DEGRADED: Partial specialists available (no parentheses in UI status)
         if (aiDot) aiDot.className = "chip-status-dot warning";
-        if (specialistsVal) specialistsVal.textContent = `Degraded (${loadedCount}/5 Specialists)`;
+        if (specialistsVal) specialistsVal.textContent = "Degraded";
         if (runtimeModels) runtimeModels.textContent = `${loadedCount} / 5 Operational`;
         if (healthAiModels) healthAiModels.textContent = `${loadedCount} of 5 Specialists Loaded`;
         if (healthAiBadge) {
@@ -517,7 +517,7 @@ class EnterpriseSocApp {
             proto: payload["Protocol Type"] || 6,
             attack_category: item.class_name,
             canonical_id: item.canonical_id,
-            engine: "Smart AI-NIDS (" + (item.specialist || "Unified") + ")",
+            engine: "Smart AI-NIDS " + (item.specialist || "Unified"),
             specialist: item.specialist,
             confidence: item.confidence,
             severity: this.getSeverityForClass(item.canonical_id)
@@ -601,7 +601,7 @@ class EnterpriseSocApp {
                 proto: 6,
                 attack_category: p.class_name,
                 canonical_id: p.canonical_id,
-                engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
+                engine: "Smart AI-NIDS " + (p.specialist || "Unified"),
                 specialist: p.specialist,
                 confidence: p.confidence,
                 severity: this.getSeverityForClass(p.canonical_id)
@@ -739,7 +739,7 @@ class EnterpriseSocApp {
             proto: payload["Protocol Type"] || 6,
             attack_category: item.class_name,
             canonical_id: item.canonical_id,
-            engine: "Smart AI-NIDS (" + (item.specialist || "Unified") + ")",
+            engine: "Smart AI-NIDS " + (item.specialist || "Unified"),
             specialist: item.specialist,
             confidence: item.confidence,
             severity: this.getSeverityForClass(item.canonical_id)
@@ -801,7 +801,7 @@ class EnterpriseSocApp {
               proto: 6,
               attack_category: p.class_name,
               canonical_id: p.canonical_id,
-              engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
+              engine: "Smart AI-NIDS " + (p.specialist || "Unified"),
               specialist: p.specialist,
               confidence: p.confidence,
               severity: this.getSeverityForClass(p.canonical_id)
@@ -1159,7 +1159,7 @@ class EnterpriseSocApp {
           proto: p.proto || 6,
           attack_category: p.class_name,
           canonical_id: p.canonical_id,
-          engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
+          engine: "Smart AI-NIDS " + (p.specialist || "Unified"),
           specialist: p.specialist,
           confidence: p.confidence,
           severity: this.getSeverityForClass(p.canonical_id)
@@ -1389,7 +1389,7 @@ class EnterpriseSocApp {
               proto: idx === 12 ? 17 : idx === 9 ? 1 : 6,
               attack_category: p.class_name,
               canonical_id: p.canonical_id,
-              engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
+              engine: "Smart AI-NIDS " + (p.specialist || "Unified"),
               specialist: p.specialist,
               confidence: p.confidence,
               severity: this.getSeverityForClass(p.canonical_id)

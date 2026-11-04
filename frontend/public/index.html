@@ -43,7 +43,6 @@
             <button class="nav-item-btn" data-view="view-traffic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span>Traffic Analysis</span>
-              <span class="nav-item-badge cyan">Ingest</span>
             </button>
           </li>
           <!-- 3. Threat Detection -->
@@ -51,7 +50,6 @@
             <button class="nav-item-btn" data-view="view-predict">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
               <span>Threat Detection</span>
-              <span class="nav-item-badge" id="nav-badge-detections">0</span>
             </button>
           </li>
           <!-- 4. Alerts & Events -->
@@ -59,7 +57,6 @@
             <button class="nav-item-btn" data-view="view-alerts">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
               <span>Alerts &amp; Events</span>
-              <span class="nav-item-badge" id="nav-badge-alerts">0</span>
             </button>
           </li>
         </ul>
@@ -71,7 +68,6 @@
             <button class="nav-item-btn" data-view="view-comparison">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/></svg>
               <span>Suricata vs AI-NIDS</span>
-              <span class="nav-item-badge cyan">Benchmark</span>
             </button>
           </li>
           <!-- 6. Reports & Evaluation -->
@@ -111,9 +107,11 @@
          ==================================================================== -->
     <div class="soc-content-col">
 
-      <!-- TOP HEADER BAR -->
+      <!-- TOP HEADER BAR (MINIMAL, SIMPLE, NO CLUTTER) -->
       <header class="soc-top-header">
         <div class="header-left-group">
+          <span class="header-brand-tag">Smart AI-NIDS</span>
+          <span class="header-slash-divider">/</span>
           <span class="header-page-title" id="header-view-title">Security Overview</span>
         </div>
 
@@ -122,26 +120,15 @@
           <div class="header-stat-chip">
             <span class="chip-status-dot" id="header-status-dot"></span>
             <span class="chip-label">Backend:</span>
-            <span class="chip-val" id="header-backend-text">Checking...</span>
+            <span class="chip-val" id="header-backend-text">Connecting...</span>
           </div>
 
-          <!-- Active Specialists Chip -->
+          <!-- AI Detection Engine Status Chip -->
           <div class="header-stat-chip">
+            <span class="chip-status-dot" id="header-ai-dot"></span>
             <span class="chip-label">AI Engine:</span>
-            <span class="chip-val" id="header-specialists-val">Checking...</span>
+            <span class="chip-val" id="header-specialists-val">Connecting...</span>
           </div>
-
-          <!-- Frozen Taxonomy Classes -->
-          <div class="header-stat-chip">
-            <span class="chip-label">Taxonomy:</span>
-            <span class="chip-val">13 Canonical Classes</span>
-          </div>
-
-          <!-- Live Clock -->
-          <div class="header-clock" id="header-live-clock">--:--:--</div>
-
-          <!-- User Avatar -->
-          <div class="header-avatar-circle">SOC</div>
         </div>
       </header>
 
@@ -154,14 +141,8 @@
         <section id="view-overview" class="view-panel active">
           <div class="page-title-row">
             <div>
-              <h1 class="page-heading">Security Operations Overview</h1>
-              <div class="page-description">Real-time multi-specialist network intrusion telemetry and canonical attack distribution</div>
-            </div>
-            <div style="display: flex; gap: 10px;">
-              <button class="btn btn-primary" id="btn-run-13-quick">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Run 13-Class Verification
-              </button>
+              <h1 class="page-heading">Security Overview</h1>
+              <div class="page-description">Enterprise security operations center dashboard and multi-specialist telemetry</div>
             </div>
           </div>
 
@@ -221,7 +202,7 @@
           </div>
 
           <!-- THREE CLEAN VISUALISATIONS ROW -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- Chart 1: Traffic Trend Over Time -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
@@ -229,16 +210,19 @@
                   <div class="card-title">Traffic Trend</div>
                   <div class="card-subtitle">Flow volume evaluation timeline</div>
                 </div>
-                <span class="tag tag-info" id="trend-time-indicator">Current Session</span>
               </div>
-              <div class="card-body" style="height: 280px; position: relative;">
-                <canvas id="overview-trend-chart"></canvas>
-                <div id="trend-empty-state" class="empty-state-box" style="display: flex; position: absolute; inset: 0; background: var(--bg-card);">
+              <div class="card-body" style="padding: 12px 16px;">
+                <!-- Empty State (Shown when 0 flows) -->
+                <div id="trend-empty-state" class="soc-empty-state">
                   <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                   </div>
-                  <div class="empty-state-title">No Flow Events Recorded</div>
-                  <div class="empty-state-desc">Ingest traffic in Traffic Analysis or run 13-class verification to visualize flow trends.</div>
+                  <h4 class="empty-state-title">No Flow Events Recorded</h4>
+                  <p class="empty-state-desc">Ingest traffic in Traffic Analysis to visualize flow trends over time.</p>
+                </div>
+                <!-- Chart Canvas Container (Rendered when flows exist) -->
+                <div id="trend-chart-container" style="display: none; height: 210px;">
+                  <canvas id="overview-trend-chart"></canvas>
                 </div>
               </div>
             </div>
@@ -251,14 +235,18 @@
                   <div class="card-subtitle">Benign vs malicious proportion</div>
                 </div>
               </div>
-              <div class="card-body" style="height: 280px; position: relative;">
-                <canvas id="overview-distribution-chart"></canvas>
-                <div id="dist-empty-state" class="empty-state-box" style="display: flex; position: absolute; inset: 0; background: var(--bg-card);">
+              <div class="card-body" style="padding: 12px 16px;">
+                <!-- Empty State (Shown when 0 flows) -->
+                <div id="dist-empty-state" class="soc-empty-state">
                   <div class="empty-state-icon">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/></svg>
                   </div>
-                  <div class="empty-state-title">No Classification Data</div>
-                  <div class="empty-state-desc">Awaiting session inference records.</div>
+                  <h4 class="empty-state-title">No Classification Data</h4>
+                  <p class="empty-state-desc">Awaiting session flow records to calculate distribution.</p>
+                </div>
+                <!-- Chart Canvas Container (Rendered when flows exist) -->
+                <div id="dist-chart-container" style="display: none; height: 210px;">
+                  <canvas id="overview-distribution-chart"></canvas>
                 </div>
               </div>
             </div>
@@ -268,34 +256,38 @@
           <div class="card">
             <div class="card-header">
               <div>
-                <div class="card-title">Attack-Class Distribution (13 Canonical Classes)</div>
-                <div class="card-subtitle">Empirical session counts per taxonomy class ID 0–12</div>
+                <div class="card-title">Attack-Class Distribution</div>
+                <div class="card-subtitle">Empirical session detections per taxonomy class ID 0–12</div>
               </div>
             </div>
-            <div class="card-body" style="height: 260px; position: relative;">
-              <canvas id="overview-attack-chart"></canvas>
-              <div id="attack-empty-state" class="empty-state-box" style="display: flex; position: absolute; inset: 0; background: var(--bg-card);">
+            <div class="card-body" style="padding: 12px 16px;">
+              <!-- Empty State (Shown when 0 flows) -->
+              <div id="attack-empty-state" class="soc-empty-state">
                 <div class="empty-state-icon">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
                 </div>
-                <div class="empty-state-title">No Attack Records Detected</div>
-                <div class="empty-state-desc">Execute verification or upload traffic capture to populate the 13-class distribution.</div>
+                <h4 class="empty-state-title">No Attack Telemetry Recorded</h4>
+                <p class="empty-state-desc">Detections across the 13 canonical taxonomy classes will populate here.</p>
+              </div>
+              <!-- Chart Canvas Container (Rendered when flows exist) -->
+              <div id="attack-chart-container" style="display: none; height: 220px;">
+                <canvas id="overview-attack-chart"></canvas>
               </div>
             </div>
           </div>
 
           <!-- RECENT SECURITY ALERTS & SYSTEM HEALTH SPLIT -->
-          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px;">
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 16px;">
             <!-- Recent Security Alerts Table -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
                 <div>
                   <div class="card-title">Recent Security Alerts</div>
-                  <div class="card-subtitle">Real-time alerts generated from ingested network traffic</div>
+                  <div class="card-subtitle">Security events generated from ingested traffic</div>
                 </div>
-                <button class="btn btn-secondary btn-sm" onclick="switchSocView('view-alerts')">View All &rarr;</button>
+                <button class="btn btn-secondary btn-sm" onclick="switchSocView('view-alerts')">View All Alerts &rarr;</button>
               </div>
-              <div class="card-body" style="padding: 0; max-height: 320px; overflow-y: auto;">
+              <div class="card-body" style="padding: 0; max-height: 290px; overflow-y: auto;">
                 <table class="soc-table">
                   <thead>
                     <tr>
@@ -309,7 +301,7 @@
                     </tr>
                   </thead>
                   <tbody id="overview-recent-tbody">
-                    <tr><td colspan="7" class="soc-table-empty">No security alerts recorded in current session. Upload traffic in Traffic Analysis or run benchmark to view events.</td></tr>
+                    <tr><td colspan="7" class="soc-table-empty">No security alerts recorded in current session. Upload traffic in Traffic Analysis to view events.</td></tr>
                   </tbody>
                 </table>
               </div>
@@ -324,21 +316,21 @@
                 </div>
               </div>
               <div class="card-body">
-                <div style="display: flex; flex-direction: column; gap: 14px;">
+                <div style="display: flex; flex-direction: column; gap: 12px;">
                   <!-- Backend Service -->
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
                     <div>
                       <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Backend Service</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;" id="health-backend-url">http://localhost:8000</div>
+                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-backend-url">http://localhost:8000</div>
                     </div>
                     <span class="tag tag-benign" id="health-backend-badge">Operational</span>
                   </div>
 
                   <!-- AI Detection Engine -->
-                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 12px; border-bottom: 1px solid var(--border-subtle);">
+                  <div style="display: flex; align-items: flex-start; justify-content: space-between; padding-bottom: 10px; border-bottom: 1px solid var(--border-subtle);">
                     <div>
                       <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">AI Detection Engine</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;" id="health-ai-models">5 of 5 Specialists Loaded</div>
+                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-ai-models">5 of 5 Specialists Loaded</div>
                     </div>
                     <span class="tag tag-benign" id="health-ai-badge">Ready</span>
                   </div>
@@ -347,7 +339,7 @@
                   <div style="display: flex; align-items: flex-start; justify-content: space-between;">
                     <div>
                       <div style="font-weight: 600; font-size: 13px; color: var(--text-primary);">Suricata Integration</div>
-                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 2px;" id="health-suricata-ver">Checking...</div>
+                      <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 1px;" id="health-suricata-ver">Checking...</div>
                     </div>
                     <span class="tag tag-suricata" id="health-suricata-badge">Suricata 8.0.8</span>
                   </div>
@@ -377,7 +369,7 @@
             <span class="tag tag-benign" style="margin-left: 4px;">Offline PCAP/PCAPNG Dual Stream</span>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- INGESTION METHOD 1: SINGLE FLOW INFERENCE -->
             <div class="card">
               <div class="card-header">
@@ -406,7 +398,7 @@
 
                 <div class="form-group">
                   <label class="form-label">Feature Payload (JSON):</label>
-                  <textarea class="form-textarea" id="traffic-single-json" rows="8"></textarea>
+                  <textarea class="form-textarea" id="traffic-single-json" rows="7"></textarea>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
@@ -426,7 +418,7 @@
                 <span class="tag tag-benign">CSV / PCAP</span>
               </div>
               <div class="card-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 14px;">
+                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px;">
                   Upload genuine network packet captures (<code>.pcap</code>, <code>.pcapng</code>) or statistical flow records (<code>.csv</code>).
                   Packet captures are evaluated simultaneously through Suricata Traditional NIDS and Smart AI-NIDS flow extractor.
                 </p>
@@ -436,7 +428,7 @@
                   <input type="file" class="form-input" id="traffic-file-input" accept=".pcap,.pcapng,.csv,.json">
                 </div>
 
-                <div id="traffic-upload-progress" style="display: none; margin-bottom: 14px;">
+                <div id="traffic-upload-progress" style="display: none; margin-bottom: 12px;">
                   <div style="display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 4px;">
                     <span id="traffic-progress-text">Ingesting capture file...</span>
                     <span id="traffic-progress-pct">0%</span>
@@ -466,22 +458,22 @@
               <span class="tag tag-benign" id="traffic-summary-status">Completed</span>
             </div>
             <div class="card-body">
-              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px;">
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px;">
                 <div>
                   <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Source File</div>
-                  <div style="font-weight: 600; font-size: 14px; margin-top: 2px;" id="traffic-summary-filename">—</div>
+                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-filename">—</div>
                 </div>
                 <div>
                   <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Total Flows / Packets</div>
-                  <div style="font-weight: 600; font-size: 14px; margin-top: 2px;" id="traffic-summary-total">0</div>
+                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-total">0</div>
                 </div>
                 <div>
                   <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Threats Detected</div>
-                  <div style="font-weight: 600; font-size: 14px; margin-top: 2px; color: var(--color-critical);" id="traffic-summary-threats">0</div>
+                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px; color: var(--color-critical);" id="traffic-summary-threats">0</div>
                 </div>
                 <div>
                   <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Processing Duration</div>
-                  <div style="font-weight: 600; font-size: 14px; margin-top: 2px;" id="traffic-summary-duration">—</div>
+                  <div style="font-weight: 600; font-size: 13.5px; margin-top: 2px;" id="traffic-summary-duration">—</div>
                 </div>
               </div>
             </div>
@@ -498,7 +490,7 @@
                 </button>
               </div>
             </div>
-            <div class="card-body" style="padding: 0; max-height: 420px; overflow-y: auto;">
+            <div class="card-body" style="padding: 0; max-height: 380px; overflow-y: auto;">
               <table class="soc-table">
                 <thead>
                   <tr>
@@ -533,7 +525,7 @@
           </div>
 
           <!-- Single Prediction & Batch Prediction Workspace -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- Panel 1: Single Record Prediction -->
             <div class="card">
               <div class="card-header">
@@ -562,7 +554,7 @@
 
                 <div class="form-group">
                   <label class="form-label">JSON Flow Features:</label>
-                  <textarea class="form-textarea" id="predict-single-json" rows="8"></textarea>
+                  <textarea class="form-textarea" id="predict-single-json" rows="7"></textarea>
                 </div>
 
                 <div style="display: flex; gap: 10px;">
@@ -574,15 +566,15 @@
                 </div>
 
                 <!-- Single Prediction Result Box -->
-                <div id="predict-single-result-box" style="display: none; margin-top: 16px; padding: 14px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--bg-app);">
-                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <div id="predict-single-result-box" style="display: none; margin-top: 14px; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--bg-app);">
+                  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
                     <div>
-                      <div style="font-size: 11px; color: var(--text-muted); text-transform: uppercase;">Prediction Result</div>
-                      <div style="font-size: 16px; font-weight: 700; color: var(--text-primary);" id="predict-result-class">—</div>
+                      <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase;">Prediction Result</div>
+                      <div style="font-size: 15px; font-weight: 700; color: var(--text-primary);" id="predict-result-class">—</div>
                     </div>
                     <span class="tag" id="predict-result-verdict">Verdict</span>
                   </div>
-                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; font-size: 12px;">
+                  <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 6px; font-size: 12px;">
                     <div><span style="color: var(--text-muted);">Confidence:</span> <strong id="predict-result-conf">—</strong></div>
                     <div><span style="color: var(--text-muted);">Specialist:</span> <strong id="predict-result-spec">—</strong></div>
                     <div><span style="color: var(--text-muted);">Canonical ID:</span> <code id="predict-result-id">—</code></div>
@@ -599,16 +591,16 @@
                 <span class="tag tag-primary">Multi-Flow Batch</span>
               </div>
               <div class="card-body">
-                <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 12px;">
+                <p style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Provide an array of flow records to test multi-specialist batch classification.
                 </p>
 
                 <div class="form-group">
                   <label class="form-label">Batch JSON Array:</label>
-                  <textarea class="form-textarea" id="predict-batch-json" rows="8" placeholder="[ { ... }, { ... } ]"></textarea>
+                  <textarea class="form-textarea" id="predict-batch-json" rows="7" placeholder="[ { ... }, { ... } ]"></textarea>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 16px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 14px;">
                   <button class="btn btn-primary" id="btn-predict-batch-exec">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                     Execute Batch Prediction
@@ -619,23 +611,23 @@
                 </div>
 
                 <!-- Batch Summary Metrics -->
-                <div id="predict-batch-summary-box" style="display: none; padding: 12px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--bg-app);">
-                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; text-align: center;">
+                <div id="predict-batch-summary-box" style="display: none; padding: 10px; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--bg-app);">
+                  <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; text-align: center;">
                     <div>
-                      <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase;">Total</div>
-                      <div style="font-size: 15px; font-weight: 700;" id="batch-sum-total">0</div>
+                      <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Total</div>
+                      <div style="font-size: 14px; font-weight: 700;" id="batch-sum-total">0</div>
                     </div>
                     <div>
-                      <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase;">Benign</div>
-                      <div style="font-size: 15px; font-weight: 700; color: var(--color-benign);" id="batch-sum-benign">0</div>
+                      <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Benign</div>
+                      <div style="font-size: 14px; font-weight: 700; color: var(--color-benign);" id="batch-sum-benign">0</div>
                     </div>
                     <div>
-                      <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase;">Threats</div>
-                      <div style="font-size: 15px; font-weight: 700; color: var(--color-critical);" id="batch-sum-threats">0</div>
+                      <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Threats</div>
+                      <div style="font-size: 14px; font-weight: 700; color: var(--color-critical);" id="batch-sum-threats">0</div>
                     </div>
                     <div>
-                      <div style="font-size: 10.5px; color: var(--text-muted); text-transform: uppercase;">Avg Conf</div>
-                      <div style="font-size: 15px; font-weight: 700;" id="batch-sum-conf">—</div>
+                      <div style="font-size: 10px; color: var(--text-muted); text-transform: uppercase;">Avg Conf</div>
+                      <div style="font-size: 14px; font-weight: 700;" id="batch-sum-conf">—</div>
                     </div>
                   </div>
                 </div>
@@ -649,7 +641,7 @@
               <span class="card-title">Batch Prediction Results</span>
               <span class="tag tag-info" id="predict-batch-count-tag">0 Records</span>
             </div>
-            <div class="card-body" style="padding: 0; max-height: 380px; overflow-y: auto;">
+            <div class="card-body" style="padding: 0; max-height: 360px; overflow-y: auto;">
               <table class="soc-table">
                 <thead>
                   <tr>
@@ -690,7 +682,7 @@
                 <input type="text" class="form-input" id="search-alerts-input" placeholder="Search IP, port, attack name, or event ID...">
               </div>
 
-              <select class="form-select" id="filter-category-select" style="width: 180px;">
+              <select class="form-select" id="filter-category-select" style="width: 170px;">
                 <option value="ALL">All 13 Categories</option>
                 <option value="0">0: Benign</option>
                 <option value="1">1: DDoS</option>
@@ -707,13 +699,13 @@
                 <option value="12">12: DNS Tunneling</option>
               </select>
 
-              <select class="form-select" id="filter-engine-select" style="width: 150px;">
+              <select class="form-select" id="filter-engine-select" style="width: 140px;">
                 <option value="ALL">All Engines</option>
                 <option value="SURICATA">Suricata T-NIDS</option>
                 <option value="AI_NIDS">Smart AI-NIDS</option>
               </select>
 
-              <select class="form-select" id="filter-severity-select" style="width: 140px;">
+              <select class="form-select" id="filter-severity-select" style="width: 130px;">
                 <option value="ALL">All Severities</option>
                 <option value="CRITICAL">Critical</option>
                 <option value="HIGH">High</option>
@@ -725,7 +717,7 @@
             </div>
 
             <!-- Full Alerts Table -->
-            <div class="card-body" style="padding: 0; max-height: 520px; overflow-y: auto;">
+            <div class="card-body" style="padding: 0; max-height: 500px; overflow-y: auto;">
               <table class="soc-table">
                 <thead>
                   <tr>
@@ -782,9 +774,9 @@
                 <span class="kpi-label">Overall Accuracy</span>
                 <span class="tag tag-ai">+0.77% Delta</span>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 10px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;">
                 <div class="kpi-value" style="color: var(--color-primary);" id="comp-acc-ai">81.54%</div>
-                <div style="font-size: 13px; color: var(--color-suricata);" id="comp-acc-suri">(Suri: 80.77%)</div>
+                <div style="font-size: 12.5px; color: var(--color-suricata);" id="comp-acc-suri">(Suri: 80.77%)</div>
               </div>
               <div class="kpi-bottom">Evaluated on 650 13-class test set</div>
             </div>
@@ -794,9 +786,9 @@
                 <span class="kpi-label">Macro F1-Score</span>
                 <span class="tag tag-info">Reconciled</span>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 10px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;">
                 <div class="kpi-value" style="color: var(--color-primary);" id="comp-f1-ai">79.65%</div>
-                <div style="font-size: 13px; color: var(--color-suricata);" id="comp-f1-suri">(Suri: 80.34%)</div>
+                <div style="font-size: 12.5px; color: var(--color-suricata);" id="comp-f1-suri">(Suri: 80.34%)</div>
               </div>
               <div class="kpi-bottom">Reconciled: 91.38% on deep tunneling</div>
             </div>
@@ -806,9 +798,9 @@
                 <span class="kpi-label">Layer-2 ARP Recall</span>
                 <span class="tag tag-critical">L2 Gap</span>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 10px;">
+              <div style="display: flex; align-items: baseline; gap: 8px;">
                 <div class="kpi-value" style="color: var(--color-benign);" id="comp-arp-ai">100.0%</div>
-                <div style="font-size: 13px; color: var(--color-critical);" id="comp-arp-suri">(Suri: 0.0%)</div>
+                <div style="font-size: 12.5px; color: var(--color-critical);" id="comp-arp-suri">(Suri: 0.0%)</div>
               </div>
               <div class="kpi-bottom">Suricata rule engine cannot parse L2</div>
             </div>
@@ -818,7 +810,7 @@
                 <span class="kpi-label">Throughput &amp; Latency</span>
                 <span class="tag tag-suricata">Speed Win</span>
               </div>
-              <div style="font-size: 17px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); margin-bottom: 4px;">
+              <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); margin-bottom: 2px;">
                 Suri: 37,838 pkts/s
               </div>
               <div class="kpi-bottom">AI: 98.5 flows/s (0.235 ms/flow)</div>
@@ -826,13 +818,13 @@
           </div>
 
           <!-- COMPARATIVE CHARTS ROW -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- Overall Benchmark Comparison Chart -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
                 <span class="card-title">Overall Performance Comparison (Suricata vs Smart AI-NIDS)</span>
               </div>
-              <div class="card-body" style="height: 280px;">
+              <div class="card-body" style="height: 260px;">
                 <canvas id="comp-overall-chart"></canvas>
               </div>
             </div>
@@ -842,7 +834,7 @@
               <div class="card-header">
                 <span class="card-title">Per-Class F1-Score Comparison (13 Canonical Classes)</span>
               </div>
-              <div class="card-body" style="height: 280px;">
+              <div class="card-body" style="height: 260px;">
                 <canvas id="comp-perclass-chart"></canvas>
               </div>
             </div>
@@ -927,12 +919,35 @@
           <div class="page-title-row">
             <div>
               <h1 class="page-heading">Research Reports &amp; Model Verification</h1>
-              <div class="page-description">Detailed benchmark provenance, minority class error analysis, 5 specialist model architectures, and experimental artifacts</div>
+              <div class="page-description">Detailed benchmark provenance, minority class error analysis, 5 specialist model architectures, and automated verification</div>
+            </div>
+          </div>
+
+          <!-- PROJECT VALIDATION UTILITY (MOVED CLEANLY HERE AS REQUESTED) -->
+          <div class="card">
+            <div class="card-header">
+              <div>
+                <div class="card-title">Project Validation Utility</div>
+                <div class="card-subtitle">Automated multi-specialist verification across all 13 canonical taxonomy classes</div>
+              </div>
+              <button class="btn btn-primary" id="btn-run-13-quick">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Run 13-Class Verification
+              </button>
+            </div>
+            <div class="card-body">
+              <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 0;">
+                Executes batch inference on verified test vectors for each canonical class (0–12) across the 5 production specialist models.
+                Results populate the telemetry stream and update the Overview KPI counters.
+              </p>
+              <div id="verif-results-box" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono); background: var(--color-benign-bg); color: var(--color-benign-text); border: 1px solid var(--color-benign-border);">
+                13-Class automated verification completed successfully.
+              </div>
             </div>
           </div>
 
           <!-- 5 SPECIALIST MODEL CARDS -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-bottom: 24px;">
+          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
             <!-- IDS2018 -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
@@ -943,10 +958,10 @@
                 <span class="tag tag-benign">Active</span>
               </div>
               <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Trained on CSE-CIC-IDS2018 enterprise flows targeting high-volume perimeter attacks.
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Architecture:</span>
                     <code>DecisionTree_Tuned</code>
@@ -977,10 +992,10 @@
                 <span class="tag tag-benign">Active</span>
               </div>
               <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Specialized for modern Internet-of-Things topologies, protocol sweeps, and polymorphic DDoS attacks.
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Architecture:</span>
                     <code>XGBoost Classifier</code>
@@ -1011,10 +1026,10 @@
                 <span class="tag tag-benign">Active</span>
               </div>
               <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Dedicated Layer-2 MAC address resolution detector covering attacks invisible to Suricata.
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Architecture:</span>
                     <code>DecisionTree Classifier</code>
@@ -1045,10 +1060,10 @@
                 <span class="tag tag-benign">Active</span>
               </div>
               <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Trained on 5G-NIDD telemetry to detect IP header spoofing, martian addressing, and TTL anomalies.
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Architecture:</span>
                     <code>DecisionTree Classifier</code>
@@ -1079,10 +1094,10 @@
                 <span class="tag tag-benign">Active</span>
               </div>
               <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 12px;">
+                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
                   Analyzes Shannon entropy, label depth, and character frequency to intercept DNS tunneling channels.
                 </div>
-                <div style="display: flex; flex-direction: column; gap: 6px; font-size: 12px;">
+                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
                   <div style="display: flex; justify-content: space-between;">
                     <span style="color: var(--text-muted);">Architecture:</span>
                     <code>DecisionTree Classifier</code>
@@ -1189,7 +1204,7 @@
           <!-- Minority Class Error Analysis Callout -->
           <div class="callout-box amber">
             <strong>Honest Error Analysis &amp; Minority-Class Limitations:</strong>
-            <p style="margin-top: 6px;">
+            <p style="margin-top: 5px;">
               In extreme imbalance scenarios (CICIoT2023 Infiltration with only 85 samples, Brute Force with 300 samples, and Web Attack with 509 samples),
               decision trees trained with uniform class weights exhibit higher false positive rates on borderline telemetry.
               Threshold tuning and calibration improve minority class recall to 94.0%, but require baseline filtering to maintain high overall precision.
@@ -1209,7 +1224,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- Connection Manager -->
             <div class="card" style="margin-bottom: 0;">
               <div class="card-header">
@@ -1224,12 +1239,12 @@
                   </div>
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 14px;">
+                <div style="display: flex; gap: 10px; margin-top: 12px;">
                   <button class="btn btn-secondary" id="btn-settings-test">Test Connection</button>
                   <button class="btn btn-primary" id="btn-settings-save">Save &amp; Reconnect</button>
                 </div>
 
-                <div id="settings-status-banner" style="display: none; margin-top: 14px; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono);"></div>
+                <div id="settings-status-banner" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono);"></div>
               </div>
             </div>
 

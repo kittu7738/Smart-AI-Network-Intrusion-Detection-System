@@ -9,7 +9,7 @@
  * 3. Threat Detection (Single and Batch Inference Workspace)
  * 4. Alerts & Events (Investigation Console with Search & Filters)
  * 5. Suricata vs AI-NIDS (Empirical Comparative Benchmark & Confusion Matrix)
- * 6. Reports & Evaluation (5 AI Specialists, 13-Class Matrix, Dataset Provenance)
+ * 6. Reports & Evaluation (5 AI Specialists, 13-Class Matrix, Project Validation Utility)
  * 7. System Configuration (Connection & Environment Inspector)
  */
 
@@ -82,14 +82,17 @@ class EnterpriseSocApp {
 
   async init() {
     this.initNavigation();
-    this.initClock();
     this.initOverviewCharts();
     this.renderModelsMatrix();
     this.bindTrafficControls();
     this.bindPredictControls();
     this.bindAlertsControls();
     this.bindComparisonControls();
+    this.bindReportsControls();
     this.bindSettingsControls();
+
+    // Set initial clean empty states and zero values
+    this.updateOverviewKPIs();
 
     // Check backend health & fetch comparative evaluation metrics
     await this.checkBackendStatus();
@@ -105,13 +108,13 @@ class EnterpriseSocApp {
     const viewTitle = document.getElementById("header-view-title");
 
     const sectionTitles = {
-      "view-overview": "Security Operations Overview",
-      "view-traffic": "Network Traffic Ingestion & Analysis",
-      "view-predict": "Threat Detection & Inference",
-      "view-alerts": "Alerts & Incident Triage",
-      "view-comparison": "Suricata vs Smart AI-NIDS Comparative Evaluation",
-      "view-reports": "Research Reports & Model Verification",
-      "view-settings": "System Configuration & Integration"
+      "view-overview": "Security Overview",
+      "view-traffic": "Traffic Analysis",
+      "view-predict": "Threat Detection",
+      "view-alerts": "Alerts & Events",
+      "view-comparison": "Suricata vs AI-NIDS",
+      "view-reports": "Reports & Evaluation",
+      "view-settings": "System Configuration"
     };
 
     const switchView = (targetId) => {
@@ -166,26 +169,12 @@ class EnterpriseSocApp {
   }
 
   /* ========================================================================
-     HEADER CLOCK
-     ======================================================================== */
-  initClock() {
-    const clockEl = document.getElementById("header-live-clock");
-    const update = () => {
-      const now = new Date();
-      if (clockEl) {
-        clockEl.textContent = now.toLocaleTimeString("en-US", { hour12: false }) + " UTC" + (now.getTimezoneOffset() <= 0 ? "+" : "-") + Math.abs(now.getTimezoneOffset() / 60);
-      }
-    };
-    update();
-    setInterval(update, 1000);
-  }
-
-  /* ========================================================================
      BACKEND STATUS & SYSTEM HEALTH (FROM ACTUAL HEALTH ENDPOINT)
      ======================================================================== */
   async checkBackendStatus() {
     const statusDot = document.getElementById("header-status-dot");
     const statusText = document.getElementById("header-backend-text");
+    const aiDot = document.getElementById("header-ai-dot");
     const specialistsVal = document.getElementById("header-specialists-val");
     const runtimePython = document.getElementById("runtime-python-ver");
     const runtimeSuricata = document.getElementById("runtime-suricata-ver");
@@ -205,8 +194,9 @@ class EnterpriseSocApp {
       if (health && health.status === "ok") {
         if (statusDot) statusDot.className = "chip-status-dot";
         if (statusText) statusText.textContent = "Connected";
+        if (aiDot) aiDot.className = "chip-status-dot";
         const loadedCount = health.loaded_specialists?.length || 5;
-        if (specialistsVal) specialistsVal.textContent = `${loadedCount} Active`;
+        if (specialistsVal) specialistsVal.textContent = `Ready (${loadedCount} Models)`;
         if (runtimeModels) runtimeModels.textContent = `${loadedCount} / 5 Operational`;
         if (healthBackendBadge) {
           healthBackendBadge.className = "tag tag-benign";
@@ -220,6 +210,7 @@ class EnterpriseSocApp {
       } else {
         if (statusDot) statusDot.className = "chip-status-dot warning";
         if (statusText) statusText.textContent = "Degraded";
+        if (aiDot) aiDot.className = "chip-status-dot warning";
         if (specialistsVal) specialistsVal.textContent = "Degraded";
       }
 
@@ -247,6 +238,7 @@ class EnterpriseSocApp {
     } catch (err) {
       if (statusDot) statusDot.className = "chip-status-dot offline";
       if (statusText) statusText.textContent = "Offline";
+      if (aiDot) aiDot.className = "chip-status-dot offline";
       if (specialistsVal) specialistsVal.textContent = "Offline";
       if (runtimeModels) runtimeModels.textContent = "Backend Offline";
       if (healthBackendBadge) {
@@ -436,7 +428,6 @@ class EnterpriseSocApp {
     const btnUpload = document.getElementById("btn-traffic-upload");
     const fileInput = document.getElementById("traffic-file-input");
     const btnRunSamplePcap = document.getElementById("btn-traffic-run-sample-pcap");
-    const btnQuick13 = document.getElementById("btn-run-13-quick");
     const btnExportJson = document.getElementById("btn-traffic-export-json");
 
     // Populate initial scenario
@@ -489,44 +480,6 @@ class EnterpriseSocApp {
         } finally {
           btnPredictSingle.disabled = false;
           btnPredictSingle.textContent = "Execute Inference";
-        }
-      });
-    }
-
-    // Run quick 13-class verification benchmark
-    if (btnQuick13) {
-      btnQuick13.addEventListener("click", async () => {
-        btnQuick13.disabled = true;
-        btnQuick13.textContent = "⚡ Running Verification...";
-        try {
-          const records = Object.values(this.presetScenarios);
-          const res = await this.api.predictBatch(records, "auto");
-          const predictions = res.predictions || [];
-
-          predictions.forEach((p, idx) => {
-            this.recordDetection({
-              id: "VERIF-" + (idx + 1),
-              timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
-              src_ip: `192.168.1.${10 + idx}`,
-              dest_ip: "10.0.0.1",
-              src_port: 50000 + idx,
-              dest_port: idx === 12 ? 53 : idx === 9 ? 0 : 80,
-              proto: idx === 12 ? 17 : idx === 9 ? 1 : 6,
-              attack_category: p.class_name,
-              canonical_id: p.canonical_id,
-              engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
-              specialist: p.specialist,
-              confidence: p.confidence,
-              severity: this.getSeverityForClass(p.canonical_id)
-            });
-          });
-
-          this.renderTrafficResults(predictions);
-        } catch (err) {
-          alert(`Verification failed: ${err.message}`);
-        } finally {
-          btnQuick13.disabled = false;
-          btnQuick13.textContent = "⚡ Run 13-Class Verification";
         }
       });
     }
@@ -889,10 +842,7 @@ class EnterpriseSocApp {
 
   renderAlertsTable() {
     const tbody = document.getElementById("alerts-queue-tbody");
-    const countBadge = document.getElementById("nav-badge-alerts");
     if (!tbody) return;
-
-    if (countBadge) countBadge.textContent = this.sessionAlerts.length;
 
     const query = (document.getElementById("search-alerts-input")?.value || "").toLowerCase();
     const catVal = document.getElementById("filter-category-select")?.value || "ALL";
@@ -959,8 +909,6 @@ class EnterpriseSocApp {
     const threatPctEl = document.getElementById("kpi-malicious-pct");
     const detRateEl = document.getElementById("kpi-detection-rate");
     const detRateSubEl = document.getElementById("kpi-detection-rate-sub");
-    const badgeDet = document.getElementById("nav-badge-detections");
-    const badgeAlerts = document.getElementById("nav-badge-alerts");
 
     const total = this.sessionDetections.length;
     const benign = this.sessionDetections.filter(d => d.canonical_id === 0).length;
@@ -984,26 +932,31 @@ class EnterpriseSocApp {
       if (detRateSubEl) detRateSubEl.textContent = "Awaiting traffic ingestion";
     }
 
-    if (badgeDet) badgeDet.textContent = total;
-    if (badgeAlerts) badgeAlerts.textContent = threats;
-
     // Toggle Empty States vs Render Charts
     const trendEmpty = document.getElementById("trend-empty-state");
+    const trendContainer = document.getElementById("trend-chart-container");
     const distEmpty = document.getElementById("dist-empty-state");
+    const distContainer = document.getElementById("dist-chart-container");
     const attackEmpty = document.getElementById("attack-empty-state");
+    const attackContainer = document.getElementById("attack-chart-container");
 
     if (total === 0) {
       if (trendEmpty) trendEmpty.style.display = "flex";
+      if (trendContainer) trendContainer.style.display = "none";
       if (distEmpty) distEmpty.style.display = "flex";
+      if (distContainer) distContainer.style.display = "none";
       if (attackEmpty) attackEmpty.style.display = "flex";
+      if (attackContainer) attackContainer.style.display = "none";
     } else {
       if (trendEmpty) trendEmpty.style.display = "none";
+      if (trendContainer) trendContainer.style.display = "block";
       if (distEmpty) distEmpty.style.display = "none";
+      if (distContainer) distContainer.style.display = "block";
       if (attackEmpty) attackEmpty.style.display = "none";
+      if (attackContainer) attackContainer.style.display = "block";
 
       // 1. Update Traffic Trend Chart
       if (this.trendChart) {
-        // Build sequence points
         const labels = this.sessionDetections.slice(0, 15).reverse().map(d => d.timestamp);
         let cumFlows = 0;
         let cumThreats = 0;
@@ -1046,7 +999,7 @@ class EnterpriseSocApp {
     const recentTbody = document.getElementById("overview-recent-tbody");
     if (recentTbody) {
       if (this.sessionAlerts.length === 0) {
-        recentTbody.innerHTML = `<tr><td colspan="7" class="soc-table-empty">No security alerts recorded in current session. Upload traffic in Traffic Analysis or run benchmark to view events.</td></tr>`;
+        recentTbody.innerHTML = `<tr><td colspan="7" class="soc-table-empty">No security alerts recorded in current session. Upload traffic in Traffic Analysis to view events.</td></tr>`;
       } else {
         recentTbody.innerHTML = this.sessionAlerts.slice(0, 6).map(a => `
           <tr>
@@ -1358,6 +1311,55 @@ class EnterpriseSocApp {
 
     html += `</tbody></table>`;
     container.innerHTML = html;
+  }
+
+  /* ========================================================================
+     REPORTS & PROJECT VALIDATION UTILITY
+     ======================================================================== */
+  bindReportsControls() {
+    const btnQuick13 = document.getElementById("btn-run-13-quick");
+    const verifBox = document.getElementById("verif-results-box");
+
+    if (btnQuick13) {
+      btnQuick13.addEventListener("click", async () => {
+        btnQuick13.disabled = true;
+        btnQuick13.textContent = "Running Verification...";
+        try {
+          const records = Object.values(this.presetScenarios);
+          const res = await this.api.predictBatch(records, "auto");
+          const predictions = res.predictions || [];
+
+          predictions.forEach((p, idx) => {
+            this.recordDetection({
+              id: "VERIF-" + (idx + 1),
+              timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
+              src_ip: `192.168.1.${10 + idx}`,
+              dest_ip: "10.0.0.1",
+              src_port: 50000 + idx,
+              dest_port: idx === 12 ? 53 : idx === 9 ? 0 : 80,
+              proto: idx === 12 ? 17 : idx === 9 ? 1 : 6,
+              attack_category: p.class_name,
+              canonical_id: p.canonical_id,
+              engine: "Smart AI-NIDS (" + (p.specialist || "Unified") + ")",
+              specialist: p.specialist,
+              confidence: p.confidence,
+              severity: this.getSeverityForClass(p.canonical_id)
+            });
+          });
+
+          this.renderTrafficResults(predictions);
+          if (verifBox) {
+            verifBox.style.display = "block";
+            verifBox.textContent = `✓ 13-Class Automated Verification Complete: ${predictions.length} test vectors evaluated across all 5 specialist models. Overview KPIs and telemetry updated.`;
+          }
+        } catch (err) {
+          alert(`Verification failed: ${err.message}`);
+        } finally {
+          btnQuick13.disabled = false;
+          btnQuick13.textContent = "Run 13-Class Verification";
+        }
+      });
+    }
   }
 
   /* ========================================================================

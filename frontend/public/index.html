@@ -65,14 +65,14 @@
         <ul class="nav-links-list">
           <!-- 5. Suricata vs AI-NIDS -->
           <li>
-            <button class="nav-item-btn active" data-view="view-comparison">
+            <button class="nav-item-btn" data-view="view-comparison">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <span>Suricata vs AI-NIDS</span>
             </button>
           </li>
           <!-- 6. Reports & Evaluation -->
           <li>
-            <button class="nav-item-btn" data-view="view-reports">
+            <button class="nav-item-btn active" data-view="view-reports">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
               <span>Reports &amp; Evaluation</span>
             </button>
@@ -110,9 +110,20 @@
       <!-- TOP HEADER BAR (MINIMAL, SIMPLE, NO CLUTTER) -->
       <header class="soc-top-header">
         <div class="header-left-group">
+          <svg class="header-grid-icon" width="16" height="16" viewBox="0 0 24 24" fill="#64748B">
+            <rect x="3" y="3" width="4" height="4" rx="1"/>
+            <rect x="10" y="3" width="4" height="4" rx="1"/>
+            <rect x="17" y="3" width="4" height="4" rx="1"/>
+            <rect x="3" y="10" width="4" height="4" rx="1"/>
+            <rect x="10" y="10" width="4" height="4" rx="1"/>
+            <rect x="17" y="10" width="4" height="4" rx="1"/>
+            <rect x="3" y="17" width="4" height="4" rx="1"/>
+            <rect x="10" y="17" width="4" height="4" rx="1"/>
+            <rect x="17" y="17" width="4" height="4" rx="1"/>
+          </svg>
           <span class="header-brand-tag">Smart AI-NIDS</span>
           <span class="header-slash-divider">/</span>
-          <span class="header-page-title" id="header-view-title">Suricata vs AI-NIDS</span>
+          <span class="header-page-title" id="header-view-title">Reports &amp; Evaluation</span>
         </div>
 
         <div class="header-meta-group">
@@ -1003,7 +1014,7 @@
         <!-- ==============================================================
              SECTION 5: SURICATA VS AI-NIDS (COMPARATIVE EVALUATION)
              ============================================================== -->
-        <section id="view-comparison" class="view-panel active">
+        <section id="view-comparison" class="view-panel">
           <div class="page-title-row" style="margin-bottom: 20px;">
             <h1 class="page-heading" style="margin: 0;">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
@@ -1164,300 +1175,253 @@
         <!-- ==============================================================
              SECTION 6: REPORTS & EVALUATION (RESEARCH & ARCHITECTURE)
              ============================================================== -->
-        <section id="view-reports" class="view-panel">
-          <div class="page-title-row">
+        <section id="view-reports" class="view-panel active">
+          <!-- Page Header Row -->
+          <div class="reports-header-row">
+            <div class="reports-header-icon-box">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                <polyline points="14 2 14 8 20 8"></polyline>
+                <line x1="16" y1="13" x2="8" y2="13"></line>
+                <line x1="16" y1="17" x2="8" y2="17"></line>
+                <polyline points="10 9 9 9 8 9"></polyline>
+              </svg>
+            </div>
             <div>
               <h1 class="page-heading">Research Reports &amp; Model Verification</h1>
-              <div class="page-description">Detailed benchmark provenance, minority class error analysis, 5 specialist model architectures, and automated verification</div>
+              <div class="page-description">Detailed benchmark provenance, minority class error analysis, 5 specialist model architectures, and automated verification.</div>
             </div>
           </div>
 
-          <!-- PROJECT VALIDATION UTILITY (MOVED CLEANLY HERE AS REQUESTED) -->
-          <div class="card">
-            <div class="card-header">
-              <div>
-                <div class="card-title">Project Validation Utility</div>
-                <div class="card-subtitle">Automated multi-specialist verification across all 13 canonical taxonomy classes</div>
+          <!-- Card 1: PROJECT VALIDATION UTILITY -->
+          <div class="card reports-card">
+            <div class="reports-util-header">
+              <div class="reports-util-title-group">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <circle cx="12" cy="12" r="3"></circle>
+                  <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+                </svg>
+                <div>
+                  <div class="reports-util-title">Project Validation Utility</div>
+                  <div class="reports-util-subtitle">Automated multi-specialist verification across all 13 canonical taxonomy classes.</div>
+                </div>
               </div>
-              <button class="btn btn-primary" id="btn-run-13-quick">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
-                Run 13-Class Verification
+              <button class="btn-run-verification" id="btn-run-13-quick">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor">
+                  <polygon points="5 3 19 12 5 21 5 3"></polygon>
+                </svg>
+                <span>Run 13-Class Verification</span>
               </button>
             </div>
-            <div class="card-body">
-              <p style="font-size: 12.5px; color: var(--text-secondary); margin-bottom: 0;">
-                Executes batch inference on verified test vectors for each canonical class (0–12) across the 5 production specialist models.
-                Results populate the telemetry stream and update the Overview KPI counters.
+            <div class="reports-util-body">
+              <p class="reports-util-desc">
+                Executes batch inference on verified test vectors for each canonical class (0–12) across the 5 production specialist models. Results populate the telemetry stream and update the Overview KPI counters.
               </p>
-              <div id="verif-results-box" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono); background: var(--color-benign-bg); color: var(--color-benign-text); border: 1px solid var(--color-benign-border);">
-                13-Class automated verification completed successfully.
+              <div id="verif-results-box" class="reports-verif-box" style="display: none;">
+                ✓ 13-Class Automated Verification Complete: 13 test vectors evaluated across all 5 specialist models. Overview KPIs and telemetry updated.
               </div>
             </div>
           </div>
 
-          <!-- 5 SPECIALIST MODEL CARDS -->
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 14px; margin-bottom: 20px;">
-            <!-- IDS2018 -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">IDS2018 Specialist</div>
-                  <div class="card-subtitle">Enterprise Flow Classifier</div>
-                </div>
-                <span class="tag tag-benign">Active</span>
+          <!-- Card 2: FROZEN 13-CLASS CANONICAL TAXONOMY MAPPING MATRIX -->
+          <div class="card reports-card">
+            <div class="reports-matrix-header">
+              <div class="reports-matrix-title-group">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                  <polyline points="14 2 14 8 20 8"></polyline>
+                  <line x1="16" y1="13" x2="8" y2="13"></line>
+                  <line x1="16" y1="17" x2="8" y2="17"></line>
+                  <polyline points="10 9 9 9 8 9"></polyline>
+                </svg>
+                <span class="card-title">Frozen 13-Class Canonical Taxonomy Mapping Matrix</span>
               </div>
-              <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  Trained on CSE-CIC-IDS2018 enterprise flows targeting high-volume perimeter attacks.
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Architecture:</span>
-                    <code>DecisionTree_Tuned</code>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Feature Dimension:</span>
-                    <strong style="color: var(--color-primary);">77 Flow Features</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Test Accuracy:</span>
-                    <strong style="color: var(--color-benign);">98.77%</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Macro F1-Score:</span>
-                    <strong>84.15%</strong>
-                  </div>
-                </div>
-              </div>
+              <span class="reports-static-pill">Static Class ID Mapping: 0 to 12</span>
             </div>
-
-            <!-- CICIoT2023 -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">CICIoT2023 Specialist</div>
-                  <div class="card-subtitle">IoT Network Perimeter</div>
-                </div>
-                <span class="tag tag-benign">Active</span>
-              </div>
-              <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  Specialized for modern Internet-of-Things topologies, protocol sweeps, and polymorphic DDoS attacks.
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Architecture:</span>
-                    <code>XGBoost Classifier</code>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Feature Dimension:</span>
-                    <strong style="color: var(--color-primary);">46 Flow Features</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Test Accuracy:</span>
-                    <strong style="color: var(--color-benign);">99.06%</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Macro F1-Score:</span>
-                    <strong>68.69%</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- ARP Spoofing -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">ARP Specialist</div>
-                  <div class="card-subtitle">Layer-2 Cache Poisoning</div>
-                </div>
-                <span class="tag tag-benign">Active</span>
-              </div>
-              <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  Dedicated Layer-2 MAC address resolution detector covering attacks invisible to Suricata.
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Architecture:</span>
-                    <code>DecisionTree Classifier</code>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Feature Dimension:</span>
-                    <strong style="color: var(--color-primary);">Target MAC / Opcode</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Test Accuracy:</span>
-                    <strong style="color: var(--color-benign);">100.00%</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Macro F1-Score:</span>
-                    <strong>100.00%</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- IP Spoofing (5G-NIDD) -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">5G / IP Specialist</div>
-                  <div class="card-subtitle">Header Telemetry Classifier</div>
-                </div>
-                <span class="tag tag-benign">Active</span>
-              </div>
-              <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  Trained on 5G-NIDD telemetry to detect IP header spoofing, martian addressing, and TTL anomalies.
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Architecture:</span>
-                    <code>DecisionTree Classifier</code>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Feature Dimension:</span>
-                    <strong style="color: var(--color-primary);">44 Telemetry Cols</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Test Accuracy:</span>
-                    <strong style="color: var(--color-benign);">100.00%</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Macro F1-Score:</span>
-                    <strong>100.00%</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- DNS Tunneling -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <div>
-                  <div class="card-title">DNS Tunneling Specialist</div>
-                  <div class="card-subtitle">Statistical Exfiltration</div>
-                </div>
-                <span class="tag tag-benign">Active</span>
-              </div>
-              <div class="card-body">
-                <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 10px;">
-                  Analyzes Shannon entropy, label depth, and character frequency to intercept DNS tunneling channels.
-                </div>
-                <div style="display: flex; flex-direction: column; gap: 5px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Architecture:</span>
-                    <code>DecisionTree Classifier</code>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Feature Dimension:</span>
-                    <strong style="color: var(--color-primary);">9 Entropy Features</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Test Accuracy:</span>
-                    <strong style="color: var(--color-benign);">99.98%</strong>
-                  </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Macro F1-Score:</span>
-                    <strong>99.98%</strong>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 13 CANONICAL CLASSES RESPONSIBILITY MATRIX -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Frozen 13-Class Canonical Taxonomy Mapping Matrix</span>
-              <span class="card-subtitle">Strict Class ID Mappings 0 to 12</span>
-            </div>
-            <div class="card-body" style="padding: 0;">
-              <table class="soc-table">
+            <div class="reports-table-container">
+              <table class="reports-soc-table">
                 <thead>
                   <tr>
-                    <th>Class ID</th>
-                    <th>Canonical Attack Name</th>
-                    <th>Responsible Specialist(s)</th>
-                    <th>Input Schema &amp; Features</th>
-                    <th>Suricata Rule Coverage</th>
-                    <th style="text-align: right;">Coverage Status</th>
+                    <th style="width: 70px;">CLASS ID</th>
+                    <th style="width: 150px;">CANONICAL ATTACK NAME</th>
+                    <th style="width: 200px;">RESPONSIBLE SPECIALIST(S)</th>
+                    <th>INPUT SCHEMA &amp; FEATURES</th>
+                    <th style="width: 210px;">SURICATA RULE COVERAGE</th>
+                    <th style="width: 140px;">COVERAGE STATUS</th>
                   </tr>
                 </thead>
                 <tbody id="models-matrix-tbody">
-                  <!-- Rendered dynamically -->
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">0</td>
+                    <td style="font-weight: 700; color: #0F172A;">Benign</td>
+                    <td><span class="tax-specialist-badge">All 5 Specialists</span></td>
+                    <td style="color: #334155; font-size: 12px;">Clean normal network traffic</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Pass-through)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">1</td>
+                    <td style="font-weight: 700; color: #0F172A;">DDoS</td>
+                    <td><span class="tax-specialist-badge">CSE-CIC2018 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">High-rate distinct toll denial of service</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Rate/Threshold)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">2</td>
+                    <td style="font-weight: 700; color: #0F172A;">DoS</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">Denial of service (SYN/HTTP/Slowloris)</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (TCP/ICMP Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">3</td>
+                    <td style="font-weight: 700; color: #0F172A;">Botnet</td>
+                    <td><span class="tax-specialist-badge">CSE-CIC2018 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">Botnet C2 communications &amp; IRC beacons</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (IRC/C2 Signatures)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">4</td>
+                    <td style="font-weight: 700; color: #0F172A;">Infiltration</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">Post-exploitation reverse shell / Meterpreter</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Payload Signatures)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">5</td>
+                    <td style="font-weight: 700; color: #0F172A;">Brute Force</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">SSH, FTP, and HTTP auth credential bursts</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Auth Rate Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">6</td>
+                    <td style="font-weight: 700; color: #0F172A;">Web Attack</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">SQL injection, XSS, and directory traversal</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Regex Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">7</td>
+                    <td style="font-weight: 700; color: #0F172A;">DNS Spoofing</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / DNS_Tunneling</span></td>
+                    <td style="color: #334155; font-size: 12px;">Poisoned DNS replies and TXID anomalies</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (DNS Ruleset1)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">8</td>
+                    <td style="font-weight: 700; color: #0F172A;">IP Spoofing</td>
+                    <td><span class="tax-specialist-badge">IP_Spoofing Specialist</span></td>
+                    <td style="color: #334155; font-size: 12px;">5G-NIDD Martian IPs and header checksum spoofing</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Martian IP Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">9</td>
+                    <td style="font-weight: 700; color: #0F172A;">ARP Spoofing</td>
+                    <td><span class="tax-specialist-badge">ARP_Spoofing Specialist</span></td>
+                    <td style="color: #334155; font-size: 12px;">Layer-2 MAC cache poison &amp; duplicate IPs</td>
+                    <td><span style="font-size: 12px; color: #DC2626; font-weight: 700;">UNSUPPORTED (L2-L3 Only)</span></td>
+                    <td><span class="tax-status-unsupported">Unsupported L2</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">10</td>
+                    <td style="font-weight: 700; color: #0F172A;">Recon / Port Scan</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">Horizontal/vertical SYN, NULL, and Xmas scans</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Port Sweep Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">11</td>
+                    <td style="font-weight: 700; color: #0F172A;">MITM</td>
+                    <td><span class="tax-specialist-badge">CICIoT2023 / IDS2018</span></td>
+                    <td style="color: #334155; font-size: 12px;">SSL strip, rogue gateways &amp; asymmetric sessions</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (SSL/Cert Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
+                  <tr>
+                    <td style="font-weight: 600; color: #334155;">12</td>
+                    <td style="font-weight: 700; color: #0F172A;">DNS Tunneling</td>
+                    <td><span class="tax-specialist-badge">DNS_Tunneling Specialist</span></td>
+                    <td style="color: #334155; font-size: 12px;">Statistical exfiltration via DNS labels &amp; base64</td>
+                    <td><span style="font-size: 12px; color: #334155;">Supported (Label Rules)</span></td>
+                    <td><span class="tax-status-full">Full Support</span></td>
+                  </tr>
                 </tbody>
               </table>
             </div>
           </div>
 
-          <!-- Dataset Provenance Table -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Benchmark Datasets &amp; Feature Provenance</span>
+          <!-- Card 3: BENCHMARK DATASETS & FEATURE PROVENANCE -->
+          <div class="card reports-card">
+            <div class="reports-matrix-header">
+              <div class="reports-matrix-title-group">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                  <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                  <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+                </svg>
+                <span class="card-title">Benchmark Datasets &amp; Feature Provenance</span>
+              </div>
             </div>
-            <div class="card-body" style="padding: 0;">
-              <table class="soc-table">
+            <div class="reports-table-container">
+              <table class="reports-soc-table">
                 <thead>
                   <tr>
-                    <th>Dataset Identifier</th>
-                    <th>Target Threat Classes</th>
-                    <th>Raw Records</th>
-                    <th>Feature Dimension</th>
-                    <th>Specialist Model</th>
+                    <th style="width: 220px;">DATASET IDENTIFIER</th>
+                    <th>TARGET THREAT CLASSES</th>
+                    <th style="width: 150px;">RAW RECORDS</th>
+                    <th style="width: 190px;">FEATURE DIMENSION</th>
+                    <th style="width: 150px;">SPECIALIST MODEL</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr>
-                    <td><strong>CSE-CIC-IDS2018</strong></td>
-                    <td>Benign, DDoS, DoS, Botnet, Infiltration, Brute Force, Web Attack</td>
-                    <td>1,048,575 rows</td>
-                    <td>77 Flow Features</td>
-                    <td><code>IDS2018</code></td>
+                    <td><strong class="dataset-name">CSE-CIC-IDS2018</strong></td>
+                    <td class="dataset-threats">Benign, DDoS, DoS, Botnet, Infiltration, Brute Force, Web Attack</td>
+                    <td class="dataset-meta">1,048,575 rows</td>
+                    <td class="dataset-meta">77 Flow Features</td>
+                    <td class="dataset-specialist">IDS2018</td>
                   </tr>
                   <tr>
-                    <td><strong>CICIoT2023</strong></td>
-                    <td>IoT DDoS, DoS, Recon, MITM, DNS Spoofing, Web Attack, Infiltration</td>
-                    <td>1,114,845 rows</td>
-                    <td>46 Network Telemetry</td>
-                    <td><code>CICIoT2023</code></td>
+                    <td><strong class="dataset-name">CICIoT2023</strong></td>
+                    <td class="dataset-threats">IoT DDoS, DoS, Recon, MITM, DNS Spoofing, Web Attack, Infiltration</td>
+                    <td class="dataset-meta">1,114,545 rows</td>
+                    <td class="dataset-meta">46 Network Telemetry</td>
+                    <td class="dataset-specialist">CICIoT2023</td>
                   </tr>
                   <tr>
-                    <td><strong>5G-NIDD Dataset</strong></td>
-                    <td>IP Spoofing, Martian IP Egress, Header Checksum Anomalies</td>
-                    <td>3,787 rows</td>
-                    <td>44 Header Features</td>
-                    <td><code>IP_Spoofing</code></td>
+                    <td><strong class="dataset-name">5G-NIDD Dataset</strong></td>
+                    <td class="dataset-threats">IP Spoofing, Martian IP Egress, Header Checksum Anomalies</td>
+                    <td class="dataset-meta">3,787 rows</td>
+                    <td class="dataset-meta">44 Header Features</td>
+                    <td class="dataset-specialist">IP_Spoofing</td>
                   </tr>
                   <tr>
-                    <td><strong>ARP Poisoning Dataset</strong></td>
-                    <td>Layer-2 ARP Storms, Cache Poisoning, Duplicate IP Announcements</td>
-                    <td>4 frames / streams</td>
-                    <td>Target MAC &amp; Opcode</td>
-                    <td><code>ARP_Spoofing</code></td>
+                    <td><strong class="dataset-name">ARP Poisoning Dataset</strong></td>
+                    <td class="dataset-threats">Layer-2 ARP Storms, Cache Poisoning, Duplicate IP Announcements</td>
+                    <td class="dataset-meta">4 frames / streams</td>
+                    <td class="dataset-meta">Target MAC &amp; Opcode</td>
+                    <td class="dataset-specialist">ARP_Spoofing</td>
                   </tr>
                   <tr>
-                    <td><strong>DNS Exfiltration Log</strong></td>
-                    <td>High-Entropy DNS Tunneling, Base64/Hex Data Exfiltration</td>
-                    <td>4 rows / domain streams</td>
-                    <td>9 Entropy Statistics</td>
-                    <td><code>DNS_Tunneling</code></td>
+                    <td><strong class="dataset-name">DNS Exfiltration Log</strong></td>
+                    <td class="dataset-threats">High-entropy DNS Tunneling, Base64/Hex Data Exfiltration</td>
+                    <td class="dataset-meta">4 rows / domain streams</td>
+                    <td class="dataset-meta">9 Entropy Statistics</td>
+                    <td class="dataset-specialist">DNS_Tunneling</td>
                   </tr>
                 </tbody>
               </table>
             </div>
-          </div>
-
-          <!-- Minority Class Error Analysis Callout -->
-          <div class="callout-box amber">
-            <strong>Honest Error Analysis &amp; Minority-Class Limitations:</strong>
-            <p style="margin-top: 5px;">
-              In extreme imbalance scenarios (CICIoT2023 Infiltration with only 85 samples, Brute Force with 300 samples, and Web Attack with 509 samples),
-              decision trees trained with uniform class weights exhibit higher false positive rates on borderline telemetry.
-              Threshold tuning and calibration improve minority class recall to 94.0%, but require baseline filtering to maintain high overall precision.
-            </p>
           </div>
         </section>
 

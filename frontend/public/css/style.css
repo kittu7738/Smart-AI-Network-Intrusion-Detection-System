@@ -2217,3 +2217,237 @@ a:hover {
     padding: 14px;
   }
 }
+
+/* ==========================================================================
+   PAGE 6: RESEARCH REPORTS & MODEL VERIFICATION (1:1 REFERENCE DESIGN)
+   ========================================================================== */
+
+.reports-header-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 20px;
+}
+
+.reports-header-icon-box {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  border-radius: 6px;
+  background-color: #2563EB;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
+}
+
+.reports-card {
+  background-color: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  margin-bottom: 18px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.03);
+  overflow: hidden;
+}
+
+.reports-util-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 18px;
+}
+
+.reports-util-title-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.reports-util-title {
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.25;
+}
+
+.reports-util-subtitle {
+  font-size: 12px;
+  color: #64748B;
+  margin-top: 2px;
+}
+
+.btn-run-verification {
+  background-color: #2563EB;
+  color: #FFFFFF;
+  border: none;
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 12.5px;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s ease-in-out;
+  box-shadow: 0 1px 2px rgba(37, 99, 235, 0.2);
+}
+
+.btn-run-verification:hover {
+  background-color: #1D4ED8;
+}
+
+.btn-run-verification:active {
+  background-color: #1E40AF;
+}
+
+.reports-util-body {
+  padding: 0 18px 14px 18px;
+}
+
+.reports-util-desc {
+  font-size: 12px;
+  color: #475569;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.reports-verif-box {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: var(--font-mono);
+  background-color: #DCFCE7;
+  color: #15803D;
+  border: 1px solid #BBF7D0;
+}
+
+.reports-matrix-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 18px;
+  border-bottom: 1px solid #F1F5F9;
+}
+
+.reports-matrix-title-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.reports-matrix-title-group .card-title {
+  font-size: 14px;
+  font-weight: 700;
+  color: #0F172A;
+}
+
+.reports-static-pill {
+  background-color: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.1px;
+}
+
+.reports-table-container {
+  overflow-x: auto;
+  width: 100%;
+}
+
+.reports-soc-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: left;
+}
+
+.reports-soc-table th {
+  background-color: #F8FAFC;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 9px 14px;
+  border-bottom: 1px solid #E2E8F0;
+  white-space: nowrap;
+}
+
+.reports-soc-table td {
+  padding: 7.5px 14px;
+  font-size: 12px;
+  color: #334155;
+  border-bottom: 1px solid #F1F5F9;
+  vertical-align: middle;
+}
+
+.reports-soc-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.reports-soc-table tbody tr:hover td {
+  background-color: #F8FAFC;
+}
+
+.tax-specialist-badge {
+  background-color: #EFF6FF;
+  border: 1px solid #BFDBFE;
+  color: #2563EB;
+  font-weight: 600;
+  font-size: 11px;
+  padding: 2.5px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.tax-status-full {
+  background-color: #DCFCE7;
+  border: 1px solid #BBF7D0;
+  color: #16A34A;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.tax-status-unsupported {
+  background-color: #FEE2E2;
+  border: 1px solid #FECACA;
+  color: #DC2626;
+  font-weight: 700;
+  font-size: 11px;
+  padding: 2px 9px;
+  border-radius: 4px;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.dataset-name {
+  font-weight: 700;
+  color: #0F172A;
+  font-size: 12px;
+}
+
+.dataset-threats {
+  color: #334155;
+  font-size: 12px;
+}
+
+.dataset-meta {
+  color: #334155;
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.dataset-specialist {
+  color: #334155;
+  font-size: 12px;
+  font-family: inherit;
+}
+

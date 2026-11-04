@@ -119,6 +119,18 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def add_cache_control_headers(request: Request, call_next):
+    """Ensure HTML, JavaScript, and CSS assets are never cached stale by web browsers."""
+    response = await call_next(request)
+    path = request.url.path
+    if path == "/" or path.endswith((".html", ".js", ".css", ".json")):
+        response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
+        response.headers["Pragma"] = "no-cache"
+        response.headers["Expires"] = "0"
+    return response
+
+
 @app.exception_handler(ValueError)
 async def value_error_exception_handler(request: Request, exc: ValueError):
     """Convert ValueError from UnifiedNIDS into a clean HTTP 400 Bad Request."""

@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/style.css?v=2.2.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -118,16 +118,16 @@
         <div class="header-meta-group">
           <!-- Backend Status Chip -->
           <div class="header-stat-chip">
-            <span class="chip-status-dot" id="header-status-dot"></span>
+            <span class="chip-status-dot warning" id="header-status-dot"></span>
             <span class="chip-label">Backend:</span>
-            <span class="chip-val" id="header-backend-text">Connecting...</span>
+            <span class="chip-val" id="header-backend-text">Checking...</span>
           </div>
 
           <!-- AI Detection Engine Status Chip -->
           <div class="header-stat-chip">
-            <span class="chip-status-dot" id="header-ai-dot"></span>
+            <span class="chip-status-dot warning" id="header-ai-dot"></span>
             <span class="chip-label">AI Engine:</span>
-            <span class="chip-val" id="header-specialists-val">Connecting...</span>
+            <span class="chip-val" id="header-specialists-val">Checking...</span>
           </div>
         </div>
       </header>
@@ -1307,7 +1307,7 @@
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/api.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/api.js?v=2.2.0"></script>
+  <script src="js/app.js?v=2.2.0"></script>
 </body>
 </html>

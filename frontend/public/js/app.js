@@ -94,9 +94,12 @@ class EnterpriseSocApp {
     // Set initial clean empty states and zero values
     this.updateOverviewKPIs();
 
-    // Check backend health & fetch comparative evaluation metrics
-    await this.checkBackendStatus();
-    await this.loadComparativeMetrics();
+    // Check backend health, AI engine models, and fetch comparative evaluation metrics
+    await Promise.allSettled([
+      this.checkBackendStatus(),
+      this.checkAiEngineStatus(),
+      this.loadComparativeMetrics()
+    ]);
   }
 
   /* ========================================================================
@@ -174,15 +177,10 @@ class EnterpriseSocApp {
   async checkBackendStatus() {
     const statusDot = document.getElementById("header-status-dot");
     const statusText = document.getElementById("header-backend-text");
-    const aiDot = document.getElementById("header-ai-dot");
-    const specialistsVal = document.getElementById("header-specialists-val");
     const runtimePython = document.getElementById("runtime-python-ver");
     const runtimeSuricata = document.getElementById("runtime-suricata-ver");
-    const runtimeModels = document.getElementById("runtime-models-loaded");
     const healthBackendUrl = document.getElementById("health-backend-url");
     const healthBackendBadge = document.getElementById("health-backend-badge");
-    const healthAiModels = document.getElementById("health-ai-models");
-    const healthAiBadge = document.getElementById("health-ai-badge");
     const healthSuricataVer = document.getElementById("health-suricata-ver");
     const healthSuricataBadge = document.getElementById("health-suricata-badge");
 
@@ -193,25 +191,18 @@ class EnterpriseSocApp {
       const health = await this.api.getHealth();
       if (health && health.status === "ok") {
         if (statusDot) statusDot.className = "chip-status-dot";
-        if (statusText) statusText.textContent = "Connected";
-        if (aiDot) aiDot.className = "chip-status-dot";
-        const loadedCount = health.loaded_specialists?.length || 5;
-        if (specialistsVal) specialistsVal.textContent = `Ready (${loadedCount} Models)`;
-        if (runtimeModels) runtimeModels.textContent = `${loadedCount} / 5 Operational`;
+        if (statusText) statusText.textContent = "Operational";
         if (healthBackendBadge) {
           healthBackendBadge.className = "tag tag-benign";
           healthBackendBadge.textContent = "Operational";
         }
-        if (healthAiModels) healthAiModels.textContent = `${loadedCount} of 5 Specialists Loaded`;
-        if (healthAiBadge) {
-          healthAiBadge.className = "tag tag-benign";
-          healthAiBadge.textContent = "Ready";
-        }
       } else {
         if (statusDot) statusDot.className = "chip-status-dot warning";
         if (statusText) statusText.textContent = "Degraded";
-        if (aiDot) aiDot.className = "chip-status-dot warning";
-        if (specialistsVal) specialistsVal.textContent = "Degraded";
+        if (healthBackendBadge) {
+          healthBackendBadge.className = "tag tag-medium";
+          healthBackendBadge.textContent = "Degraded";
+        }
       }
 
       // Check Suricata status from actual backend endpoint
@@ -238,16 +229,74 @@ class EnterpriseSocApp {
     } catch (err) {
       if (statusDot) statusDot.className = "chip-status-dot offline";
       if (statusText) statusText.textContent = "Offline";
-      if (aiDot) aiDot.className = "chip-status-dot offline";
-      if (specialistsVal) specialistsVal.textContent = "Offline";
-      if (runtimeModels) runtimeModels.textContent = "Backend Offline";
       if (healthBackendBadge) {
         healthBackendBadge.className = "tag tag-critical";
         healthBackendBadge.textContent = "Offline";
       }
+    }
+  }
+
+  /* ========================================================================
+     AI ENGINE STATUS & SPECIALISTS INTROSPECTION (FROM ACTUAL /models ENDPOINT)
+     ======================================================================== */
+  async checkAiEngineStatus() {
+    const aiDot = document.getElementById("header-ai-dot");
+    const specialistsVal = document.getElementById("header-specialists-val");
+    const runtimeModels = document.getElementById("runtime-models-loaded");
+    const healthAiModels = document.getElementById("health-ai-models");
+    const healthAiBadge = document.getElementById("health-ai-badge");
+
+    const requiredSpecialists = ["IDS2018", "CICIoT2023", "ARP_Spoofing", "IP_Spoofing", "DNS_Tunneling"];
+
+    try {
+      // Query dedicated /models endpoint with explicit timeout protection
+      const modelsData = await this.api.getModels();
+      const specialistsMap = (modelsData && modelsData.specialists) ? modelsData.specialists : {};
+      
+      // Count verified loaded specialist models from actual response
+      const verifiedSpecs = requiredSpecialists.filter(spec => spec in specialistsMap);
+      const loadedCount = verifiedSpecs.length;
+
+      if (loadedCount >= 5) {
+        // OPERATIONAL: All 5 specialists confirmed ready
+        if (aiDot) aiDot.className = "chip-status-dot";
+        if (specialistsVal) specialistsVal.textContent = "Operational (5 Specialists)";
+        if (runtimeModels) runtimeModels.textContent = "5 / 5 Operational";
+        if (healthAiModels) healthAiModels.textContent = "5 of 5 Specialists Loaded";
+        if (healthAiBadge) {
+          healthAiBadge.className = "tag tag-benign";
+          healthAiBadge.textContent = "Operational";
+        }
+      } else if (loadedCount > 0) {
+        // DEGRADED: Partial specialists available
+        if (aiDot) aiDot.className = "chip-status-dot warning";
+        if (specialistsVal) specialistsVal.textContent = `Degraded (${loadedCount}/5 Specialists)`;
+        if (runtimeModels) runtimeModels.textContent = `${loadedCount} / 5 Operational`;
+        if (healthAiModels) healthAiModels.textContent = `${loadedCount} of 5 Specialists Loaded`;
+        if (healthAiBadge) {
+          healthAiBadge.className = "tag tag-medium";
+          healthAiBadge.textContent = "Degraded";
+        }
+      } else {
+        // OFFLINE: 0 specialists available
+        if (aiDot) aiDot.className = "chip-status-dot offline";
+        if (specialistsVal) specialistsVal.textContent = "Offline";
+        if (runtimeModels) runtimeModels.textContent = "AI Engine Offline";
+        if (healthAiModels) healthAiModels.textContent = "0 of 5 Specialists Loaded";
+        if (healthAiBadge) {
+          healthAiBadge.className = "tag tag-critical";
+          healthAiBadge.textContent = "Offline";
+        }
+      }
+    } catch (err) {
+      // OFFLINE: Connection failure or request timeout
+      if (aiDot) aiDot.className = "chip-status-dot offline";
+      if (specialistsVal) specialistsVal.textContent = "Offline";
+      if (runtimeModels) runtimeModels.textContent = "AI Engine Offline";
+      if (healthAiModels) healthAiModels.textContent = "0 of 5 Specialists Loaded";
       if (healthAiBadge) {
         healthAiBadge.className = "tag tag-critical";
-        healthAiBadge.textContent = "Unreachable";
+        healthAiBadge.textContent = "Offline";
       }
     }
   }
@@ -1411,6 +1460,7 @@ class EnterpriseSocApp {
         banner.style.border = "1px solid var(--color-benign-border)";
         banner.textContent = `Configuration saved. Active Base URL: ${inp.value}`;
         this.checkBackendStatus();
+        this.checkAiEngineStatus();
       });
     }
 

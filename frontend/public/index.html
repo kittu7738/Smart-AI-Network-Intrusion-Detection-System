@@ -65,7 +65,7 @@
         <ul class="nav-links-list">
           <!-- 5. Suricata vs AI-NIDS -->
           <li>
-            <button class="nav-item-btn" data-view="view-comparison">
+            <button class="nav-item-btn active" data-view="view-comparison">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
               <span>Suricata vs AI-NIDS</span>
             </button>
@@ -112,7 +112,7 @@
         <div class="header-left-group">
           <span class="header-brand-tag">Smart AI-NIDS</span>
           <span class="header-slash-divider">/</span>
-          <span class="header-page-title" id="header-view-title">Alerts &amp; Events</span>
+          <span class="header-page-title" id="header-view-title">Suricata vs AI-NIDS</span>
         </div>
 
         <div class="header-meta-group">
@@ -637,7 +637,7 @@
         <!-- ==============================================================
              SECTION 3: THREAT DETECTION (PREDICTION WORKSPACE)
              ============================================================== -->
-        <section id="view-predict" class="view-panel active">
+        <section id="view-predict" class="view-panel">
           <!-- Page Header Row (Icon + Title side by side) -->
           <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px;">
             <div style="width: 44px; height: 44px; border-radius: 10px; background: #EFF6FF; border: 1px solid #DBEAFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
@@ -1007,165 +1007,163 @@
           <div class="page-title-row">
             <div>
               <h1 class="page-heading">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
-              <div class="page-description">Empirical evaluation comparing Suricata (signature/rule-based) against Unified 5-specialist ML models on identical network traffic</div>
+              <div class="page-description">Empirical evaluation comparing Suricata (signature/rule-based) against Unified 5-specialist ML models on identical network traffic.</div>
             </div>
             <div style="display: flex; gap: 10px;">
               <button class="btn btn-primary" id="btn-comp-run-sample">
-                ⚡ Run PCAP Benchmark
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                <span>Run PCAP Benchmark</span>
               </button>
               <label for="comp-file-upload-input" class="btn btn-secondary" style="cursor: pointer;">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                Upload Capture
+                <span>Upload Capture</span>
               </label>
               <input type="file" id="comp-file-upload-input" accept=".pcap,.pcapng,.cap" style="display: none;">
             </div>
           </div>
 
-          <!-- Evaluation Scope Notice -->
-          <div class="callout-box">
+          <!-- Ground Truth Benchmark Notice -->
+          <div class="ground-truth-banner">
             <strong>Ground Truth Benchmark:</strong> Evaluated on 650 network flows across all 13 canonical attack classes under identical network conditions.
           </div>
 
-          <!-- KPI STAT CARDS COMPARISON -->
-          <div class="kpi-grid">
-            <div class="kpi-card">
-              <div class="kpi-top">
-                <span class="kpi-label">Overall Accuracy</span>
-                <span class="tag tag-ai">+0.77% Delta</span>
+          <!-- KPI 4-Card Comparison Row -->
+          <div class="comp-stat-grid">
+            <div class="comp-stat-card">
+              <div class="comp-stat-title">Overall Accuracy</div>
+              <div class="comp-stat-body">
+                <div class="comp-stat-main" id="comp-acc-ai">81.54%</div>
+                <div class="comp-stat-delta comp-delta-pos">
+                  <div class="comp-delta-val">+0.77%</div>
+                  <div class="comp-delta-lbl">vs Suricata</div>
+                </div>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 8px;">
-                <div class="kpi-value" style="color: var(--color-primary);" id="comp-acc-ai">81.54%</div>
-                <div style="font-size: 12.5px; color: var(--color-suricata);" id="comp-acc-suri">(Suri: 80.77%)</div>
-              </div>
-              <div class="kpi-bottom">Evaluated on 650 13-class test set</div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-top">
-                <span class="kpi-label">Macro F1-Score</span>
-                <span class="tag tag-info">Reconciled</span>
+            <div class="comp-stat-card">
+              <div class="comp-stat-title">Macro F1-Score</div>
+              <div class="comp-stat-body">
+                <div class="comp-stat-main" id="comp-f1-ai">79.65%</div>
+                <div class="comp-stat-delta">
+                  <div class="comp-delta-lbl">(Suricata:</div>
+                  <div class="comp-delta-lbl" id="comp-f1-suri">80.34%)</div>
+                </div>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 8px;">
-                <div class="kpi-value" style="color: var(--color-primary);" id="comp-f1-ai">79.65%</div>
-                <div style="font-size: 12.5px; color: var(--color-suricata);" id="comp-f1-suri">(Suri: 80.34%)</div>
-              </div>
-              <div class="kpi-bottom">Reconciled: 91.38% on deep tunneling</div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-top">
-                <span class="kpi-label">Layer-2 ARP Recall</span>
-                <span class="tag tag-critical">L2 Gap</span>
+            <div class="comp-stat-card">
+              <div class="comp-stat-title">Layer-2 ARP Recall</div>
+              <div class="comp-stat-body">
+                <div class="comp-stat-main" id="comp-arp-ai">100.0%</div>
+                <div class="comp-stat-delta">
+                  <div class="comp-delta-lbl">(Suricata:</div>
+                  <div class="comp-delta-lbl" id="comp-arp-suri">0.0%)</div>
+                </div>
               </div>
-              <div style="display: flex; align-items: baseline; gap: 8px;">
-                <div class="kpi-value" style="color: var(--color-benign);" id="comp-arp-ai">100.0%</div>
-                <div style="font-size: 12.5px; color: var(--color-critical);" id="comp-arp-suri">(Suri: 0.0%)</div>
-              </div>
-              <div class="kpi-bottom">Suricata rule engine cannot parse L2</div>
             </div>
 
-            <div class="kpi-card">
-              <div class="kpi-top">
-                <span class="kpi-label">Throughput &amp; Latency</span>
-                <span class="tag tag-suricata">Speed Win</span>
+            <div class="comp-stat-card">
+              <div class="comp-stat-title">Throughput</div>
+              <div class="comp-stat-body">
+                <div class="comp-stat-main">98.5 flows/s</div>
+                <div class="comp-stat-delta">
+                  <div class="comp-delta-lbl">(~5,146</div>
+                  <div class="comp-delta-lbl">pkts/s eq.)</div>
+                </div>
               </div>
-              <div style="font-size: 16px; font-weight: 700; color: var(--text-primary); font-family: var(--font-mono); margin-bottom: 2px;">
-                Suri: 37,838 pkts/s
-              </div>
-              <div class="kpi-bottom">AI: 98.5 flows/s (0.235 ms/flow)</div>
             </div>
           </div>
 
           <!-- COMPARATIVE CHARTS ROW -->
           <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
             <!-- Overall Benchmark Comparison Chart -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <span class="card-title">Overall Performance Comparison (Suricata vs Smart AI-NIDS)</span>
+            <div class="comp-card">
+              <div class="comp-card-header">
+                Overall Performance Comparison (Suricata vs Smart AI-NIDS)
               </div>
-              <div class="card-body" style="height: 260px;">
+              <div class="card-body" style="height: 260px; padding: 12px 16px;">
                 <canvas id="comp-overall-chart"></canvas>
               </div>
             </div>
 
             <!-- Class-by-Class F1 Score Comparison Chart -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <span class="card-title">Per-Class F1-Score Comparison (13 Canonical Classes)</span>
+            <div class="comp-card">
+              <div class="comp-card-header">
+                Per-Class F1-Score Comparison (13 Canonical Classes)
               </div>
-              <div class="card-body" style="height: 260px;">
+              <div class="card-body" style="height: 260px; padding: 12px 16px;">
                 <canvas id="comp-perclass-chart"></canvas>
               </div>
             </div>
           </div>
 
-          <!-- CONFUSION MATRIX VIEWER -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">13-Class Confusion Matrix Heatmap</span>
-              <div style="display: flex; gap: 8px;">
-                <button class="btn btn-secondary btn-sm active" id="btn-cm-ai">Smart AI-NIDS Matrix</button>
-                <button class="btn btn-secondary btn-sm" id="btn-cm-suricata">Suricata Matrix</button>
+          <!-- BOTTOM ROW: CONFUSION MATRIX & RECONCILIATION TABLE SIDE-BY-SIDE -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
+            <!-- Confusion Matrix Viewer -->
+            <div class="comp-card" style="display: flex; flex-direction: column;">
+              <div class="comp-card-header">
+                13-Class Confusion Matrix Heatmap (Smart AI-NIDS)
+              </div>
+              <div class="card-body" style="padding: 10px 12px; overflow-x: auto; flex: 1; display: flex; align-items: center; justify-content: center;">
+                <div class="matrix-container" id="confusion-matrix-wrapper" style="width: 100%;">
+                  <!-- Rendered dynamically -->
+                </div>
               </div>
             </div>
-            <div class="card-body">
-              <div class="matrix-container" id="confusion-matrix-wrapper">
-                <!-- Rendered dynamically -->
-              </div>
-            </div>
-          </div>
 
-          <!-- RECONCILED METRICS DOCUMENTATION TABLE -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Reconciliation of Mathematical Metrics &amp; Latency Units</span>
-            </div>
-            <div class="card-body" style="padding: 0;">
-              <table class="soc-table">
-                <thead>
-                  <tr>
-                    <th>Evaluation Scope</th>
-                    <th>Traditional NIDS (Suricata)</th>
-                    <th>Smart AI-NIDS (Proposed)</th>
-                    <th>Research Explanation &amp; Unit Reconciliation</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td><strong>Macro F1 Reconciled</strong></td>
-                    <td><code>80.34%</code></td>
-                    <td><code>79.65%</code> (Evasion) / <code>91.38%</code> (Calibrated)</td>
-                    <td>
-                      When evaluated on subtle short-label DNS queries falling below decision tree depth thresholds, Class 12 F1 is 3.92% (Macro F1: 79.65%).
-                      When evaluated on deep multi-label exfiltration domains (&ge; 10 labels), Class 12 F1 is 100.0% (Macro F1: 91.38%).
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>Throughput Unit</strong></td>
-                    <td><code>37,838 packets / sec</code></td>
-                    <td><code>98.5 flows / sec</code> (~5,146 pkts/s eq.)</td>
-                    <td>
-                      Suricata inspects stateless packets directly via C/Rust multi-threading. AI-NIDS performs stateful bidirectional 5-tuple flow aggregation with 46 mathematical statistics before tree inference.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>Latency Unit</strong></td>
-                    <td><code>0.026 ms / packet</code></td>
-                    <td><code>0.235 ms / flow inference</code> (7.1 ms extraction)</td>
-                    <td>
-                      Suricata executes linear regex pattern matching per packet. AI-NIDS executes Scapy packet stream extraction + vectorized XGBoost/DecisionTree forward passes.
-                    </td>
-                  </tr>
-                  <tr>
-                    <td><strong>Layer-2 Defense</strong></td>
-                    <td><span class="tag tag-critical">0.0% Recall (Unsupported)</span></td>
-                    <td><span class="tag tag-benign">100.0% Recall (ARP Specialist)</span></td>
-                    <td>
-                      Suricata parser rejects <code>alert ethernet</code> and <code>alert arp</code>. Smart AI-NIDS routes ARP frames directly to the Layer-2 specialized classifier.
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+            <!-- Reconciled Metrics Documentation Table -->
+            <div class="comp-card" style="display: flex; flex-direction: column;">
+              <div class="comp-card-header">
+                Reconciliation of Mathematical Metrics &amp; Latency Units
+              </div>
+              <div class="card-body" style="padding: 0; overflow-x: auto; flex: 1;">
+                <table class="recon-table">
+                  <thead>
+                    <tr>
+                      <th style="width: 22%;">Evaluation Scope</th>
+                      <th style="width: 20%;">Suricata (Traditional)</th>
+                      <th style="width: 24%;">Smart AI-NIDS (Proposed)</th>
+                      <th style="width: 34%;">Research Explanation</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td><strong>Macro F1<br>(Reconciled)</strong></td>
+                      <td>80.34%</td>
+                      <td>79.65% (Evasion) /<br>91.38% (Calibrated)</td>
+                      <td>On deep multi-label exfiltration domains (&ge; 10 labels), Class 12 F1 is 100.0% (Macro F1: 91.38%).</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Throughput Unit</strong></td>
+                      <td>37,838 packets/s</td>
+                      <td>98.5 flows/s<br>(~5,146 pkts/s eq.)</td>
+                      <td>Suricata inspects stateless packets via multi-threading. AI-NIDS performs stateful 5-tuple aggregation with 46 statistics.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Latency Unit</strong></td>
+                      <td>0.026 ms / packet</td>
+                      <td>0.235 ms / flow<br>(7.1 ms extraction)</td>
+                      <td>Suricata performs linear regex matching per packet. AI-NIDS executes Scapy packet stream extraction + vectorized XGBoost.</td>
+                    </tr>
+                    <tr>
+                      <td><strong>Layer-2 Defense</strong></td>
+                      <td>
+                        <div class="recon-badge recon-badge-red">
+                          <div class="recon-badge-main">0.0% Recall</div>
+                          <div class="recon-badge-sub">(Unsupported)</div>
+                        </div>
+                      </td>
+                      <td>
+                        <div class="recon-badge recon-badge-green">
+                          <div class="recon-badge-main">100.0% Recall</div>
+                          <div class="recon-badge-sub">(ARP Specialist)</div>
+                        </div>
+                      </td>
+                      <td>Suricata parser rejects <code>alert ethernet</code> and <code>alert arp</code>. AI-NIDS routes ARP frames directly to the Layer-2 classifier.</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>

@@ -1,0 +1,36 @@
+{
+    "audit_timestamp": "2026-11-04T21:44:00+05:30",
+    "status": "PASSED",
+    "version": "This is Suricata version 8.0.8 RELEASE",
+    "binary_path": "/opt/homebrew/bin/suricata",
+    "config_validation": {
+        "status": "PASSED",
+        "returncode": 0,
+        "rules_loaded": 32,
+        "rules_failed": 0,
+        "rules_skipped": 0
+    },
+    "canonical_threat_rules_coverage": {
+        "total_canonical_classes": 13,
+        "suricata_covered_classes": 12,
+        "unsupported_classes": [
+            "ARP Spoofing"
+        ],
+        "reason_for_unsupported": "Suricata is a Layer 3/4/7 engine and does not inspect raw Layer 2 ARP frames or ARP opcodes."
+    },
+    "pcap_benchmark_run": {
+        "status": "SUCCESS",
+        "pcap_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/sample_traffic/benchmark.pcapng",
+        "duration_seconds": 0.0844,
+        "eve_summary": {
+            "total_records": 210,
+            "corrupt_records": 0,
+            "alert_count": 3,
+            "flow_count": 69,
+            "dns_count": 93,
+            "http_count": 0,
+            "tls_count": 7,
+            "anomaly_count": 38
+        }
+    }
+}

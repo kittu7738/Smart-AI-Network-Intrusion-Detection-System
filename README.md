@@ -2,10 +2,11 @@
 
 > A Multi-Model Machine Learning-based Network Intrusion Detection System that detects malicious network traffic using AI algorithms, specializing in both enterprise and IoT networks, and providing real-time attack analysis through an interactive web dashboard.
 
-![Python](https://img.shields.io/badge/Python-3.11-blue)
-![Flask](https://img.shields.io/badge/Flask-Web%20Framework-black)
-![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn-orange)
-![Security](https://img.shields.io/badge/Cybersecurity-NIDS-red)
+![Python](https://img.shields.io/badge/Python-3.11%20%7C%203.13-blue)
+![FastAPI](https://img.shields.io/badge/FastAPI-High--Performance%20Async-009688)
+![Suricata](https://img.shields.io/badge/Suricata-8.0.8%20T--NIDS-red)
+![Machine Learning](https://img.shields.io/badge/Machine%20Learning-Scikit--Learn%20%26%20XGBoost-orange)
+![Security](https://img.shields.io/badge/Cybersecurity-Smart%20AI--NIDS-red)
 ![License](https://img.shields.io/badge/License-MIT-green)
 
 ---
@@ -86,7 +87,7 @@ Smart AI NIDS uses a 13-class intrusion/traffic classification taxonomy.
                     (13 Unified Classes)
                               │
                               ▼
-                     Flask Web Server
+                     FastAPI Web Server
                               │
                               ▼
                     Interactive Dashboard
@@ -154,7 +155,7 @@ pip install -r requirements.txt
 ## 5. Run Application
 
 ```bash
-python app.py
+python -m uvicorn backend.main:app --host 127.0.0.1 --port 8000
 ```
 
 ---

@@ -296,9 +296,10 @@
             "routed_specialist": "DNS_Tunneling",
             "predicted_id": 12,
             "predicted_name": "DNS Tunneling",
-            "confidence": 1.0,
+            "confidence": 0.9,
             "status": "MATCH",
             "probabilities": [
+                0.10000000149011612,
                 0.0,
                 0.0,
                 0.0,
@@ -310,8 +311,7 @@
                 0.0,
                 0.0,
                 0.0,
-                0.0,
-                1.0
+                0.8999999761581421
             ]
         }
     ]

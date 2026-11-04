@@ -116,7 +116,7 @@
             "predicted": "DNS Tunneling",
             "predicted_id": 12,
             "specialist": "DNS_Tunneling",
-            "confidence": 1.0,
+            "confidence": 0.9,
             "status": "PASS"
         }
     ]

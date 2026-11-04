@@ -102,6 +102,7 @@ def run_suricata_pcap(
         raise RuntimeError("Suricata binary not installed. Run 'brew install suricata' or use local sensor.")
 
     validate_pcap_file(pcap_path)
+    os.makedirs("/tmp/suricata-logs", exist_ok=True)
 
     if not os.path.exists(config_path):
         raise FileNotFoundError(f"Suricata configuration not found at: {config_path}")

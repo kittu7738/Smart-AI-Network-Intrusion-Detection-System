@@ -1,9 +1,9 @@
 {
   "pcap_correlation": {
     "mutual_threat_detections": 0,
-    "ai_only_novel_detections": 52,
+    "ai_only_novel_detections": 70,
     "suricata_only_detections": 0,
-    "mutual_benign_flows": 18,
+    "mutual_benign_flows": 0,
     "detection_coverage_delta": {
       "suricata_covered_classes": 12,
       "ai_covered_classes": 13,
@@ -12,16 +12,16 @@
       ]
     },
     "latency_comparison": {
-      "suricata_total_sec": 0.0967,
-      "ai_total_sec": 0.5627,
-      "ai_inference_only_sec": 0.1532
+      "suricata_total_sec": 0.0876,
+      "ai_total_sec": 0.5955,
+      "ai_inference_only_sec": 0.1303
     }
   },
   "benchmark_delta": {
-    "accuracy_delta": 0.0077,
-    "macro_f1_delta": -0.0069,
-    "weighted_f1_delta": -0.0069,
-    "threat_detection_rate_delta": 0.0983,
+    "accuracy_delta": 0.0831,
+    "macro_f1_delta": 0.0864,
+    "weighted_f1_delta": 0.0864,
+    "threat_detection_rate_delta": 0.18,
     "false_alarm_rate_delta": 0.0,
     "unsupported_in_suricata": [
       "ARP Spoofing (Class 9)"
@@ -37,10 +37,10 @@
     "false_alarm_rate": 0.0
   },
   "ai_nids_summary": {
-    "accuracy": 0.8154,
-    "macro_f1": 0.7965,
-    "weighted_f1": 0.7965,
-    "threat_detection_rate": 0.89,
+    "accuracy": 0.8908,
+    "macro_f1": 0.8898,
+    "weighted_f1": 0.8898,
+    "threat_detection_rate": 0.9717,
     "false_alarm_rate": 0.0
   }
 }

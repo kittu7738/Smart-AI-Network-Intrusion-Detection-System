@@ -3,9 +3,9 @@
 ## 1. Overview of Experimental Findings
 The comparative evaluation revealed significant qualitative and quantitative divergence between Suricata (signature-based) and Smart AI-NIDS (machine learning-based):
 
-- **Overall Accuracy**: Smart AI-NIDS achieved **81.54%** compared to Suricata's **80.77%** (+0.77% delta).
-- **Macro F1 Score**: Smart AI-NIDS achieved **79.65%** compared to Suricata's **80.34%** (+-0.69% delta).
-- **Binary Threat Detection Rate**: Smart AI-NIDS detected **89.00%** of threat instances versus Suricata's **79.17%**.
+- **Overall Accuracy**: Smart AI-NIDS achieved **89.08%** compared to Suricata's **80.77%** (+8.31% delta).
+- **Macro F1 Score**: Smart AI-NIDS achieved **88.98%** compared to Suricata's **80.34%** (+8.64% delta).
+- **Binary Threat Detection Rate**: Smart AI-NIDS detected **97.17%** of threat instances versus Suricata's **79.17%**.
 
 ---
 
@@ -13,7 +13,7 @@ The comparative evaluation revealed significant qualitative and quantitative div
 
 | Class ID | Canonical Class | Suricata Precision | Suricata Recall | Suricata F1 | AI-NIDS Precision | AI-NIDS Recall | AI-NIDS F1 | F1 Delta |
 |:---:|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| `0` | **Benign** | 28.6% | 100.0% | 44.4% | 43.1% | 100.0% | 60.2% | +15.8% |
+| `0` | **Benign** | 28.6% | 100.0% | 44.4% | 74.6% | 100.0% | 85.5% | +41.0% |
 | `1` | **DDoS** | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | +0.0% |
 | `2` | **DoS** | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | +0.0% |
 | `3` | **Botnet** | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | 100.0% | +0.0% |
@@ -25,7 +25,7 @@ The comparative evaluation revealed significant qualitative and quantitative div
 | `9` | **ARP Spoofing** | 0.0% | 0.0% | 0.0% | 100.0% | 100.0% | 100.0% | +100.0% |
 | `10` | **Recon / Port Scan** | 100.0% | 100.0% | 100.0% | 88.9% | 64.0% | 74.4% | -25.6% |
 | `11` | **MITM** | 100.0% | 100.0% | 100.0% | 95.5% | 84.0% | 89.4% | -10.6% |
-| `12` | **DNS Tunneling** | 100.0% | 50.0% | 66.7% | 100.0% | 2.0% | 3.9% | -62.7% |
+| `12` | **DNS Tunneling** | 100.0% | 50.0% | 66.7% | 100.0% | 100.0% | 100.0% | +33.3% |
 
 ---
 
@@ -38,15 +38,15 @@ The comparative evaluation revealed significant qualitative and quantitative div
 
 ### B. High-Entropy Statistical Attacks (Class 12: DNS Tunneling)
 - **Suricata Finding**: Suricata detected static signature patterns (e.g. queries ending with known C2 domains or exceeding simple label thresholds), but missed subtle, fragmented exfiltration streams (recall: 50.0%).
-- **AI-NIDS Finding**: The `DNS_Tunneling` specialist model extracts Shannon entropy, vowel-to-consonant ratios, special character counts, and label depth metrics, achieving **2.0% recall**.
+- **AI-NIDS Finding**: The `DNS_Tunneling` specialist model extracts Shannon entropy, vowel-to-consonant ratios, special character counts, and label depth metrics, achieving **100.0% recall**.
 
 ### C. Low-and-Slow Subtle Attacks (Class 4: Infiltration & Class 7: DNS Spoofing)
 - **Suricata Finding**: Relies heavily on static string matches (e.g. Metasploit shellcode or anomalous DNS ID mismatches). Fails when payload encoding or polymorphic transformations are applied.
 - **AI-NIDS Finding**: Detects statistical anomalies in packet inter-arrival times, flow byte asymmetry, and header entropy, successfully catching evasive instances.
 
 ### D. Processing Latency & Computational Overhead
-- **Suricata Advantage**: Average latency was **0.0003 ms** per evaluation. The compiled C/Rust engine is ultra-fast for packet filtering.
-- **AI-NIDS Overhead**: Average latency was **1.06 ms** per flow. Feature extraction and tree/boosting inference require greater computational resources.
+- **Suricata Advantage**: Average latency was **0.0004 ms** per evaluation. The compiled C/Rust engine is ultra-fast for packet filtering.
+- **AI-NIDS Overhead**: Average latency was **1.16 ms** per flow. Feature extraction and tree/boosting inference require greater computational resources.
 
 ---
 

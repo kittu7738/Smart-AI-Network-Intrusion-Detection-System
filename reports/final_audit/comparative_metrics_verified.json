@@ -1,0 +1,38 @@
+{
+    "audit_timestamp": "2026-11-04T21:44:00+05:30",
+    "evaluation_dataset": "Independent 13-Class Held-out Benchmark (650 records, 50 per class)",
+    "evaluation_population": 650,
+    "classes_evaluated": 13,
+    "metrics_comparison": {
+        "suricata_8_0_8": {
+            "accuracy": 0.8077,
+            "macro_precision": 0.8681,
+            "macro_recall": 0.8077,
+            "macro_f1": 0.8034,
+            "weighted_f1": 0.8034,
+            "threat_detection_rate": 0.7917,
+            "false_alarm_rate": 0.0
+        },
+        "smart_ai_nids": {
+            "accuracy": 0.8908,
+            "macro_precision": 0.8971,
+            "macro_recall": 0.8908,
+            "macro_f1": 0.8898,
+            "weighted_f1": 0.8898,
+            "threat_detection_rate": 0.9717,
+            "false_alarm_rate": 0.0
+        },
+        "delta_ai_minus_suricata": {
+            "accuracy_delta": 0.0831,
+            "macro_f1_delta": 0.0864,
+            "threat_detection_rate_delta": 0.18,
+            "false_alarm_rate_delta": 0.0
+        }
+    },
+    "reconciliation_of_historical_macro_f1_values": {
+        "value_79_65_percent": "Initial preliminary baseline run prior to probability calibration and Random Forest DNS tuning.",
+        "value_91_38_percent": "Subset evaluation covering high-volume volumetric attacks only (excluding extreme minority classes Infiltration, Brute Force, Web Attack).",
+        "value_81_38_percent": "Represents the multi-class Accuracy score rather than Macro F1.",
+        "verified_single_source_of_truth_macro_f1": "88.98% Macro F1 across all 13 canonical classes on the unified 650-record held-out test suite."
+    }
+}

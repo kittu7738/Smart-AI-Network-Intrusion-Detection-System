@@ -518,9 +518,26 @@ def load_specialist_splits(
             train_df = pd.read_parquet(train_path)
 
         if smoke_test:
-            val_df = pd.read_parquet(val_path).head(30) if os.path.exists(val_path) else None
-            test_df = pd.read_parquet(test_path).head(30) if os.path.exists(test_path) else None
-            return train_df.head(60), val_df, test_df
+            if "final_label" in train_df.columns:
+                n_classes = train_df["final_label"].nunique()
+                per_class = max(2, 60 // n_classes) if n_classes > 0 else 6
+                train_sample = train_df.groupby("final_label", group_keys=False).head(per_class)
+            else:
+                train_sample = train_df.head(60)
+
+            if os.path.exists(val_path):
+                v_df = pd.read_parquet(val_path)
+                val_sample = v_df.groupby("final_label", group_keys=False).head(3) if "final_label" in v_df.columns else v_df.head(30)
+            else:
+                val_sample = None
+
+            if os.path.exists(test_path):
+                t_df = pd.read_parquet(test_path)
+                test_sample = t_df.groupby("final_label", group_keys=False).head(3) if "final_label" in t_df.columns else t_df.head(30)
+            else:
+                test_sample = None
+
+            return train_sample, val_sample, test_sample
         if lazy_val_test:
             return train_df, val_path, test_path
 
@@ -537,8 +554,19 @@ def load_specialist_splits(
         del train_full
 
         if smoke_test:
-            test_df = pd.read_parquet(test_path).head(30) if os.path.exists(test_path) else None
-            return train_df.head(60), val_df.head(30), test_df
+            if "final_label" in train_df.columns:
+                n_classes = train_df["final_label"].nunique()
+                per_class = max(2, 60 // n_classes) if n_classes > 0 else 6
+                train_s = train_df.groupby("final_label", group_keys=False).head(per_class)
+                val_s = val_df.groupby("final_label", group_keys=False).head(3) if "final_label" in val_df.columns else val_df.head(30)
+            else:
+                train_s, val_s = train_df.head(60), val_df.head(30)
+            if os.path.exists(test_path):
+                t_df = pd.read_parquet(test_path)
+                test_s = t_df.groupby("final_label", group_keys=False).head(3) if "final_label" in t_df.columns else t_df.head(30)
+            else:
+                test_s = None
+            return train_s, val_s, test_s
         if lazy_val_test:
             return train_df, val_df, test_path
 

@@ -3,14 +3,14 @@
     "engine": "UnifiedNIDS (5 ML Specialists)",
     "status": "ONLINE",
     "total_inferences": 70,
-    "threats_detected": 52,
-    "benign_classified": 18,
-    "extraction_duration_sec": 0.4095,
-    "inference_duration_sec": 0.1532,
-    "total_duration_sec": 0.5627,
-    "throughput_flows_per_sec": 124.4,
+    "threats_detected": 70,
+    "benign_classified": 0,
+    "extraction_duration_sec": 0.4652,
+    "inference_duration_sec": 0.1303,
+    "total_duration_sec": 0.5955,
+    "throughput_flows_per_sec": 117.6,
     "class_distribution": {
-      "Benign": 18,
+      "Benign": 0,
       "DDoS": 1,
       "DoS": 0,
       "Botnet": 4,
@@ -22,7 +22,7 @@
       "ARP Spoofing": 0,
       "Recon / Port Scan": 17,
       "MITM": 0,
-      "DNS Tunneling": 8
+      "DNS Tunneling": 26
     },
     "sample_predictions": [
       {
@@ -140,9 +140,10 @@
       {
         "canonical_id": 12,
         "class_name": "DNS Tunneling",
-        "confidence": 1.0,
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -154,8 +155,7 @@
           0.0,
           0.0,
           0.0,
-          0.0,
-          1.0
+          0.8999999761581421
         ],
         "src_ip": "2402:8100:2843:47ca:f853:35b:5b0c:e2de",
         "dest_ip": "2402:8100:2843:47ca::e",
@@ -278,12 +278,12 @@
         "byte_count": 54
       },
       {
-        "canonical_id": 0,
-        "class_name": "Benign",
-        "confidence": 1.0,
+        "canonical_id": 12,
+        "class_name": "DNS Tunneling",
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
-          1.0,
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -295,7 +295,7 @@
           0.0,
           0.0,
           0.0,
-          0.0
+          0.8999999761581421
         ],
         "src_ip": "10.97.99.41",
         "dest_ip": "224.0.0.251",
@@ -306,12 +306,12 @@
         "byte_count": 547
       },
       {
-        "canonical_id": 0,
-        "class_name": "Benign",
-        "confidence": 1.0,
+        "canonical_id": 12,
+        "class_name": "DNS Tunneling",
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
-          1.0,
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -323,7 +323,7 @@
           0.0,
           0.0,
           0.0,
-          0.0
+          0.8999999761581421
         ],
         "src_ip": "fe80::bb07:22a1:9f18",
         "dest_ip": "ff02::fb",
@@ -362,12 +362,12 @@
         "byte_count": 724
       },
       {
-        "canonical_id": 0,
-        "class_name": "Benign",
-        "confidence": 1.0,
+        "canonical_id": 12,
+        "class_name": "DNS Tunneling",
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
-          1.0,
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -379,7 +379,7 @@
           0.0,
           0.0,
           0.0,
-          0.0
+          0.8999999761581421
         ],
         "src_ip": "10.97.99.41",
         "dest_ip": "10.97.99.78",
@@ -390,12 +390,12 @@
         "byte_count": 371
       },
       {
-        "canonical_id": 0,
-        "class_name": "Benign",
-        "confidence": 1.0,
+        "canonical_id": 12,
+        "class_name": "DNS Tunneling",
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
-          1.0,
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -407,7 +407,7 @@
           0.0,
           0.0,
           0.0,
-          0.0
+          0.8999999761581421
         ],
         "src_ip": "10.97.99.41",
         "dest_ip": "10.97.99.78",
@@ -418,12 +418,12 @@
         "byte_count": 462
       },
       {
-        "canonical_id": 0,
-        "class_name": "Benign",
-        "confidence": 1.0,
+        "canonical_id": 12,
+        "class_name": "DNS Tunneling",
+        "confidence": 0.9,
         "specialist": "DNS_Tunneling",
         "probabilities": [
-          1.0,
+          0.10000000149011612,
           0.0,
           0.0,
           0.0,
@@ -435,7 +435,7 @@
           0.0,
           0.0,
           0.0,
-          0.0
+          0.8999999761581421
         ],
         "src_ip": "10.97.99.41",
         "dest_ip": "10.97.99.78",
@@ -450,14 +450,14 @@
   "ground_truth_benchmark": {
     "system_name": "Proposed Smart AI-NIDS (Unified 5 Specialists)",
     "total_samples": 650,
-    "accuracy": 0.8154,
-    "macro_precision": 0.8729,
-    "macro_recall": 0.8154,
-    "macro_f1": 0.7965,
-    "weighted_precision": 0.8729,
-    "weighted_recall": 0.8154,
-    "weighted_f1": 0.7965,
-    "binary_threat_detection_rate": 0.89,
+    "accuracy": 0.8908,
+    "macro_precision": 0.8971,
+    "macro_recall": 0.8908,
+    "macro_f1": 0.8898,
+    "weighted_precision": 0.8971,
+    "weighted_recall": 0.8908,
+    "weighted_f1": 0.8898,
+    "binary_threat_detection_rate": 0.9717,
     "binary_threat_precision": 1.0,
     "binary_false_alarm_rate": 0.0,
     "per_class": {
@@ -465,13 +465,13 @@
         "class_id": 0,
         "samples": 50,
         "tp": 50,
-        "fp": 66,
+        "fp": 17,
         "fn": 0,
-        "tn": 534,
-        "precision": 0.431,
+        "tn": 583,
+        "precision": 0.7463,
         "recall": 1.0,
-        "f1_score": 0.6024,
-        "false_positive_rate": 0.11,
+        "f1_score": 0.8547,
+        "false_positive_rate": 0.0283,
         "false_negative_rate": 0.0
       },
       "DDoS": {
@@ -620,15 +620,15 @@
       "DNS Tunneling": {
         "class_id": 12,
         "samples": 50,
-        "tp": 1,
+        "tp": 50,
         "fp": 0,
-        "fn": 49,
+        "fn": 0,
         "tn": 600,
         "precision": 1.0,
-        "recall": 0.02,
-        "f1_score": 0.0392,
+        "recall": 1.0,
+        "f1_score": 1.0,
         "false_positive_rate": 0.0,
-        "false_negative_rate": 0.98
+        "false_negative_rate": 0.0
       }
     },
     "confusion_matrix": [
@@ -813,7 +813,6 @@
         0
       ],
       [
-        49,
         0,
         0,
         0,
@@ -825,14 +824,15 @@
         0,
         0,
         0,
-        1
+        0,
+        50
       ]
     ],
     "timing": {
-      "total_benchmark_time_sec": 0.6932,
-      "mean_inference_latency_ms": 1.065,
+      "total_benchmark_time_sec": 0.7546,
+      "mean_inference_latency_ms": 1.159,
       "median_inference_latency_ms": 1.066,
-      "p99_inference_latency_ms": 1.855
+      "p99_inference_latency_ms": 2.895
     }
   },
   "sample_predictions": [
@@ -843,7 +843,7 @@
       "pred_name": "Benign",
       "confidence": 0.5650048851966858,
       "specialist": "CICIoT2023",
-      "latency_ms": 2.134
+      "latency_ms": 3.472
     },
     {
       "true_id": 0,
@@ -852,7 +852,7 @@
       "pred_name": "Benign",
       "confidence": 0.9795464873313904,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.222
+      "latency_ms": 2.198
     },
     {
       "true_id": 0,
@@ -861,7 +861,7 @@
       "pred_name": "Benign",
       "confidence": 0.9822854995727539,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.165
+      "latency_ms": 1.868
     },
     {
       "true_id": 0,
@@ -870,7 +870,7 @@
       "pred_name": "Benign",
       "confidence": 0.5863775014877319,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.179
+      "latency_ms": 1.893
     },
     {
       "true_id": 0,
@@ -879,7 +879,7 @@
       "pred_name": "Benign",
       "confidence": 0.971754789352417,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.122
+      "latency_ms": 1.496
     },
     {
       "true_id": 0,
@@ -888,7 +888,7 @@
       "pred_name": "Benign",
       "confidence": 0.5230411887168884,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.689
+      "latency_ms": 1.38
     },
     {
       "true_id": 0,
@@ -897,7 +897,7 @@
       "pred_name": "Benign",
       "confidence": 0.976316511631012,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.137
+      "latency_ms": 1.324
     },
     {
       "true_id": 0,
@@ -906,7 +906,7 @@
       "pred_name": "Benign",
       "confidence": 0.9811978936195374,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.093
+      "latency_ms": 1.948
     },
     {
       "true_id": 0,
@@ -915,7 +915,7 @@
       "pred_name": "Benign",
       "confidence": 0.9686736464500427,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.09
+      "latency_ms": 1.877
     },
     {
       "true_id": 0,
@@ -924,7 +924,7 @@
       "pred_name": "Benign",
       "confidence": 0.973818838596344,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.074
+      "latency_ms": 1.387
     },
     {
       "true_id": 0,
@@ -933,7 +933,7 @@
       "pred_name": "Benign",
       "confidence": 0.7829185128211975,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.083
+      "latency_ms": 1.216
     },
     {
       "true_id": 0,
@@ -942,7 +942,7 @@
       "pred_name": "Benign",
       "confidence": 0.42032021284103394,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.097
+      "latency_ms": 1.189
     },
     {
       "true_id": 0,
@@ -951,7 +951,7 @@
       "pred_name": "Benign",
       "confidence": 0.9818507432937622,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.09
+      "latency_ms": 1.504
     },
     {
       "true_id": 0,
@@ -960,7 +960,7 @@
       "pred_name": "Benign",
       "confidence": 0.7449852228164673,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.081
+      "latency_ms": 1.748
     },
     {
       "true_id": 0,
@@ -969,7 +969,7 @@
       "pred_name": "Benign",
       "confidence": 0.5517058372497559,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.078
+      "latency_ms": 1.347
     },
     {
       "true_id": 0,
@@ -978,7 +978,7 @@
       "pred_name": "Benign",
       "confidence": 0.9808776378631592,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.092
+      "latency_ms": 1.185
     },
     {
       "true_id": 0,
@@ -987,7 +987,7 @@
       "pred_name": "Benign",
       "confidence": 0.9804329872131348,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.077
+      "latency_ms": 1.147
     },
     {
       "true_id": 0,
@@ -996,7 +996,7 @@
       "pred_name": "Benign",
       "confidence": 0.9725698828697205,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.083
+      "latency_ms": 1.332
     },
     {
       "true_id": 0,
@@ -1005,7 +1005,7 @@
       "pred_name": "Benign",
       "confidence": 0.947674036026001,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.083
+      "latency_ms": 1.64
     },
     {
       "true_id": 0,
@@ -1014,7 +1014,7 @@
       "pred_name": "Benign",
       "confidence": 0.9792559146881104,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.077
+      "latency_ms": 1.771
     },
     {
       "true_id": 0,
@@ -1023,7 +1023,7 @@
       "pred_name": "Benign",
       "confidence": 0.3127823770046234,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.075
+      "latency_ms": 1.341
     },
     {
       "true_id": 0,
@@ -1032,7 +1032,7 @@
       "pred_name": "Benign",
       "confidence": 0.27922335267066956,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.074
+      "latency_ms": 1.189
     },
     {
       "true_id": 0,
@@ -1041,7 +1041,7 @@
       "pred_name": "Benign",
       "confidence": 0.9712337255477905,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.089
+      "latency_ms": 1.257
     },
     {
       "true_id": 0,
@@ -1050,7 +1050,7 @@
       "pred_name": "Benign",
       "confidence": 0.7614859342575073,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.077
+      "latency_ms": 1.217
     },
     {
       "true_id": 0,
@@ -1059,7 +1059,7 @@
       "pred_name": "Benign",
       "confidence": 0.4549379050731659,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.166
+      "latency_ms": 1.588
     },
     {
       "true_id": 0,
@@ -1068,7 +1068,7 @@
       "pred_name": "Benign",
       "confidence": 0.6347786784172058,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.191
+      "latency_ms": 1.431
     },
     {
       "true_id": 0,
@@ -1077,7 +1077,7 @@
       "pred_name": "Benign",
       "confidence": 0.6472833156585693,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.209
+      "latency_ms": 1.218
     },
     {
       "true_id": 0,
@@ -1086,7 +1086,7 @@
       "pred_name": "Benign",
       "confidence": 0.863646924495697,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.13
+      "latency_ms": 1.161
     },
     {
       "true_id": 0,
@@ -1095,7 +1095,7 @@
       "pred_name": "Benign",
       "confidence": 0.974672794342041,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.104
+      "latency_ms": 1.141
     },
     {
       "true_id": 0,
@@ -1104,7 +1104,7 @@
       "pred_name": "Benign",
       "confidence": 0.5474526286125183,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.094
+      "latency_ms": 1.164
     }
   ]
 }

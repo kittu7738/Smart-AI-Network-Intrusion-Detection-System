@@ -1,7 +1,7 @@
 {
     "dataset": "DNS_Tunneling",
-    "model_name": "DecisionTree",
-    "best_model": "DecisionTree",
+    "model_name": "RandomForest",
+    "best_model": "RandomForest",
     "feature_list": [
         "query_length",
         "num_dots",
@@ -30,7 +30,7 @@
     "validation_row_count": 0,
     "test_row_count": 1,
     "preprocessing_artifact_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/preprocessor.joblib",
-    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/DecisionTree.joblib",
+    "model_path": "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/ids/saiids/models/DNS_Tunneling/RandomForest.joblib",
     "random_seed": 42,
     "training_duration_seconds": 0.0007109642028808594,
     "validation_metrics": {

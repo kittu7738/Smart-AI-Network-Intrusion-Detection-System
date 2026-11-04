@@ -1,0 +1,86 @@
+{
+    "endpoints": {
+        "GET /health": {
+            "status_code": 200,
+            "verified": true,
+            "response": {
+                "status": "ok",
+                "service": "Smart AI Network Intrusion Detection System API",
+                "version": "1.0.0",
+                "engine_ready": true,
+                "available_specialists": [
+                    "IDS2018",
+                    "CICIoT2023",
+                    "ARP_Spoofing",
+                    "IP_Spoofing",
+                    "DNS_Tunneling"
+                ],
+                "loaded_specialists": [
+                    "CICIoT2023",
+                    "ARP_Spoofing",
+                    "IP_Spoofing",
+                    "DNS_Tunneling"
+                ]
+            }
+        },
+        "GET /models": {
+            "status_code": 200,
+            "verified": true,
+            "specialist_count": 5,
+            "canonical_class_count": 13
+        },
+        "POST /predict": {
+            "status_code": 200,
+            "verified": true,
+            "sample_response": {
+                "predicted_class_id": 12,
+                "predicted_class": "DNS Tunneling",
+                "confidence": 0.9,
+                "specialist": "DNS_Tunneling",
+                "probabilities": [
+                    0.10000000149011612,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.0,
+                    0.8999999761581421
+                ],
+                "canonical_id": 12,
+                "class_name": "DNS Tunneling"
+            }
+        },
+        "POST /predict/batch": {
+            "status_code": 200,
+            "verified": true,
+            "count": 2
+        },
+        "GET /sensor/status": {
+            "status_code": 200,
+            "verified": true,
+            "response": {
+                "status": "OFFLINE",
+                "sensor_id": null,
+                "interface": null,
+                "last_heartbeat": 0.0,
+                "registered_at": 0.0,
+                "packets_captured": 0,
+                "flows_processed": 0,
+                "threats_detected": 0,
+                "benign_classified": 0,
+                "suricata_alerts": 0,
+                "suricata_live_enabled": false,
+                "is_active": false,
+                "server_time": 1793808875.888938,
+                "buffered_events_count": 0
+            }
+        }
+    },
+    "status": "PASSED"
+}

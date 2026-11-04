@@ -18,6 +18,8 @@ class TestFastAPIBackend(unittest.TestCase):
     def setUpClass(cls):
         cls.client = TestClient(app)
         cls.engine = get_engine()
+        ip_prep = cls.engine.load_specialist("IP_Spoofing")["preprocessor"]
+        cls.ip_features = {f: 0.5 for f in ip_prep.feature_names_in_}
 
     def test_01_health_endpoint_returns_200(self):
         """GET /health must return HTTP 200 with engine readiness and status."""
@@ -69,7 +71,7 @@ class TestFastAPIBackend(unittest.TestCase):
     def test_04_prediction_response_contains_all_required_fields(self):
         """POST /predict response must contain all specified fields."""
         payload = {
-            "features": {"some_feature": 0.5},
+            "features": self.ip_features,
             "specialist": "IP_Spoofing"
         }
         response = self.client.post("/predict", json=payload)
@@ -116,7 +118,7 @@ class TestFastAPIBackend(unittest.TestCase):
         self.assertEqual(r_arp.json()["specialist"], "ARP_Spoofing")
 
         # 3. IP signature features
-        ip_payload = {"some_feature": 1.5, "Seq": 10.0}
+        ip_payload = self.ip_features.copy()
         r_ip = self.client.post("/predict", json=ip_payload)
         self.assertEqual(r_ip.status_code, 200)
         self.assertEqual(r_ip.json()["specialist"], "IP_Spoofing")

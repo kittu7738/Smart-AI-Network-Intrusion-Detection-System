@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=2.8.0">
+  <link rel="stylesheet" href="css/style.css?v=2.9.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -33,14 +33,14 @@
         <ul class="nav-links-list">
           <!-- 1. Security Overview -->
           <li>
-            <button class="nav-item-btn active" data-view="view-overview">
+            <button class="nav-item-btn" data-view="view-overview">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
               <span>Security Overview</span>
             </button>
           </li>
           <!-- 2. Traffic Analysis -->
           <li>
-            <button class="nav-item-btn" data-view="view-traffic">
+            <button class="nav-item-btn active" data-view="view-traffic">
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
               <span>Traffic Analysis</span>
             </button>
@@ -154,7 +154,7 @@
                 <div class="kpi-value" id="kpi-total-records">482,317</div>
                 <div class="kpi-bottom">
                   <span class="trend-green">↑ +12.8%</span>
-                  <span id="kpi-session-status">(vs. previous)</span>
+                  <span id="kpi-session-status"></span>
                 </div>
               </div>
             </div>
@@ -167,7 +167,7 @@
                 <span class="kpi-label">Benign Traffic</span>
                 <div class="kpi-value" id="kpi-benign-count">438,912</div>
                 <div class="kpi-bottom">
-                  <span id="kpi-benign-pct">(91.0% of total)</span>
+                  <span id="kpi-benign-pct"></span>
                 </div>
               </div>
             </div>
@@ -180,7 +180,7 @@
                 <span class="kpi-label">Threats Detected</span>
                 <div class="kpi-value" id="kpi-malicious-count">43,405</div>
                 <div class="kpi-bottom">
-                  <span id="kpi-malicious-pct">(9.0% of total)</span>
+                  <span id="kpi-malicious-pct"></span>
                 </div>
               </div>
             </div>
@@ -194,7 +194,7 @@
                 <div class="kpi-value" id="kpi-detection-rate">93.21%</div>
                 <div class="kpi-bottom">
                   <span class="trend-green">↑ +1.56%</span>
-                  <span id="kpi-detection-rate-sub">(vs. previous)</span>
+                  <span id="kpi-detection-rate-sub"></span>
                 </div>
               </div>
             </div>
@@ -1448,7 +1448,7 @@
   <script src="vendor/chart.min.js"></script>
 
   <!-- Application Logic -->
-  <script src="js/api.js?v=2.8.0"></script>
-  <script src="js/app.js?v=2.8.0"></script>
+  <script src="js/api.js?v=2.9.0"></script>
+  <script src="js/app.js?v=2.9.0"></script>
 </body>
 </html>

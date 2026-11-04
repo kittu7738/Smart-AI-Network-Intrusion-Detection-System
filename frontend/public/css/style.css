@@ -1166,10 +1166,10 @@ a:hover {
 }
 
 .traffic-dropzone {
-  border: 2px dashed var(--color-primary-border);
-  background-color: var(--bg-subtle-blue);
-  border-radius: 8px;
-  padding: 22px 16px;
+  border: 1.5px dashed #93C5FD;
+  background-color: #F8FAFC;
+  border-radius: 10px;
+  padding: 24px 16px;
   text-align: center;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1181,36 +1181,113 @@ a:hover {
 }
 
 .traffic-dropzone:hover, .traffic-dropzone.drag-active {
-  background-color: #E6F0FA;
-  border-color: var(--color-primary);
+  background-color: #EFF6FF;
+  border-color: #2563EB;
 }
 
 .traffic-dropzone .dropzone-icon {
-  width: 38px;
-  height: 38px;
-  border-radius: 50%;
-  background-color: var(--color-primary-bg);
-  color: var(--color-primary);
+  margin-bottom: 4px;
+  color: #2563EB;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 2px;
-}
-
-.traffic-dropzone .dropzone-icon svg {
-  width: 20px;
-  height: 20px;
 }
 
 .traffic-dropzone .dropzone-title {
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--text-primary);
+  font-size: 14.5px;
+  font-weight: 700;
+  color: #0F172A;
 }
 
 .traffic-dropzone .dropzone-subtitle {
-  font-size: 11.5px;
-  color: var(--text-muted);
+  font-size: 12px;
+  color: #64748B;
+}
+
+.traffic-summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.traffic-metric-box {
+  background: #FFFFFF;
+  border: 1px solid #E2E8F0;
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.traffic-metric-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.traffic-metric-icon.blue {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.traffic-metric-icon.green {
+  background: #F0FDF4;
+  color: #16A34A;
+}
+
+.traffic-metric-icon.purple {
+  background: #FAF5FF;
+  color: #9333EA;
+}
+
+.traffic-metric-icon.amber {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.traffic-metric-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.traffic-metric-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.traffic-metric-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #0F172A;
+  line-height: 1.2;
+  margin-top: 2px;
+}
+
+.traffic-empty-strip {
+  background: #EBF3FE;
+  border-radius: 8px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #0F172A;
+  font-weight: 700;
+  font-size: 13.5px;
+}
+
+.traffic-empty-strip svg {
+  stroke: #2563EB;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
 }
 
 .traffic-insights-grid {
@@ -1227,7 +1304,7 @@ a:hover {
   box-shadow: var(--shadow-card);
   display: flex;
   flex-direction: column;
-  min-height: 220px;
+  min-height: 200px;
 }
 
 .traffic-insight-card .card-body {

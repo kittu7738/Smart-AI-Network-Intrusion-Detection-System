@@ -913,11 +913,11 @@ class EnterpriseSocApp {
     const detRateEl = document.getElementById("kpi-detection-rate");
     const detRateSubEl = document.getElementById("kpi-detection-rate-sub");
 
-    // Strictly maintain reference subtexts and prevent test session text overrides
-    if (sessionStatus) sessionStatus.textContent = "(vs. previous)";
-    if (benignPctEl) benignPctEl.textContent = "(91.0% of total)";
-    if (threatPctEl) threatPctEl.textContent = "(9.0% of total)";
-    if (detRateSubEl) detRateSubEl.textContent = "(vs. previous)";
+    // Strictly prevent any parentheses and unwanted subtexts from appearing
+    if (sessionStatus) sessionStatus.textContent = "";
+    if (benignPctEl) benignPctEl.textContent = "";
+    if (threatPctEl) threatPctEl.textContent = "";
+    if (detRateSubEl) detRateSubEl.textContent = "";
 
     const total = this.sessionDetections.length;
     if (total === 0 || total < 100) {

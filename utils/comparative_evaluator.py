@@ -180,7 +180,8 @@ class ComparativeEvaluator:
                 "execution_duration_sec": suricata_results["execution_duration"],
                 "throughput_packets_per_sec": round(total_packets_processed / suri_dur, 1) if suricata_status["available"] else 0.0,
                 "class_distribution": suricata_results["class_distribution"],
-                "sample_alerts": suricata_results["alerts"][:15]
+                "sample_alerts": suricata_results["alerts"][:15],
+                "all_alerts": suricata_results["alerts"]
             },
             "smart_ai_nids": {
                 "engine": "UnifiedNIDS (5 ML Specialists)",
@@ -193,7 +194,8 @@ class ComparativeEvaluator:
                 "total_duration_sec": round(total_ai_duration, 4),
                 "throughput_flows_per_sec": round(len(ai_predictions) / ai_dur, 1),
                 "class_distribution": ai_class_counts,
-                "sample_predictions": ai_predictions[:15]
+                "sample_predictions": ai_predictions[:15],
+                "all_predictions": ai_predictions
             },
             "comparative_analysis": {
                 "mutual_threat_detections": both_threat,

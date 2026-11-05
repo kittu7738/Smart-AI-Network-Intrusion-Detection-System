@@ -209,6 +209,10 @@
             <div>
               <h1 class="page-heading">Security Overview</h1>
             </div>
+            <div id="overview-session-pill" style="display: none; align-items: center; gap: 6px; background: #EFF6FF; border: 1px solid #DBEAFE; color: #2563EB; padding: 4px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: var(--font-mono);">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+              Active Session: <span id="overview-active-session-id">—</span>
+            </div>
           </div>
 
           <!-- 4 TOP KPI CARDS (MATCHING REFERENCE DESIGN) -->
@@ -562,8 +566,9 @@
                 </div>
 
                 <!-- Analysis metadata bar (shown when analyzed) -->
-                <div id="traffic-summary-meta" style="display: none; justify-content: space-between; align-items: center; padding: 10px 12px; background-color: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11.5px; color: var(--text-secondary); margin-top: 10px;">
+                <div id="traffic-summary-meta" style="display: none; justify-content: space-between; align-items: center; padding: 10px 12px; background-color: var(--bg-app); border: 1px solid var(--border-subtle); border-radius: 6px; font-size: 11.5px; color: var(--text-secondary); margin-top: 10px; flex-wrap: wrap; gap: 8px;">
                   <div>File: <strong id="traffic-summary-filename" style="color: var(--text-primary); font-family: var(--font-mono);">—</strong></div>
+                  <div>Session: <strong id="traffic-summary-session" style="color: #2563EB; font-family: var(--font-mono);">—</strong></div>
                   <div>Duration: <strong id="traffic-summary-duration" style="color: var(--text-primary);">—</strong></div>
                   <div>Threats: <strong id="traffic-summary-threats" style="color: var(--color-critical);">0</strong></div>
                 </div>
@@ -719,10 +724,44 @@
             </div>
           </div>
 
-          <!-- Single Prediction & Batch Prediction Workspace (2 Columns) -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
-            <!-- Left Card: Single-Record Flow Inference -->
-            <div class="card" style="margin-bottom: 0;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 44px; height: 44px; border-radius: 10px; background: #EFF6FF; border: 1px solid #DBEAFE; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#2563EB" stroke-width="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                </svg>
+              </div>
+              <div>
+                <h1 style="font-size: 20px; font-weight: 700; color: #0F172A; margin: 0 0 4px 0; letter-spacing: -0.3px;">Threat Detection &amp; Inference</h1>
+                <div style="font-size: 13px; color: #64748B;">Single-record, batch, and shared traffic-analysis predictions using UnifiedNIDS across five specialist models.</div>
+              </div>
+            </div>
+            <div id="predict-session-pill" style="display: none; align-items: center; gap: 6px; background: #EFF6FF; border: 1px solid #DBEAFE; color: #2563EB; padding: 4px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: var(--font-mono);">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+              Active Session: <span id="predict-active-session-id">—</span>
+            </div>
+          </div>
+
+          <!-- Prediction Mode Navigation Tabs (Single / Batch / Shared Predictions) -->
+          <div class="predict-nav-tabs" style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid #E2E8F0; padding-bottom: 10px;">
+            <button type="button" class="btn-predict-tab active" id="tab-predict-single" style="background: #2563EB; color: #FFFFFF; border: none; font-weight: 600; font-size: 13px; padding: 8px 18px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
+              Single Flow Inference
+            </button>
+            <button type="button" class="btn-predict-tab" id="tab-predict-batch" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #334155; font-weight: 600; font-size: 13px; padding: 8px 18px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+              Batch Flow Analysis
+            </button>
+            <button type="button" class="btn-predict-tab" id="tab-predict-shared" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #334155; font-weight: 600; font-size: 13px; padding: 8px 18px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 7px;">
+              <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              Shared Prediction Results
+              <span id="predict-shared-badge" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11px; padding: 2px 8px; border-radius: 9999px;">0 Flows</span>
+            </button>
+          </div>
+
+          <!-- TAB 1: Single Prediction Workspace -->
+          <div id="predict-single-panel" class="predict-tab-panel">
+            <div class="card" style="margin-bottom: 24px; max-width: 800px;">
               <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;">
                 <div class="card-title" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #0F172A;">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg>
@@ -787,15 +826,17 @@
                 </div>
               </div>
             </div>
+          </div>
 
-            <!-- Right Card: Batch Flow Inference -->
-            <div class="card" style="margin-bottom: 0;">
+          <!-- TAB 2: Batch Prediction Workspace -->
+          <div id="predict-batch-panel" class="predict-tab-panel" style="display: none;">
+            <div class="card" style="margin-bottom: 20px;">
               <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;">
                 <div class="card-title" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #0F172A;">
                   <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                  Batch Flow Inference
+                  Manual Batch Flow Inference
                 </div>
-                <span class="tag" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Multi-Flow Batch</span>
+                <span class="tag" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">Manual Input</span>
               </div>
               <div class="card-body" style="padding: 18px 20px;">
                 <p style="font-size: 13px; color: #64748B; margin-bottom: 12px; margin-top: 0;">
@@ -822,41 +863,92 @@
                 </div>
               </div>
             </div>
+
+            <!-- Manual Batch Prediction Results -->
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;">
+                <div class="card-title" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #0F172A;">
+                  <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                  Manual Batch Results
+                </div>
+                <span class="tag" id="predict-batch-count-tag" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">0 Records</span>
+              </div>
+              <div class="card-body" style="padding: 0; overflow-x: auto;">
+                <table class="soc-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; width: 60px;">#</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Predicted Class</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Canonical ID</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Specialist Model</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Confidence</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: right;">Verdict</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predict-batch-tbody">
+                    <tr>
+                      <td colspan="6" style="padding: 48px 20px; text-align: center; border: none;">
+                        <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #64748B;">
+                          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+                        </div>
+                        <div style="font-weight: 700; font-size: 14.5px; color: #0F172A; margin-bottom: 4px;">No batch records evaluated.</div>
+                        <div style="font-size: 12.5px; color: #64748B;">Load a sample batch or paste JSON records to execute.</div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
 
-          <!-- Bottom Card: Batch Prediction Results -->
-          <div class="card" style="margin-bottom: 0;">
-            <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px;">
-              <div class="card-title" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #0F172A;">
-                <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
-                Batch Prediction Results
+          <!-- TAB 3: Shared Prediction Results (From Traffic Analysis File) -->
+          <div id="predict-shared-panel" class="predict-tab-panel" style="display: none;">
+            <div class="card" style="margin-bottom: 0;">
+              <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                  <div class="card-title" style="display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 700; color: #0F172A;">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2"/><rect x="2" y="14" width="20" height="8" rx="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                    Shared File Predictions (From Traffic Analysis)
+                  </div>
+                  <div style="font-size: 12px; color: #64748B; margin-top: 2px;">
+                    Session: <strong id="predict-shared-session-id" style="color: #2563EB; font-family: var(--font-mono);">—</strong>
+                    &bull; File: <strong id="predict-shared-filename" style="color: #0F172A; font-family: var(--font-mono);">—</strong>
+                  </div>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span class="tag" id="predict-shared-threats-tag" style="background: #FEE2E2; color: #DC2626; border: 1px solid #FECACA; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">0 Threats</span>
+                  <span class="tag" id="predict-shared-count-tag" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">0 Flows</span>
+                </div>
               </div>
-              <span class="tag" id="predict-batch-count-tag" style="background: #EFF6FF; color: #2563EB; border: 1px solid #DBEAFE; font-size: 11.5px; font-weight: 600; padding: 3px 12px; border-radius: 9999px;">0 Records</span>
-            </div>
-            <div class="card-body" style="padding: 0; overflow-x: auto;">
-              <table class="soc-table" style="width: 100%; border-collapse: collapse;">
-                <thead>
-                  <tr style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; width: 60px; text-transform: none; letter-spacing: normal;">#</th>
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; text-transform: none; letter-spacing: normal;">Predicted Class</th>
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; text-transform: none; letter-spacing: normal;">Canonical ID</th>
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; text-transform: none; letter-spacing: normal;">Specialist Model</th>
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; text-transform: none; letter-spacing: normal;">Confidence</th>
-                    <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: right; text-transform: none; letter-spacing: normal;">Verdict</th>
-                  </tr>
-                </thead>
-                <tbody id="predict-batch-tbody">
-                  <tr>
-                    <td colspan="6" style="padding: 48px 20px; text-align: center; border: none;">
-                      <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #64748B;">
-                        <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
-                      </div>
-                      <div style="font-weight: 700; font-size: 14.5px; color: #0F172A; margin-bottom: 4px;">No batch records evaluated.</div>
-                      <div style="font-size: 12.5px; color: #64748B;">Load a sample batch or paste JSON records to execute.</div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+              <div class="card-body" style="padding: 0; overflow-x: auto;">
+                <table class="soc-table" style="width: 100%; border-collapse: collapse;">
+                  <thead>
+                    <tr style="background: #F8FAFC; border-bottom: 1px solid #E2E8F0;">
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left; width: 60px;">#</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Network 5-Tuple (Src &rarr; Dest)</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Proto</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Predicted Class</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Specialist Model</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: left;">Confidence</th>
+                      <th style="padding: 10px 16px; font-size: 12.5px; font-weight: 700; color: #1E293B; text-align: right;">Verdict</th>
+                    </tr>
+                  </thead>
+                  <tbody id="predict-shared-tbody">
+                    <tr>
+                      <td colspan="7" style="padding: 48px 20px; text-align: center; border: none;">
+                        <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #64748B;">
+                          <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+                        </div>
+                        <div style="font-weight: 700; font-size: 14.5px; color: #0F172A; margin-bottom: 4px;">No shared traffic file analyzed yet.</div>
+                        <div style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Upload a CSV or PCAP in Traffic Analysis to automatically populate predictions here.</div>
+                        <button type="button" class="btn btn-secondary btn-sm" onclick="window.switchSocView('view-traffic')" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #2563EB; font-weight: 600; padding: 6px 16px; border-radius: 6px; cursor: pointer;">
+                          Go to Traffic Analysis &rarr;
+                        </button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </section>
@@ -881,14 +973,20 @@
                 <div class="alerts-page-description">Incident investigation console with multi-criteria filtering, signature correlation, and event inspection.</div>
               </div>
             </div>
-            <button class="btn-alerts-export" id="btn-alerts-export">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
-                <polyline points="7 10 12 15 17 10"/>
-                <line x1="12" y1="15" x2="12" y2="3"/>
-              </svg>
-              <span>Export Incident Log</span>
-            </button>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <div id="alerts-session-pill" style="display: none; align-items: center; gap: 6px; background: #EFF6FF; border: 1px solid #DBEAFE; color: #2563EB; padding: 4px 14px; border-radius: 9999px; font-size: 12px; font-weight: 600; font-family: var(--font-mono);">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: #10B981; display: inline-block;"></span>
+                Active Session: <span id="alerts-active-session-id">—</span>
+              </div>
+              <button class="btn-alerts-export" id="btn-alerts-export">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                  <polyline points="7 10 12 15 17 10"/>
+                  <line x1="12" y1="15" x2="12" y2="3"/>
+                </svg>
+                <span>Export Incident Log</span>
+              </button>
+            </div>
           </div>
 
           <!-- 4 Stat Cards Row -->

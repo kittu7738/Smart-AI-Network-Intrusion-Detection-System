@@ -16,6 +16,9 @@ from fastapi.responses import JSONResponse
 import tempfile
 import shutil
 
+from datetime import datetime
+import pandas as pd
+from backend.session_manager import get_session_manager
 from utils.taxonomy import (
     CLASS_NAMES,
     CLASS_TO_ID,
@@ -355,9 +358,263 @@ async def analyze_pcap(file: UploadFile = File(...)):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+# ==============================================================================
+# SHARED ANALYSIS SESSION LOGIC
+# ==============================================================================
+
+def save_pcap_comparison_session(comparison: dict, filename: str, file_size: int = 0) -> str:
+    """Register PCAP evaluation output into a unified analysis session."""
+    sm = get_session_manager()
+    ai = comparison.get("smart_ai_nids", {})
+    suri = comparison.get("traditional_nids_suricata", {})
+    src = comparison.get("traffic_source", {})
+
+    all_flows = ai.get("all_predictions", ai.get("sample_predictions", []))
+    suricata_alerts = suri.get("all_alerts", suri.get("sample_alerts", []))
+
+    total_packets = src.get("total_packets", 0)
+    total_flows = ai.get("total_inferences", len(all_flows))
+    threats_detected = ai.get("threats_detected", sum(1 for f in all_flows if f.get("canonical_id", 0) != 0))
+    benign_count = ai.get("benign_classified", total_flows - threats_detected)
+    duration_sec = ai.get("total_duration_sec", 0.0)
+
+    proto_map = {1: "ICMP", 6: "TCP", 17: "UDP", 2054: "ARP"}
+    protocol_dist: Dict[str, int] = {}
+    src_ip_counts: Dict[str, int] = {}
+    dest_ip_counts: Dict[str, int] = {}
+
+    formatted_flows = []
+    for idx, fl in enumerate(all_flows):
+        p_num = fl.get("proto", 6)
+        p_name = proto_map.get(p_num, str(p_num) if p_num else "TCP")
+        protocol_dist[p_name] = protocol_dist.get(p_name, 0) + 1
+
+        sip = fl.get("src_ip", "10.0.0.1")
+        dip = fl.get("dest_ip", "192.168.1.1")
+        src_ip_counts[sip] = src_ip_counts.get(sip, 0) + 1
+        dest_ip_counts[dip] = dest_ip_counts.get(dip, 0) + 1
+
+        cid = int(fl.get("canonical_id", 0))
+        cname = fl.get("class_name", "Benign")
+        severity = "Low" if cid == 0 else ("High" if cid in [1, 2, 3, 4, 5, 6, 8, 9, 11, 12] else "Medium")
+        formatted_flows.append({
+            "flow_index": idx + 1,
+            "timestamp": datetime.now().isoformat(),
+            "src_ip": sip,
+            "dest_ip": dip,
+            "src_port": fl.get("src_port", 0),
+            "dest_port": fl.get("dest_port", 0),
+            "proto": p_num,
+            "packet_count": fl.get("packet_count", 1),
+            "byte_count": fl.get("byte_count", 0),
+            "specialist": fl.get("specialist", "UnifiedNIDS"),
+            "canonical_id": cid,
+            "class_name": cname,
+            "confidence": float(fl.get("confidence", 0.95)),
+            "severity": severity,
+            "probabilities": fl.get("probabilities", []),
+            "is_threat": 1 if cid != 0 else 0
+        })
+
+    top_src_ips = [{"ip": k, "count": v} for k, v in sorted(src_ip_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+    top_dest_ips = [{"ip": k, "count": v} for k, v in sorted(dest_ip_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+    attack_dist = ai.get("class_distribution", {})
+
+    alerts = []
+    # AI-NIDS alerts for non-benign flows
+    for idx, fl in enumerate(formatted_flows):
+        if fl["is_threat"] == 1:
+            alerts.append({
+                "flow_id": f"FLOW-{idx + 1:04d}",
+                "timestamp": datetime.now().isoformat(),
+                "src_ip": fl["src_ip"],
+                "dest_ip": fl["dest_ip"],
+                "src_port": fl["src_port"],
+                "dest_port": fl["dest_port"],
+                "proto": fl["proto"],
+                "attack_category": fl["class_name"],
+                "canonical_id": fl["canonical_id"],
+                "engine": f"Smart AI-NIDS ({fl['specialist']})",
+                "specialist": fl["specialist"],
+                "confidence": fl["confidence"],
+                "severity": fl["severity"],
+                "signature_info": f"Classification output from {fl['specialist']} specialist model"
+            })
+
+    # Suricata traditional alerts
+    for idx, sa in enumerate(suricata_alerts):
+        cid = sa.get("canonical_id", 7)
+        alerts.append({
+            "flow_id": None,
+            "timestamp": sa.get("timestamp", datetime.now().isoformat()),
+            "src_ip": sa.get("src_ip", "10.0.0.1"),
+            "dest_ip": sa.get("dest_ip", "192.168.1.1"),
+            "src_port": sa.get("src_port", 0),
+            "dest_port": sa.get("dest_port", 0),
+            "proto": 17 if sa.get("proto") == "UDP" else 6,
+            "attack_category": sa.get("canonical_class", "Suricata Alert"),
+            "canonical_id": cid,
+            "engine": "Suricata Traditional NIDS",
+            "specialist": f"SID {sa.get('sid', 9000000)}",
+            "confidence": 1.0,
+            "severity": "High",
+            "signature_info": sa.get("signature", "Suricata Signature Alert")
+        })
+
+    session_id = sm.create_session(
+        filename=filename,
+        file_type="pcapng" if filename.lower().endswith("pcapng") else "pcap",
+        file_size_bytes=file_size,
+        total_packets=total_packets,
+        total_flows=total_flows,
+        threats_detected=threats_detected,
+        benign_count=benign_count,
+        duration_sec=duration_sec,
+        suricata_alerts_count=len(suricata_alerts),
+        protocol_dist=protocol_dist,
+        top_src_ips=top_src_ips,
+        top_dest_ips=top_dest_ips,
+        attack_dist=attack_dist,
+        flows=formatted_flows,
+        alerts=alerts,
+        status="COMPLETED"
+    )
+    return session_id
+
+
+def save_csv_analysis_session(df: pd.DataFrame, filename: str, file_size: int = 0) -> str:
+    """Process uploaded CSV through UnifiedNIDS and register a unified analysis session."""
+    sm = get_session_manager()
+    engine = get_engine()
+    t0 = time.perf_counter()
+
+    df_eval = df.head(1000).copy()
+
+    # Retain metadata / IP columns if present before stripping for model inference
+    ip_cols = {str(c).lower(): c for c in df_eval.columns}
+    src_ip_col = ip_cols.get("src_ip") or ip_cols.get("source_ip") or ip_cols.get("srcip")
+    dest_ip_col = ip_cols.get("dest_ip") or ip_cols.get("destination_ip") or ip_cols.get("dst_ip") or ip_cols.get("dstip")
+    src_port_col = ip_cols.get("src_port") or ip_cols.get("source_port") or ip_cols.get("sport")
+    dest_port_col = ip_cols.get("dest_port") or ip_cols.get("destination_port") or ip_cols.get("dport")
+    proto_col = ip_cols.get("proto") or ip_cols.get("protocol") or ip_cols.get("protocol type")
+
+    # Drop ground-truth labels and non-numeric target metadata for pure model evaluation
+    drop_cols = [c for c in df_eval.columns if "label" in str(c).lower()]
+    df_features = df_eval.drop(columns=drop_cols) if drop_cols else df_eval.copy()
+
+    # Route specialist
+    target_spec = engine.route_traffic(df_features, explicit_specialist="auto")
+    if target_spec == "IDS2018" and df_features.shape[1] == 77:
+        if not all(c.startswith("feature_") for c in df_features.columns):
+            df_features.columns = [f"feature_{i}" for i in range(77)]
+
+    raw_results = engine.predict(df_features, specialist=target_spec)
+    if isinstance(raw_results, dict):
+        raw_results = [raw_results]
+
+    duration_sec = round(time.perf_counter() - t0, 4)
+    total_flows = len(raw_results)
+
+    flows = []
+    alerts = []
+    attack_dist: Dict[str, int] = {}
+    protocol_dist: Dict[str, int] = {}
+    src_ip_counts: Dict[str, int] = {}
+    dest_ip_counts: Dict[str, int] = {}
+    threats_detected = 0
+
+    proto_map = {1: "ICMP", 6: "TCP", 17: "UDP", 2054: "ARP"}
+
+    for idx, res in enumerate(raw_results):
+        cid = int(res["canonical_id"])
+        cname = str(res["class_name"])
+        conf = float(res["confidence"])
+        spec = str(res["specialist"])
+        probs = res["probabilities"]
+
+        if cid != 0:
+            threats_detected += 1
+
+        attack_dist[cname] = attack_dist.get(cname, 0) + 1
+
+        row = df_eval.iloc[idx]
+        sip = str(row[src_ip_col]) if src_ip_col and pd.notna(row[src_ip_col]) else f"10.0.{(idx // 254) + 1}.{(idx % 254) + 1}"
+        dip = str(row[dest_ip_col]) if dest_ip_col and pd.notna(row[dest_ip_col]) else "192.168.1.100"
+        sport = int(row[src_port_col]) if src_port_col and pd.notna(row[src_port_col]) else 40000 + (idx % 20000)
+        dport = int(row[dest_port_col]) if dest_port_col and pd.notna(row[dest_port_col]) else (80 if idx % 2 == 0 else 443)
+        p_raw = int(row[proto_col]) if proto_col and pd.notna(row[proto_col]) and str(row[proto_col]).isdigit() else 6
+        p_name = proto_map.get(p_raw, "TCP")
+
+        protocol_dist[p_name] = protocol_dist.get(p_name, 0) + 1
+        src_ip_counts[sip] = src_ip_counts.get(sip, 0) + 1
+        dest_ip_counts[dip] = dest_ip_counts.get(dip, 0) + 1
+
+        severity = "Low" if cid == 0 else ("High" if cid in [1, 2, 3, 4, 5, 6, 8, 9, 11, 12] else "Medium")
+        flow_rec = {
+            "flow_index": idx + 1,
+            "timestamp": datetime.now().isoformat(),
+            "src_ip": sip,
+            "dest_ip": dip,
+            "src_port": sport,
+            "dest_port": dport,
+            "proto": p_raw,
+            "packet_count": int(row.get("Tot Fwd Pkts", row.get("Total Fwd Packets", 1)) or 1),
+            "byte_count": int(row.get("TotLen Fwd Pkts", row.get("Flow Bytes/s", 100)) or 100),
+            "specialist": spec,
+            "canonical_id": cid,
+            "class_name": cname,
+            "confidence": conf,
+            "severity": severity,
+            "probabilities": probs,
+            "is_threat": 1 if cid != 0 else 0
+        }
+        flows.append(flow_rec)
+
+        if cid != 0:
+            alerts.append({
+                "flow_id": f"CSV-F{idx + 1:04d}",
+                "timestamp": datetime.now().isoformat(),
+                "src_ip": sip,
+                "dest_ip": dip,
+                "src_port": sport,
+                "dest_port": dport,
+                "proto": p_raw,
+                "attack_category": cname,
+                "canonical_id": cid,
+                "engine": f"Smart AI-NIDS ({spec})",
+                "specialist": spec,
+                "confidence": conf,
+                "severity": severity,
+                "signature_info": f"Classification output from {spec} specialist model"
+            })
+
+    top_src_ips = [{"ip": k, "count": v} for k, v in sorted(src_ip_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+    top_dest_ips = [{"ip": k, "count": v} for k, v in sorted(dest_ip_counts.items(), key=lambda x: x[1], reverse=True)[:5]]
+
+    session_id = sm.create_session(
+        filename=filename,
+        file_type="csv",
+        file_size_bytes=file_size,
+        total_packets=total_flows,
+        total_flows=total_flows,
+        threats_detected=threats_detected,
+        benign_count=total_flows - threats_detected,
+        duration_sec=duration_sec,
+        suricata_alerts_count=0,
+        protocol_dist=protocol_dist,
+        top_src_ips=top_src_ips,
+        top_dest_ips=top_dest_ips,
+        attack_dist=attack_dist,
+        flows=flows,
+        alerts=alerts,
+        status="COMPLETED"
+    )
+    return session_id
+
+
 @app.post("/compare/pcap")
 async def compare_pcap(file: UploadFile = File(...)):
-    """Run dual-engine comparative evaluation (Suricata vs UnifiedNIDS) on uploaded PCAP."""
+    """Run dual-engine comparative evaluation (Suricata vs UnifiedNIDS) on uploaded PCAP and persist session."""
     if not file.filename.lower().endswith((".pcap", ".pcapng", ".cap")):
         raise HTTPException(status_code=400, detail="Uploaded file must be a .pcap or .pcapng packet capture.")
 
@@ -367,9 +624,16 @@ async def compare_pcap(file: UploadFile = File(...)):
         with open(pcap_path, "wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
 
+        file_size = os.path.getsize(pcap_path)
         engine = get_engine()
         evaluator = ComparativeEvaluator(nids_engine=engine)
         comparison = evaluator.evaluate_pcap(pcap_path)
+
+        # Store in shared session manager
+        session_id = save_pcap_comparison_session(comparison, filename=file.filename, file_size=file_size)
+        sm = get_session_manager()
+        comparison["session_id"] = session_id
+        comparison["session"] = sm.get_session(session_id)
         return comparison
     finally:
         shutil.rmtree(temp_dir, ignore_errors=True)
@@ -377,7 +641,7 @@ async def compare_pcap(file: UploadFile = File(...)):
 
 @app.get("/compare/sample")
 def compare_sample():
-    """Run dual-engine comparison on genuine repository benchmark capture."""
+    """Run dual-engine comparison on genuine repository benchmark capture and persist session."""
     candidates = [
         os.path.join(REPO_ROOT, "sample_traffic", "benchmark.pcapng"),
         "/Users/anjanprasadcherukuthota/Documents/Cybersecurity/projects/network/output.pcapng",
@@ -392,9 +656,109 @@ def compare_sample():
     if not sample_pcap:
         raise HTTPException(status_code=404, detail="Sample benchmark PCAP file not found.")
 
+    file_size = os.path.getsize(sample_pcap)
     engine = get_engine()
     evaluator = ComparativeEvaluator(nids_engine=engine)
-    return evaluator.evaluate_pcap(sample_pcap, max_packets=5000)
+    comparison = evaluator.evaluate_pcap(sample_pcap, max_packets=5000)
+
+    # Store in shared session manager
+    session_id = save_pcap_comparison_session(comparison, filename="benchmark.pcapng", file_size=file_size)
+    sm = get_session_manager()
+    comparison["session_id"] = session_id
+    comparison["session"] = sm.get_session(session_id)
+    return comparison
+
+
+# ==============================================================================
+# UNIFIED ANALYSIS SESSION ENDPOINTS (OPERATIONS MODULE DATA INTEGRATION)
+# ==============================================================================
+
+@app.post("/analysis/upload")
+async def upload_analysis_file(file: UploadFile = File(...)):
+    """Unified file ingestion endpoint for CSV, PCAP, and PCAPNG files.
+    
+    Creates and stores a shared analysis session consumable across:
+    1. Security Overview
+    2. Traffic Analysis
+    3. Threat Detection
+    4. Alerts & Events
+    """
+    fname = file.filename.lower()
+    valid_extensions = (".pcap", ".pcapng", ".cap", ".csv", ".json")
+    if not any(fname.endswith(ext) for ext in valid_extensions):
+        raise HTTPException(
+            status_code=400,
+            detail=f"Unsupported file format '{file.filename}'. Supported formats: CSV, PCAP, PCAPNG."
+        )
+
+    temp_dir = tempfile.mkdtemp(prefix="analysis_upload_")
+    local_path = os.path.join(temp_dir, file.filename)
+    try:
+        with open(local_path, "wb") as buffer:
+            shutil.copyfileobj(file.file, buffer)
+
+        file_size = os.path.getsize(local_path)
+        sm = get_session_manager()
+
+        if fname.endswith((".pcap", ".pcapng", ".cap")):
+            engine = get_engine()
+            evaluator = ComparativeEvaluator(nids_engine=engine)
+            comparison = evaluator.evaluate_pcap(local_path)
+            session_id = save_pcap_comparison_session(comparison, filename=file.filename, file_size=file_size)
+        elif fname.endswith(".csv"):
+            import pandas as pd
+            df = pd.read_csv(local_path)
+            session_id = save_csv_analysis_session(df, filename=file.filename, file_size=file_size)
+        elif fname.endswith(".json"):
+            import pandas as pd
+            df = pd.read_json(local_path)
+            session_id = save_csv_analysis_session(df, filename=file.filename, file_size=file_size)
+
+        session_data = sm.get_session(session_id)
+        return {
+            "status": "SUCCESS",
+            "session_id": session_id,
+            "session": session_data
+        }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Analysis processing error: {str(e)}")
+    finally:
+        shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@app.get("/analysis/sessions")
+def list_analysis_sessions(limit: int = 15):
+    """Retrieve list of recent stored analysis sessions."""
+    sm = get_session_manager()
+    return {"sessions": sm.list_sessions(limit=limit)}
+
+
+@app.get("/analysis/sessions/latest")
+def get_latest_analysis_session():
+    """Retrieve the most recent analysis session with flows and alerts."""
+    sm = get_session_manager()
+    sess = sm.get_latest_session()
+    if not sess:
+        raise HTTPException(status_code=404, detail="No analysis session found.")
+    return sess
+
+
+@app.get("/analysis/sessions/{session_id}")
+def get_analysis_session(session_id: str):
+    """Retrieve specific analysis session by unique ID."""
+    sm = get_session_manager()
+    sess = sm.get_session(session_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail=f"Session '{session_id}' not found.")
+    return sess
+
+
+@app.post("/analysis/sessions/reset")
+def reset_analysis_sessions():
+    """Purge all stored analysis sessions."""
+    sm = get_session_manager()
+    sm.clear_all()
+    return {"status": "SUCCESS", "message": "All analysis sessions successfully reset."}
 
 
 @app.get("/compare/metrics")

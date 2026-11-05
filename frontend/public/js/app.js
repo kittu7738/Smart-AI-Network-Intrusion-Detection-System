@@ -30,7 +30,9 @@ class EnterpriseSocApp {
     this.compPerClassChart = null;
 
     // Active session telemetry records (Strict data integrity: genuine session events only)
+    this.activeSession = null;
     this.sessionDetections = [];
+    this.sessionAlerts = [];
     this.alertsCurrentPage = 1;
     this.alertsPageSize = 8;
     this.selectedComparisonFile = null;
@@ -247,6 +249,9 @@ class EnterpriseSocApp {
     this.bindComparisonControls();
     this.bindReportsControls();
     this.bindSettingsControls();
+
+    // Load persistent shared analysis session if available (across restarts/refreshes)
+    await this.loadInitialAnalysisSession();
 
     // Set initial clean empty states and zero values
     this.updateOverviewKPIs();
@@ -726,8 +731,10 @@ class EnterpriseSocApp {
         btnRunSamplePcap.textContent = "Processing PCAP...";
         try {
           const res = await this.api.runComparisonSample();
+          if (res && res.session) {
+            this.loadActiveAnalysisSession(res.session);
+          }
           this.processComparativeResult(res, "benchmark.pcapng");
-          this.updateTrafficAnalysisPageFromPcap(res, "benchmark.pcapng");
         } catch (err) {
           alert(`PCAP Benchmark failed: ${err.message}`);
         } finally {
@@ -761,45 +768,15 @@ class EnterpriseSocApp {
         if (progressPct) progressPct.textContent = "40%";
 
         try {
-          if (ext === "pcap" || ext === "pcapng" || ext === "cap") {
-            const res = await this.api.runComparisonPcap(file);
-            if (progressFill) progressFill.style.width = "100%";
-            if (progressPct) progressPct.textContent = "100%";
-            this.processComparativeResult(res, file.name);
-            this.updateTrafficAnalysisPageFromPcap(res, file.name);
-          } else if (ext === "csv" || ext === "json") {
-            const text = await file.text();
-            let records = [];
-            if (ext === "json") {
-              records = JSON.parse(text);
-              if (!Array.isArray(records)) records = [records];
-            } else {
-              records = this.parseCsvToObjects(text);
-            }
-            if (progressFill) progressFill.style.width = "70%";
-            const res = await this.api.predictBatch(records.slice(0, 50), "auto");
-            const preds = res.predictions || [];
-            preds.forEach((p, idx) => {
-              this.recordDetection({
-                id: "CSV-" + (idx + 1),
-                timestamp: new Date().toLocaleTimeString("en-US", { hour12: false }),
-                src_ip: "10.0.0." + (idx + 10),
-                dest_ip: "192.168.1.1",
-                src_port: 40000 + idx,
-                dest_port: 80,
-                proto: 6,
-                attack_category: p.class_name,
-                canonical_id: p.canonical_id,
-                engine: "Smart AI-NIDS " + (p.specialist || "Unified"),
-                specialist: p.specialist,
-                confidence: p.confidence,
-                severity: this.getSeverityForClass(p.canonical_id)
-              });
-            });
+          const res = await this.api.uploadAnalysisFile(file);
+          if (progressFill) progressFill.style.width = "100%";
+          if (progressPct) progressPct.textContent = "100%";
 
-            this.updateTrafficAnalysisPageFromBatch(preds, file.name);
-            if (progressFill) progressFill.style.width = "100%";
-            if (progressPct) progressPct.textContent = "100%";
+          if (res && res.session) {
+            this.loadActiveAnalysisSession(res.session);
+            if (ext === "pcap" || ext === "pcapng" || ext === "cap") {
+              this.processComparativeResult(res, file.name);
+            }
           }
         } catch (err) {
           alert(`Processing error: ${err.message}`);
@@ -1189,6 +1166,34 @@ class EnterpriseSocApp {
      THREAT DETECTION (SINGLE & BATCH INFERENCE WORKSPACE)
      ======================================================================== */
   bindPredictControls() {
+    // Mode navigation tabs
+    const tabSingle = document.getElementById("tab-predict-single");
+    const tabBatch = document.getElementById("tab-predict-batch");
+    const tabShared = document.getElementById("tab-predict-shared");
+    const panelSingle = document.getElementById("predict-single-panel");
+    const panelBatch = document.getElementById("predict-batch-panel");
+    const panelShared = document.getElementById("predict-shared-panel");
+
+    const switchPredictTab = (mode) => {
+      const activeStyle = "background: #2563EB; color: #FFFFFF; border: none;";
+      const inactiveStyle = "background: #FFFFFF; border: 1px solid #CBD5E1; color: #334155;";
+
+      if (tabSingle) tabSingle.style.cssText += (mode === "single" ? activeStyle : inactiveStyle);
+      if (tabBatch) tabBatch.style.cssText += (mode === "batch" ? activeStyle : inactiveStyle);
+      if (tabShared) tabShared.style.cssText += (mode === "shared" ? activeStyle : inactiveStyle);
+
+      if (panelSingle) panelSingle.style.display = (mode === "single" ? "block" : "none");
+      if (panelBatch) panelBatch.style.display = (mode === "batch" ? "block" : "none");
+      if (panelShared) {
+        panelShared.style.display = (mode === "shared" ? "block" : "none");
+        if (mode === "shared") this.renderSharedPredictionsTable();
+      }
+    };
+
+    if (tabSingle) tabSingle.addEventListener("click", () => switchPredictTab("single"));
+    if (tabBatch) tabBatch.addEventListener("click", () => switchPredictTab("batch"));
+    if (tabShared) tabShared.addEventListener("click", () => switchPredictTab("shared"));
+
     const presetSelect = document.getElementById("predict-single-preset");
     const jsonTextarea = document.getElementById("predict-single-json");
     const singleGutter = document.getElementById("single-json-gutter");
@@ -1412,6 +1417,297 @@ class EnterpriseSocApp {
   }
 
   /* ========================================================================
+     SHARED ANALYSIS SESSION CONTROLLER (OPERATIONS INTEGRATION)
+     ======================================================================== */
+  async loadInitialAnalysisSession() {
+    try {
+      let savedId = null;
+      try {
+        savedId = localStorage.getItem("sai_active_session_id");
+      } catch (_) {}
+
+      let session = null;
+      if (savedId) {
+        try {
+          const res = await this.api.getAnalysisSession(savedId);
+          if (res && res.session_id) session = res;
+        } catch (_) {}
+      }
+
+      if (!session) {
+        try {
+          const res = await this.api.getLatestAnalysisSession();
+          if (res && res.session_id) session = res;
+        } catch (_) {}
+      }
+
+      if (session && session.session_id) {
+        this.loadActiveAnalysisSession(session);
+      }
+    } catch (err) {
+      console.warn("Could not load initial shared analysis session:", err);
+    }
+  }
+
+  loadActiveAnalysisSession(sessionData) {
+    if (!sessionData) return;
+    this.activeSession = sessionData;
+    try {
+      localStorage.setItem("sai_active_session_id", sessionData.session_id);
+    } catch (_) {}
+
+    // Map flows into session detections
+    const flows = sessionData.flows || [];
+    this.sessionDetections = flows.map((f, idx) => ({
+      id: f.flow_index ? `FLOW-${f.flow_index}` : `REC-${idx + 1}`,
+      timestamp: f.timestamp || new Date().toLocaleTimeString("en-US", { hour12: false }),
+      src_ip: f.src_ip || "10.0.0.1",
+      dest_ip: f.dest_ip || "192.168.1.1",
+      src_port: f.src_port || 0,
+      dest_port: f.dest_port || 0,
+      proto: f.proto || 6,
+      attack_category: f.class_name || "Benign",
+      canonical_id: f.canonical_id ?? 0,
+      engine: `Smart AI-NIDS (${f.specialist || "Unified"})`,
+      specialist: f.specialist || "Unified",
+      confidence: f.confidence ?? 0.95,
+      severity: f.severity || this.getSeverityForClass(f.canonical_id ?? 0)
+    }));
+
+    // Map genuine session alerts
+    const alerts = sessionData.alerts || [];
+    this.sessionAlerts = alerts.map((a, idx) => ({
+      id: a.id || `ALT-${idx + 1}`,
+      timestamp: a.timestamp || new Date().toLocaleTimeString("en-US", { hour12: false }),
+      src_ip: a.src_ip || "10.0.0.1",
+      dest_ip: a.dest_ip || "192.168.1.1",
+      src_port: a.src_port || 0,
+      dest_port: a.dest_port || 0,
+      proto: a.proto || 6,
+      attack_category: a.attack_category || "Unknown Threat",
+      canonical_id: a.canonical_id ?? 1,
+      engine: a.engine || "Smart AI-NIDS",
+      specialist: a.specialist || "Unified",
+      confidence: a.confidence ?? 0.95,
+      severity: a.severity || "High",
+      details: a.signature_info || `Intrusion detection alert from ${a.engine || 'AI-NIDS'}`
+    }));
+
+    // 1. Update session badges across all 4 Operations pages
+    const ovPill = document.getElementById("overview-session-pill");
+    const ovId = document.getElementById("overview-active-session-id");
+    if (ovPill && ovId) {
+      ovPill.style.display = "inline-flex";
+      ovId.textContent = sessionData.session_id;
+    }
+
+    const trSession = document.getElementById("traffic-summary-session");
+    if (trSession) {
+      trSession.textContent = sessionData.session_id;
+    }
+
+    const predBadge = document.getElementById("predict-shared-badge");
+    const predSessionId = document.getElementById("predict-shared-session-id");
+    const predFilename = document.getElementById("predict-shared-filename");
+    const predThreatsTag = document.getElementById("predict-shared-threats-tag");
+    const predCountTag = document.getElementById("predict-shared-count-tag");
+    if (predBadge) predBadge.textContent = `${flows.length} Flows`;
+    if (predSessionId) predSessionId.textContent = sessionData.session_id;
+    if (predFilename) predFilename.textContent = sessionData.filename || "traffic_capture";
+    if (predThreatsTag) predThreatsTag.textContent = `${sessionData.threat_flows || 0} Threats`;
+    if (predCountTag) predCountTag.textContent = `${flows.length} Flows`;
+
+    const alPill = document.getElementById("alerts-session-pill");
+    const alId = document.getElementById("alerts-active-session-id");
+    if (alPill && alId) {
+      alPill.style.display = "inline-flex";
+      alId.textContent = sessionData.session_id;
+    }
+
+    // 2. Synchronize all 4 Operations views
+    this.updateOverviewKPIs();
+    this.updateTrafficAnalysisPageFromSession(sessionData);
+    this.renderSharedPredictionsTable();
+    this.alertsCurrentPage = 1;
+    this.renderAlertsTable();
+    this.updateSessionTelemetry();
+  }
+
+  updateTrafficAnalysisPageFromSession(sessionData) {
+    if (!sessionData) return;
+    const flows = sessionData.flows || [];
+    this.currentTrafficRecords = flows;
+
+    const elFlows = document.getElementById("traffic-sum-flows");
+    const elSrcIps = document.getElementById("traffic-sum-src-ips");
+    const elDestIps = document.getElementById("traffic-sum-dest-ips");
+    const elProtos = document.getElementById("traffic-sum-protocols");
+
+    if (elFlows) elFlows.textContent = sessionData.total_flows ?? flows.length;
+    if (elSrcIps) elSrcIps.textContent = sessionData.unique_src_ips ?? new Set(flows.map(f => f.src_ip)).size;
+    if (elDestIps) elDestIps.textContent = sessionData.unique_dest_ips ?? new Set(flows.map(f => f.dest_ip)).size;
+    if (elProtos) {
+      const protoSet = new Set(flows.map(f => this.getProtocolName(f.proto)));
+      elProtos.textContent = protoSet.size || Object.keys(sessionData.protocol_distribution || {}).length || 1;
+    }
+
+    const emptyMsg = document.getElementById("traffic-summary-empty-msg");
+    const metaBar = document.getElementById("traffic-summary-meta");
+    if (emptyMsg) emptyMsg.style.display = "none";
+    if (metaBar) {
+      metaBar.style.display = "flex";
+      const fnEl = document.getElementById("traffic-summary-filename");
+      const durEl = document.getElementById("traffic-summary-duration");
+      const thrEl = document.getElementById("traffic-summary-threats");
+      const sesEl = document.getElementById("traffic-summary-session");
+      if (fnEl) fnEl.textContent = sessionData.filename || "traffic_analysis";
+      if (durEl) durEl.textContent = (sessionData.execution_time_seconds || 1.15).toFixed(2) + "s";
+      if (thrEl) thrEl.textContent = sessionData.threat_flows ?? 0;
+      if (sesEl) sesEl.textContent = sessionData.session_id;
+    }
+
+    // Protocol Distribution Chart
+    const protoCounts = sessionData.protocol_distribution || {};
+    if (Object.keys(protoCounts).length === 0 && flows.length > 0) {
+      flows.forEach(p => {
+        const name = this.getProtocolName(p.proto || 6);
+        protoCounts[name] = (protoCounts[name] || 0) + 1;
+      });
+    }
+
+    const protoEmpty = document.getElementById("traffic-proto-empty");
+    const protoContainer = document.getElementById("traffic-proto-container");
+    if (protoEmpty && protoContainer) {
+      protoEmpty.style.display = "none";
+      protoContainer.style.display = "block";
+      const canvas = document.getElementById("traffic-proto-chart");
+      if (canvas) {
+        if (this.trafficProtoChartInstance) {
+          this.trafficProtoChartInstance.destroy();
+        }
+        const labels = Object.keys(protoCounts);
+        const values = Object.values(protoCounts);
+        this.trafficProtoChartInstance = new Chart(canvas, {
+          type: "doughnut",
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: ["#2563EB", "#059669", "#D97706", "#7C3AED", "#DC2626"],
+              borderWidth: 2,
+              borderColor: "#FFFFFF"
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: { position: "right", labels: { boxWidth: 12, font: { size: 11, family: "Inter, sans-serif" } } }
+            },
+            cutout: "65%"
+          }
+        });
+      }
+    }
+
+    // Top Source IPs Table
+    const topSrc = sessionData.top_source_ips || [];
+    const srcEmpty = document.getElementById("traffic-srcip-empty");
+    const srcContainer = document.getElementById("traffic-srcip-container");
+    const srcTbody = document.getElementById("traffic-srcip-tbody");
+    if (srcEmpty && srcContainer && srcTbody) {
+      srcEmpty.style.display = "none";
+      srcContainer.style.display = "block";
+      srcTbody.innerHTML = topSrc.map((item, i) => {
+        const pct = ((item.count / (flows.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${item.ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${item.count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Top Dest IPs Table
+    const topDest = sessionData.top_dest_ips || [];
+    const destEmpty = document.getElementById("traffic-destip-empty");
+    const destContainer = document.getElementById("traffic-destip-container");
+    const destTbody = document.getElementById("traffic-destip-tbody");
+    if (destEmpty && destContainer && destTbody) {
+      destEmpty.style.display = "none";
+      destContainer.style.display = "block";
+      destTbody.innerHTML = topDest.map((item, i) => {
+        const pct = ((item.count / (flows.length || 1)) * 100).toFixed(1);
+        return `
+          <tr>
+            <td><code>#${i + 1}</code></td>
+            <td><code>${item.ip}</code></td>
+            <td style="text-align: right; font-weight: 600;">${item.count}</td>
+            <td style="text-align: right; color: var(--text-muted); font-size: 11.5px;">${pct}%</td>
+          </tr>
+        `;
+      }).join("");
+    }
+
+    // Telemetry Results Table
+    this.renderTrafficResults(flows);
+  }
+
+  renderSharedPredictionsTable() {
+    const tbody = document.getElementById("predict-shared-tbody");
+    if (!tbody) return;
+
+    if (!this.activeSession || !this.activeSession.flows || this.activeSession.flows.length === 0) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="7" style="padding: 48px 20px; text-align: center; border: none;">
+            <div style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: #64748B;">
+              <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+            </div>
+            <div style="font-weight: 700; font-size: 14.5px; color: #0F172A; margin-bottom: 4px;">No shared traffic file analyzed yet.</div>
+            <div style="font-size: 12.5px; color: #64748B; margin-bottom: 12px;">Upload a CSV or PCAP in Traffic Analysis to automatically populate predictions here.</div>
+            <button type="button" class="btn btn-secondary btn-sm" onclick="window.switchSocView('view-traffic')" style="background: #FFFFFF; border: 1px solid #CBD5E1; color: #2563EB; font-weight: 600; padding: 6px 16px; border-radius: 6px; cursor: pointer;">
+              Go to Traffic Analysis &rarr;
+            </button>
+          </td>
+        </tr>
+      `;
+      return;
+    }
+
+    const flows = this.activeSession.flows;
+    tbody.innerHTML = flows.map((f, idx) => {
+      const src = f.src_ip || `10.0.0.${idx + 10}`;
+      const dest = f.dest_ip || `192.168.1.1`;
+      const sPort = f.src_port ? `:${f.src_port}` : "";
+      const dPort = f.dest_port ? `:${f.dest_port}` : "";
+      const proto = this.getProtocolName(f.proto || 6);
+      const isBenign = f.canonical_id === 0;
+      const confPct = ((f.confidence ?? 0.95) * 100).toFixed(1);
+
+      return `
+        <tr style="border-bottom: 1px solid #F1F5F9;">
+          <td style="padding: 10px 16px;"><code style="font-family: var(--font-mono); font-size: 11.5px; color: #64748B;">${f.flow_index || idx + 1}</code></td>
+          <td style="padding: 10px 16px;"><code style="font-family: var(--font-mono); font-size: 12px; color: #0F172A;">${src}${sPort} &rarr; ${dest}${dPort}</code></td>
+          <td style="padding: 10px 16px;"><span class="tag tag-info" style="font-size: 11px; padding: 2px 7px;">${proto}</span></td>
+          <td style="padding: 10px 16px;">
+            <div style="font-weight: 600; font-size: 12.5px; color: #0F172A;">${f.class_name}</div>
+            <div style="font-size: 11px; color: #64748B;">Class ID #${f.canonical_id}</div>
+          </td>
+          <td style="padding: 10px 16px;"><span class="tag tag-ai" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">${f.specialist || "Unified"}</span></td>
+          <td style="padding: 10px 16px; font-family: var(--font-mono); font-weight: 600; font-size: 12px; color: #0F172A;">${confPct}%</td>
+          <td style="padding: 10px 16px; text-align: right;">
+            <span class="tag ${isBenign ? 'tag-benign' : 'tag-critical'}" style="font-size: 11px; padding: 2px 8px; border-radius: 4px;">${isBenign ? 'Benign' : 'Malicious'}</span>
+          </td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  /* ========================================================================
      ALERTS & EVENTS INVESTIGATION CONSOLE
      ======================================================================== */
   bindAlertsControls() {
@@ -1508,46 +1804,28 @@ class EnterpriseSocApp {
 
     const isFiltered = (query !== "" || catVal !== "ALL" || engVal !== "ALL" || sevVal !== "ALL");
 
-    const filtered = this.sessionAlerts.filter(a => {
-      if (catVal !== "ALL" && a.attack_category.toLowerCase() !== catVal.toLowerCase()) return false;
+    const hasSessionAlerts = this.sessionAlerts && this.sessionAlerts.length > 0;
+    const alertSource = hasSessionAlerts ? this.sessionAlerts : this.referenceAlerts;
+
+    const filtered = alertSource.filter(a => {
+      if (catVal !== "ALL" && (a.attack_category || "").toLowerCase() !== catVal.toLowerCase()) return false;
       if (engVal !== "ALL") {
         const specialist = (a.specialist || a.engine || "").toLowerCase();
         if (!specialist.includes(engVal.toLowerCase().replace(" model", ""))) return false;
       }
-      if (sevVal !== "ALL" && a.severity.toLowerCase() !== sevVal.toLowerCase()) return false;
+      if (sevVal !== "ALL" && (a.severity || "").toLowerCase() !== sevVal.toLowerCase()) return false;
 
       if (query) {
-        const text = `${a.src_ip} ${a.dest_ip} ${a.src_port} ${a.dest_port} ${a.attack_category} ${a.specialist || ''} ${a.engine || ''} ${a.id} ${a.proto}`.toLowerCase();
+        const text = `${a.src_ip || ''} ${a.dest_ip || ''} ${a.src_port || ''} ${a.dest_port || ''} ${a.attack_category || ''} ${a.specialist || ''} ${a.engine || ''} ${a.id || ''} ${a.proto || ''} ${this.activeSession?.session_id || ''}`.toLowerCase();
         if (!text.includes(query)) return false;
       }
       return true;
     });
 
     let displayList = [];
-    let totalVirtualCount = 28421;
-    let totalPages = 3553;
+    let totalPages = 1;
 
-    if (!isFiltered) {
-      // Reference baseline state (matching reference design 1:1)
-      totalVirtualCount = 28421;
-      totalPages = 3553;
-
-      if (this.alertsCurrentPage === 1) {
-        displayList = this.referenceAlerts.slice(0, 8);
-        if (footerCount) footerCount.textContent = "Showing 1 \u2013 8 of 28,421 events";
-      } else {
-        const start = (this.alertsCurrentPage - 1) * this.alertsPageSize;
-        const end = Math.min(start + this.alertsPageSize, totalVirtualCount);
-        if (footerCount) footerCount.textContent = `Showing ${(start + 1).toLocaleString()} \u2013 ${end.toLocaleString()} of 28,421 events`;
-        // Slice from available mock alerts, wrapping if needed
-        const pool = [...this.referenceAlerts, ...this.syntheticPagingAlerts];
-        displayList = pool.slice((start % pool.length), (start % pool.length) + this.alertsPageSize);
-        if (displayList.length < this.alertsPageSize) {
-          displayList = pool.slice(0, this.alertsPageSize);
-        }
-      }
-    } else {
-      // Filtered state
+    if (hasSessionAlerts) {
       const totalFiltered = filtered.length;
       totalPages = Math.max(1, Math.ceil(totalFiltered / this.alertsPageSize));
       if (this.alertsCurrentPage > totalPages) this.alertsCurrentPage = 1;
@@ -1559,7 +1837,46 @@ class EnterpriseSocApp {
       if (footerCount) {
         footerCount.textContent = totalFiltered === 0 
           ? "Showing 0 events" 
-          : `Showing ${(start + 1).toLocaleString()} \u2013 ${end.toLocaleString()} of ${totalFiltered.toLocaleString()} events`;
+          : `Showing ${(start + 1).toLocaleString()} \u2013 ${end.toLocaleString()} of ${totalFiltered.toLocaleString()} genuine session events`;
+      }
+    } else {
+      let totalVirtualCount = 28421;
+      totalPages = 3553;
+
+      if (!isFiltered) {
+        // Reference baseline state (matching reference design 1:1)
+        totalVirtualCount = 28421;
+        totalPages = 3553;
+
+        if (this.alertsCurrentPage === 1) {
+          displayList = this.referenceAlerts.slice(0, 8);
+          if (footerCount) footerCount.textContent = "Showing 1 \u2013 8 of 28,421 events";
+        } else {
+          const start = (this.alertsCurrentPage - 1) * this.alertsPageSize;
+          const end = Math.min(start + this.alertsPageSize, totalVirtualCount);
+          if (footerCount) footerCount.textContent = `Showing ${(start + 1).toLocaleString()} \u2013 ${end.toLocaleString()} of 28,421 events`;
+          // Slice from available mock alerts, wrapping if needed
+          const pool = [...this.referenceAlerts, ...this.syntheticPagingAlerts];
+          displayList = pool.slice((start % pool.length), (start % pool.length) + this.alertsPageSize);
+          if (displayList.length < this.alertsPageSize) {
+            displayList = pool.slice(0, this.alertsPageSize);
+          }
+        }
+      } else {
+        // Filtered state
+        const totalFiltered = filtered.length;
+        totalPages = Math.max(1, Math.ceil(totalFiltered / this.alertsPageSize));
+        if (this.alertsCurrentPage > totalPages) this.alertsCurrentPage = 1;
+
+        const start = (this.alertsCurrentPage - 1) * this.alertsPageSize;
+        const end = Math.min(start + this.alertsPageSize, totalFiltered);
+        displayList = filtered.slice(start, end);
+
+        if (footerCount) {
+          footerCount.textContent = totalFiltered === 0 
+            ? "Showing 0 events" 
+            : `Showing ${(start + 1).toLocaleString()} \u2013 ${end.toLocaleString()} of ${totalFiltered.toLocaleString()} events`;
+        }
       }
     }
 
@@ -1743,35 +2060,46 @@ class EnterpriseSocApp {
     const detRateEl = document.getElementById("kpi-detection-rate");
     const detRateSubEl = document.getElementById("kpi-detection-rate-sub");
 
-    // Strictly prevent any parentheses and unwanted subtexts from appearing
+    // Strictly prevent any parentheses and unwanted subtexts from appearing initially
     if (sessionStatus) sessionStatus.textContent = "";
     if (benignPctEl) benignPctEl.textContent = "";
     if (threatPctEl) threatPctEl.textContent = "";
     if (detRateSubEl) detRateSubEl.textContent = "";
 
-    const total = this.sessionDetections.length;
-    if (total === 0 || total < 100) {
-      // Retain approved reference metrics (482,317 / 438,912 / 43,405 / 93.21%)
+    const hasData = (this.activeSession && (this.activeSession.total_flows > 0 || (this.activeSession.flows && this.activeSession.flows.length > 0))) || this.sessionDetections.length > 0;
+    if (!hasData) {
+      // Retain approved reference metrics baseline (482,317 / 438,912 / 43,405 / 93.21%)
       return;
     }
 
-    const benign = this.sessionDetections.filter(d => d.canonical_id === 0).length;
-    const threats = total - benign;
+    const total = this.activeSession 
+      ? (this.activeSession.total_flows ?? this.sessionDetections.length)
+      : this.sessionDetections.length;
+
+    const benign = this.activeSession 
+      ? (this.activeSession.benign_flows ?? this.sessionDetections.filter(d => d.canonical_id === 0).length)
+      : this.sessionDetections.filter(d => d.canonical_id === 0).length;
+
+    const threats = this.activeSession 
+      ? (this.activeSession.threat_flows ?? (total - benign))
+      : (total - benign);
+
+    const detRate = total > 0 ? ((threats / total) * 100).toFixed(2) : "0.00";
 
     if (totalEl) totalEl.textContent = total.toLocaleString();
     if (benignEl) benignEl.textContent = benign.toLocaleString();
     if (threatEl) threatEl.textContent = threats.toLocaleString();
+    if (detRateEl) detRateEl.textContent = `${detRate}%`;
 
-    if (sessionStatus) sessionStatus.textContent = "(live session)";
-    if (benignPctEl) benignPctEl.textContent = `(${((benign / total) * 100).toFixed(1)}% of total)`;
-    if (threatPctEl) threatPctEl.textContent = `(${((threats / total) * 100).toFixed(1)}% of total)`;
-    if (detRateEl) detRateEl.textContent = `${((threats / total) * 100).toFixed(2)}%`;
-    if (detRateSubEl) detRateSubEl.textContent = `(${total} flows evaluated)`;
+    if (sessionStatus) sessionStatus.textContent = "(active session)";
+    if (benignPctEl) benignPctEl.textContent = total > 0 ? `(${((benign / total) * 100).toFixed(1)}% of total)` : "";
+    if (threatPctEl) threatPctEl.textContent = total > 0 ? `(${((threats / total) * 100).toFixed(1)}% of total)` : "";
+    if (detRateSubEl) detRateSubEl.textContent = `(${total.toLocaleString()} flows evaluated)`;
 
     // 1. Update Traffic Trend Chart
     if (this.trendChart && this.sessionDetections.length > 0) {
-      const labels = this.sessionDetections.slice(0, 8).reverse().map(d => d.timestamp ? d.timestamp.substring(11, 16) : "Flow");
-      const flowData = this.sessionDetections.slice(0, 8).reverse().map((_, idx) => (idx + 1) * 1000);
+      const labels = this.sessionDetections.slice(0, 8).reverse().map((d, idx) => d.timestamp ? d.timestamp.substring(11, 16) : `Flow ${idx + 1}`);
+      const flowData = this.sessionDetections.slice(0, 8).reverse().map((_, idx) => (idx + 1) * 10);
       this.trendChart.data.labels = labels;
       this.trendChart.data.datasets[0].data = flowData;
       this.trendChart.update();
@@ -1792,10 +2120,16 @@ class EnterpriseSocApp {
     if (attackBarsContainer) {
       const counts = {};
       this.canonicalTaxonomy.forEach(c => { counts[c.name] = 0; });
-      this.sessionDetections.forEach(d => {
-        const cat = d.attack_category || (d.canonical_id === 0 ? "Benign" : "Threat");
-        counts[cat] = (counts[cat] || 0) + 1;
-      });
+      if (this.activeSession && this.activeSession.attack_class_distribution) {
+        Object.entries(this.activeSession.attack_class_distribution).forEach(([cname, count]) => {
+          counts[cname] = count;
+        });
+      } else {
+        this.sessionDetections.forEach(d => {
+          const cat = d.attack_category || (d.canonical_id === 0 ? "Benign" : "Threat");
+          counts[cat] = (counts[cat] || 0) + 1;
+        });
+      }
       const maxCount = Math.max(...Object.values(counts), 1);
       attackBarsContainer.innerHTML = Object.entries(counts)
         .filter(([name]) => name !== "Benign")
@@ -1813,17 +2147,20 @@ class EnterpriseSocApp {
     // 4. Render recent alerts in overview table
     const recentTbody = document.getElementById("overview-recent-tbody");
     if (recentTbody && this.sessionAlerts.length > 0) {
-      recentTbody.innerHTML = this.sessionAlerts.slice(0, 5).map(a => `
+      recentTbody.innerHTML = this.sessionAlerts.slice(0, 5).map(a => {
+        const confVal = typeof a.confidence === "number" ? ((a.confidence * 100).toFixed(0) / 100) : "0.95";
+        return `
         <tr>
           <td>${a.timestamp ? a.timestamp.substring(11, 19) : "21:12:34"}</td>
-          <td>${a.src_ip || "192.168.1.53"}</td>
-          <td>${a.dest_ip || "10.0.0.12"}</td>
+          <td>${a.src_ip || "10.0.0.1"}</td>
+          <td>${a.dest_ip || "192.168.1.1"}</td>
           <td><span style="color: #EF4444; margin-right: 4px;">▲</span> ${a.attack_category}</td>
           <td><span class="pill-severity ${a.severity ? a.severity.toLowerCase() : 'high'}">${a.severity || 'High'}</span></td>
-          <td>${((a.confidence || 0.95) * 100).toFixed(0) / 100}</td>
+          <td>${confVal}</td>
           <td style="text-align: right; font-weight: 500;">${a.engine || "AI-NIDS"}</td>
         </tr>
-      `).join("");
+      `;
+      }).join("");
     }
   }
 
@@ -1997,6 +2334,9 @@ class EnterpriseSocApp {
             if (procBox) procBox.style.display = "none";
           }, 600);
 
+          if (res && res.session) {
+            this.loadActiveAnalysisSession(res.session);
+          }
           this.processComparativeResult(res, "benchmark.pcapng (Canonical 650-Flow Benchmark)");
         } catch (err) {
           this.showComparisonError(`Benchmark execution failed: ${err.message}`);
@@ -2102,6 +2442,9 @@ class EnterpriseSocApp {
         if (procBox) procBox.style.display = "none";
       }, 700);
 
+      if (res && res.session) {
+        this.loadActiveAnalysisSession(res.session);
+      }
       this.processComparativeResult(res, file.name);
 
       // Scroll smoothly to results
@@ -2709,14 +3052,41 @@ class EnterpriseSocApp {
     }
 
     if (btnResetSession) {
-      btnResetSession.addEventListener("click", () => {
-        if (confirm("Reset current session telemetry and empty all recent alerts?")) {
+      btnResetSession.addEventListener("click", async () => {
+        if (confirm("Reset current shared analysis session and empty all telemetry?")) {
+          try {
+            await this.api.resetAnalysisSessions();
+          } catch (_) {}
+          try {
+            localStorage.removeItem("sai_active_session_id");
+          } catch (_) {}
+          this.activeSession = null;
           this.sessionDetections = [];
           this.sessionAlerts = [];
+
+          // Hide session indicators across all 4 Operations pages
+          const ovPill = document.getElementById("overview-session-pill");
+          if (ovPill) ovPill.style.display = "none";
+          const trSession = document.getElementById("traffic-summary-session");
+          if (trSession) trSession.textContent = "—";
+          const predBadge = document.getElementById("predict-shared-badge");
+          if (predBadge) predBadge.textContent = "0 Flows";
+          const predSessionId = document.getElementById("predict-shared-session-id");
+          if (predSessionId) predSessionId.textContent = "—";
+          const predFilename = document.getElementById("predict-shared-filename");
+          if (predFilename) predFilename.textContent = "—";
+          const predThreatsTag = document.getElementById("predict-shared-threats-tag");
+          if (predThreatsTag) predThreatsTag.textContent = "0 Threats";
+          const predCountTag = document.getElementById("predict-shared-count-tag");
+          if (predCountTag) predCountTag.textContent = "0 Flows";
+          const alPill = document.getElementById("alerts-session-pill");
+          if (alPill) alPill.style.display = "none";
+
           this.updateOverviewKPIs();
           this.renderAlertsTable();
+          this.renderSharedPredictionsTable();
           this.updateSessionTelemetry();
-          alert("Session state reset to initial zero state.");
+          alert("Shared session state reset to initial zero state.");
         }
       });
     }

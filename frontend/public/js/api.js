@@ -231,6 +231,57 @@ class ApiService {
     }
     return response.json();
   }
+
+  /**
+   * POST /analysis/upload
+   * Unified file ingestion endpoint for CSV, PCAP, and PCAPNG files.
+   */
+  async uploadAnalysisFile(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    const url = `${this.getBaseUrl()}/analysis/upload`;
+    const response = await fetch(url, {
+      method: "POST",
+      body: formData,
+    });
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({ detail: "Analysis upload failed" }));
+      throw new Error(err.detail || `HTTP ${response.status}`);
+    }
+    return response.json();
+  }
+
+  /**
+   * GET /analysis/sessions
+   * Retrieve list of recent analysis sessions.
+   */
+  async getAnalysisSessions(limit = 15) {
+    return this._request(`/analysis/sessions?limit=${limit}`, { method: "GET" }, 8000);
+  }
+
+  /**
+   * GET /analysis/sessions/latest
+   * Retrieve the most recent analysis session with flows and alerts.
+   */
+  async getLatestAnalysisSession() {
+    return this._request("/analysis/sessions/latest", { method: "GET" }, 8000);
+  }
+
+  /**
+   * GET /analysis/sessions/{session_id}
+   * Retrieve specific analysis session.
+   */
+  async getAnalysisSession(sessionId) {
+    return this._request(`/analysis/sessions/${sessionId}`, { method: "GET" }, 8000);
+  }
+
+  /**
+   * POST /analysis/sessions/reset
+   * Purge all stored analysis sessions.
+   */
+  async resetAnalysisSessions() {
+    return this._request("/analysis/sessions/reset", { method: "POST" }, 8000);
+  }
 }
 
 // Export singleton to global scope for application access

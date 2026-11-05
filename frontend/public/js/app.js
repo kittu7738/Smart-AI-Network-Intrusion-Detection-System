@@ -373,7 +373,7 @@ class EnterpriseSocApp {
     } else if (hash && document.getElementById(hash)) {
       switchView(hash);
     } else {
-      switchView("view-overview");
+      switchView("view-settings");
     }
   }
 

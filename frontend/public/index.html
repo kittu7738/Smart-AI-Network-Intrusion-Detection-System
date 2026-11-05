@@ -1170,13 +1170,57 @@
              SECTION 5: SURICATA VS AI-NIDS (COMPARATIVE EVALUATION)
              ============================================================== -->
         <section id="view-comparison" class="view-panel">
-          <div class="page-title-row" style="margin-bottom: 20px;">
-            <h1 class="page-heading" style="margin: 0;">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
-            <div style="display: flex; gap: 10px; align-items: center;">
-              <button class="btn btn-secondary" id="btn-comp-run-sample" title="Run benchmark evaluation on verified 650-flow canonical capture">
-                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
-                <span>Run PCAP Benchmark</span>
+          <div class="page-title-row" style="margin-bottom: 16px;">
+            <div>
+              <h1 class="page-heading" style="margin: 0;">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
+              <div style="font-size: 12px; color: #64748B; margin-top: 3px;">Empirical research evaluation across identical network traffic and canonical ground truth.</div>
+            </div>
+            <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+              <select id="comp-session-select" class="form-select" style="font-size: 12px; padding: 6px 12px; border-radius: 6px; border: 1px solid #CBD5E1; color: #0F172A; background-color: #FFFFFF; font-weight: 500; min-width: 230px;">
+                <option value="canonical-benchmark">Canonical Benchmark (650 Flows, 50/Class)</option>
+              </select>
+              <button class="btn btn-secondary" id="btn-comp-refresh" title="Reload active comparative metrics and session data" style="font-size: 12px; padding: 6px 12px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/></svg>
+                <span>Refresh</span>
               </button>
+              <button class="btn btn-secondary" id="btn-comp-run-sample" title="Run benchmark evaluation on verified 650-flow canonical capture" style="font-size: 12px; padding: 6px 12px;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
+                <span>Run Benchmark</span>
+              </button>
+              <button class="btn btn-primary" id="btn-comp-export" title="Export complete comparative evaluation data package" style="font-size: 12px; padding: 6px 12px; font-weight: 600;">
+                <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span>Export Results</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- EVALUATION SESSION METADATA STRIP -->
+          <div class="comp-eval-strip" id="comp-eval-strip">
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Evaluation ID</span>
+              <span class="comp-eval-val" id="comp-eval-id">EVAL-CANONICAL-650</span>
+            </div>
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Dataset / Source</span>
+              <span class="comp-eval-val" id="comp-eval-dataset" title="benchmark.pcapng & 13-Class Test Suite">benchmark.pcapng (650 flows)</span>
+            </div>
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Evaluation Date</span>
+              <span class="comp-eval-val" id="comp-eval-timestamp">2026-11-05 08:39 IST</span>
+            </div>
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Test Population</span>
+              <span class="comp-eval-val" id="comp-eval-records">650 flows &bull; 3,659 pkts</span>
+            </div>
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Engines Evaluated</span>
+              <span class="comp-eval-val" id="comp-eval-runtime" title="Suricata 8.0.8 & Unified 5 Specialists">Suricata 8.0.8 vs AI-NIDS</span>
+            </div>
+            <div class="comp-eval-item">
+              <span class="comp-eval-lbl">Evaluation Status</span>
+              <span class="comp-eval-val" id="comp-eval-status">
+                <span class="tag tag-benign" style="font-size: 10.5px; padding: 2px 7px;">VERIFIED COMPLETED</span>
+              </span>
             </div>
           </div>
 
@@ -1382,7 +1426,7 @@
             </div>
           </div>
 
-          <!-- 3. Performance Comparison Table -->
+          <!-- 3. PERFORMANCE COMPARISON TABLE -->
           <div class="comp-card" style="margin-bottom: 20px;">
             <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
               <span>Performance Comparison (Suricata vs Smart AI-NIDS)</span>
@@ -1451,10 +1495,10 @@
             <div class="comp-stat-card">
               <div class="comp-stat-title">Overall Accuracy</div>
               <div class="comp-stat-body">
-                <div class="comp-stat-main" id="comp-acc-ai">81.54%</div>
+                <div class="comp-stat-main" id="comp-acc-ai">89.08%</div>
                 <div class="comp-stat-delta comp-delta-pos">
-                  <div class="comp-delta-val">+0.77%</div>
-                  <div class="comp-delta-lbl">vs Suricata</div>
+                  <div class="comp-delta-val" id="comp-acc-delta">+8.31%</div>
+                  <div class="comp-delta-lbl" id="comp-acc-suri-lbl">(Suricata: 80.77%)</div>
                 </div>
               </div>
             </div>
@@ -1462,10 +1506,10 @@
             <div class="comp-stat-card">
               <div class="comp-stat-title">Macro F1-Score</div>
               <div class="comp-stat-body">
-                <div class="comp-stat-main" id="comp-f1-ai">79.65%</div>
-                <div class="comp-stat-delta">
-                  <div class="comp-delta-lbl">(Suricata:</div>
-                  <div class="comp-delta-lbl" id="comp-f1-suri">80.34%)</div>
+                <div class="comp-stat-main" id="comp-f1-ai">88.98%</div>
+                <div class="comp-stat-delta comp-delta-pos">
+                  <div class="comp-delta-val" id="comp-f1-delta">+8.64%</div>
+                  <div class="comp-delta-lbl" id="comp-f1-suri">(Suricata: 80.34%)</div>
                 </div>
               </div>
             </div>
@@ -1474,33 +1518,36 @@
               <div class="comp-stat-title">Layer-2 ARP Recall</div>
               <div class="comp-stat-body">
                 <div class="comp-stat-main" id="comp-arp-ai">100.0%</div>
-                <div class="comp-stat-delta">
-                  <div class="comp-delta-lbl">(Suricata:</div>
-                  <div class="comp-delta-lbl" id="comp-arp-suri">0.0%)</div>
+                <div class="comp-stat-delta comp-delta-pos">
+                  <div class="comp-delta-val">+100.0%</div>
+                  <div class="comp-delta-lbl" id="comp-arp-suri">(Suricata: 0.0%)</div>
                 </div>
               </div>
             </div>
 
             <div class="comp-stat-card">
-              <div class="comp-stat-title">Throughput</div>
+              <div class="comp-stat-title">Throughput Comparison</div>
               <div class="comp-stat-body">
-                <div class="comp-stat-main">98.5 flows/s</div>
-                <div class="comp-stat-delta">
-                  <div class="comp-delta-lbl">(~5,146</div>
-                  <div class="comp-delta-lbl">pkts/s eq.)</div>
+                <div>
+                  <div class="comp-stat-main" id="comp-stat-ai-tput">98.5 <span style="font-size: 13px; font-weight: normal; color: #64748B;">flows/s</span></div>
+                  <div style="font-size: 11px; color: #64748B;">AI-NIDS (Stateful)</div>
+                </div>
+                <div style="text-align: right;">
+                  <div style="font-size: 16px; font-weight: 700; color: #0F172A;" id="comp-stat-suri-tput">37,838 <span style="font-size: 11px; font-weight: normal; color: #64748B;">pkts/s</span></div>
+                  <div style="font-size: 11px; color: #64748B;">Suricata (Stateless)</div>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- COMPARATIVE CHARTS ROW -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
+          <!-- COMPARATIVE CHARTS ROW 1: OVERALL & PER-CLASS F1 -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
             <!-- Overall Benchmark Comparison Chart -->
             <div class="comp-card">
               <div class="comp-card-header">
                 Overall Performance Comparison (Suricata vs Smart AI-NIDS)
               </div>
-              <div class="card-body" style="height: 260px; padding: 12px 16px;">
+              <div class="card-body" style="height: 270px; padding: 12px 16px;">
                 <canvas id="comp-overall-chart"></canvas>
               </div>
             </div>
@@ -1510,23 +1557,94 @@
               <div class="comp-card-header">
                 Per-Class F1-Score Comparison (13 Canonical Classes)
               </div>
-              <div class="card-body" style="height: 260px; padding: 12px 16px;">
+              <div class="card-body" style="height: 270px; padding: 12px 16px;">
                 <canvas id="comp-perclass-chart"></canvas>
               </div>
             </div>
           </div>
 
-          <!-- BOTTOM ROW: CONFUSION MATRIX & RECONCILIATION TABLE SIDE-BY-SIDE -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
-            <!-- Confusion Matrix Viewer -->
-            <div class="comp-card" style="display: flex; flex-direction: column;">
-              <div class="comp-card-header">
-                13-Class Confusion Matrix Heatmap (Smart AI-NIDS)
+          <!-- COMPARATIVE CHARTS ROW 2: PROCESSING PERFORMANCE & DETECTION DISTRIBUTION -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px;">
+            <!-- Processing Performance & Throughput Chart -->
+            <div class="comp-card">
+              <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Processing Performance &amp; Execution Latency</span>
+                <span style="font-size: 11px; font-weight: normal; opacity: 0.85;">Packet vs Flow Units</span>
               </div>
-              <div class="card-body" style="padding: 10px 12px; overflow-x: auto; flex: 1; display: flex; align-items: center; justify-content: center;">
+              <div class="card-body" style="height: 260px; padding: 12px 16px;">
+                <canvas id="comp-processing-chart"></canvas>
+              </div>
+            </div>
+
+            <!-- Threat Detection Distribution Chart -->
+            <div class="comp-card">
+              <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <span>Threat Detection Distribution (Suricata vs AI-NIDS)</span>
+                <span style="font-size: 11px; font-weight: normal; opacity: 0.85;">13 Canonical Classes</span>
+              </div>
+              <div class="card-body" style="height: 260px; padding: 12px 16px;">
+                <canvas id="comp-dist-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- 13-CLASS PER-CLASS DETAILED BREAKDOWN TABLE (Requirement 5) -->
+          <div class="comp-card" style="margin-bottom: 20px;">
+            <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 600;">13-Class Per-Class Detailed Performance Breakdown</span>
+              <span style="font-size: 11px; font-weight: normal; opacity: 0.85;">Precision, Recall &amp; F1-Score Across All Taxonomy Classes</span>
+            </div>
+            <div class="card-body" style="padding: 0; overflow-x: auto;">
+              <table class="comp-perclass-table">
+                <thead>
+                  <tr>
+                    <th style="width: 5%;">ID</th>
+                    <th style="width: 17%;">Canonical Attack Class</th>
+                    <th style="width: 8%;">Support</th>
+                    <th style="width: 10%;">Suri Precision</th>
+                    <th style="width: 10%;">Suri Recall</th>
+                    <th style="width: 10%;">Suri F1</th>
+                    <th style="width: 10%;">AI Precision</th>
+                    <th style="width: 10%;">AI Recall</th>
+                    <th style="width: 10%;">AI F1</th>
+                    <th style="width: 8%;">F1 Delta</th>
+                    <th style="width: 12%;">Coverage &amp; Detection Note</th>
+                  </tr>
+                </thead>
+                <tbody id="comp-perclass-table-tbody">
+                  <!-- Dynamically populated from backend /compare/metrics -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- BOTTOM ROW: CONFUSION MATRIX & RECONCILIATION TABLE SIDE-BY-SIDE -->
+          <div style="display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 16px; margin-bottom: 16px; align-items: stretch;">
+            <!-- 13-Class Confusion Matrix Viewer -->
+            <div class="comp-card" style="display: flex; flex-direction: column;">
+              <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px;">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <span style="font-weight: 600;" id="comp-cm-header-title">13-Class Confusion Matrix Heatmap</span>
+                </div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <!-- Engine Toggle -->
+                  <div class="comp-btn-group">
+                    <button type="button" class="comp-toggle-btn active" id="btn-cm-ai">Smart AI-NIDS</button>
+                    <button type="button" class="comp-toggle-btn" id="btn-cm-suricata">Suricata</button>
+                  </div>
+                  <!-- Format Toggle -->
+                  <div class="comp-btn-group">
+                    <button type="button" class="comp-toggle-btn active" id="btn-cm-count">Counts</button>
+                    <button type="button" class="comp-toggle-btn" id="btn-cm-percent">Norm %</button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body" style="padding: 10px 12px; overflow-x: auto; flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative;">
                 <div class="matrix-container" id="confusion-matrix-wrapper" style="width: 100%;">
                   <!-- Rendered dynamically -->
                 </div>
+                <!-- Dynamic Hover Tooltip -->
+                <div id="cm-tooltip" class="cm-tooltip-box"></div>
               </div>
             </div>
 
@@ -1548,9 +1666,9 @@
                   <tbody>
                     <tr>
                       <td><strong>Macro F1<br>(Reconciled)</strong></td>
-                      <td>80.34%</td>
-                      <td>79.65% (Evasion) /<br>91.38% (Calibrated)</td>
-                      <td>On deep multi-label exfiltration domains (&ge; 10 labels), Class 12 F1 is 100.0% (Macro F1: 91.38%).</td>
+                      <td id="comp-recon-mf1-suri">80.34%</td>
+                      <td id="comp-recon-mf1-ai">88.98% /<br>91.38% (Calibrated)</td>
+                      <td>On multi-label exfiltration domains, Class 12 F1 is 100.0% (Calibrated Macro F1: 91.38%).</td>
                     </tr>
                     <tr>
                       <td><strong>Throughput Unit</strong></td>

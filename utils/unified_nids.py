@@ -290,15 +290,13 @@ class UnifiedNIDS:
             if "query" in df.columns and "query_length" not in df.columns:
                 df = extract_dns_features(df)
 
-        # Align aliases and impute any missing features expected by the specialist preprocessor
+        # Align aliases for features expected by the specialist preprocessor
         if hasattr(preprocessor, "feature_names_in_") and preprocessor.feature_names_in_ is not None:
             for col in preprocessor.feature_names_in_:
                 if col not in df.columns:
                     alt = col.replace(" ", "_") if " " in col else col.replace("_", " ")
                     if alt in df.columns:
                         df[col] = df[alt]
-                    else:
-                        df[col] = 0.0
 
         # 4. Feature preprocessing
         X = preprocessor.transform_features(df)

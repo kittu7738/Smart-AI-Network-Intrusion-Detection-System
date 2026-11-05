@@ -5,10 +5,10 @@
     "total_inferences": 70,
     "threats_detected": 70,
     "benign_classified": 0,
-    "extraction_duration_sec": 0.4652,
-    "inference_duration_sec": 0.1303,
-    "total_duration_sec": 0.5955,
-    "throughput_flows_per_sec": 117.6,
+    "extraction_duration_sec": 0.3985,
+    "inference_duration_sec": 0.1204,
+    "total_duration_sec": 0.519,
+    "throughput_flows_per_sec": 134.9,
     "class_distribution": {
       "Benign": 0,
       "DDoS": 1,
@@ -829,10 +829,10 @@
       ]
     ],
     "timing": {
-      "total_benchmark_time_sec": 0.7546,
-      "mean_inference_latency_ms": 1.159,
-      "median_inference_latency_ms": 1.066,
-      "p99_inference_latency_ms": 2.895
+      "total_benchmark_time_sec": 0.7025,
+      "mean_inference_latency_ms": 1.079,
+      "median_inference_latency_ms": 1.055,
+      "p99_inference_latency_ms": 2.174
     }
   },
   "sample_predictions": [
@@ -843,7 +843,7 @@
       "pred_name": "Benign",
       "confidence": 0.5650048851966858,
       "specialist": "CICIoT2023",
-      "latency_ms": 3.472
+      "latency_ms": 1.963
     },
     {
       "true_id": 0,
@@ -852,7 +852,7 @@
       "pred_name": "Benign",
       "confidence": 0.9795464873313904,
       "specialist": "CICIoT2023",
-      "latency_ms": 2.198
+      "latency_ms": 1.242
     },
     {
       "true_id": 0,
@@ -861,7 +861,7 @@
       "pred_name": "Benign",
       "confidence": 0.9822854995727539,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.868
+      "latency_ms": 1.199
     },
     {
       "true_id": 0,
@@ -870,7 +870,7 @@
       "pred_name": "Benign",
       "confidence": 0.5863775014877319,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.893
+      "latency_ms": 1.181
     },
     {
       "true_id": 0,
@@ -879,7 +879,7 @@
       "pred_name": "Benign",
       "confidence": 0.971754789352417,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.496
+      "latency_ms": 1.147
     },
     {
       "true_id": 0,
@@ -888,7 +888,7 @@
       "pred_name": "Benign",
       "confidence": 0.5230411887168884,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.38
+      "latency_ms": 1.118
     },
     {
       "true_id": 0,
@@ -897,7 +897,7 @@
       "pred_name": "Benign",
       "confidence": 0.976316511631012,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.324
+      "latency_ms": 1.126
     },
     {
       "true_id": 0,
@@ -906,7 +906,7 @@
       "pred_name": "Benign",
       "confidence": 0.9811978936195374,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.948
+      "latency_ms": 1.168
     },
     {
       "true_id": 0,
@@ -915,7 +915,7 @@
       "pred_name": "Benign",
       "confidence": 0.9686736464500427,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.877
+      "latency_ms": 1.153
     },
     {
       "true_id": 0,
@@ -924,7 +924,7 @@
       "pred_name": "Benign",
       "confidence": 0.973818838596344,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.387
+      "latency_ms": 1.131
     },
     {
       "true_id": 0,
@@ -933,7 +933,7 @@
       "pred_name": "Benign",
       "confidence": 0.7829185128211975,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.216
+      "latency_ms": 1.182
     },
     {
       "true_id": 0,
@@ -942,7 +942,7 @@
       "pred_name": "Benign",
       "confidence": 0.42032021284103394,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.189
+      "latency_ms": 1.261
     },
     {
       "true_id": 0,
@@ -951,7 +951,7 @@
       "pred_name": "Benign",
       "confidence": 0.9818507432937622,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.504
+      "latency_ms": 1.178
     },
     {
       "true_id": 0,
@@ -960,7 +960,7 @@
       "pred_name": "Benign",
       "confidence": 0.7449852228164673,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.748
+      "latency_ms": 1.163
     },
     {
       "true_id": 0,
@@ -969,7 +969,7 @@
       "pred_name": "Benign",
       "confidence": 0.5517058372497559,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.347
+      "latency_ms": 1.131
     },
     {
       "true_id": 0,
@@ -978,7 +978,7 @@
       "pred_name": "Benign",
       "confidence": 0.9808776378631592,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.185
+      "latency_ms": 1.118
     },
     {
       "true_id": 0,
@@ -987,7 +987,7 @@
       "pred_name": "Benign",
       "confidence": 0.9804329872131348,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.147
+      "latency_ms": 1.109
     },
     {
       "true_id": 0,
@@ -996,7 +996,7 @@
       "pred_name": "Benign",
       "confidence": 0.9725698828697205,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.332
+      "latency_ms": 1.096
     },
     {
       "true_id": 0,
@@ -1005,7 +1005,7 @@
       "pred_name": "Benign",
       "confidence": 0.947674036026001,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.64
+      "latency_ms": 1.093
     },
     {
       "true_id": 0,
@@ -1014,7 +1014,7 @@
       "pred_name": "Benign",
       "confidence": 0.9792559146881104,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.771
+      "latency_ms": 1.078
     },
     {
       "true_id": 0,
@@ -1023,7 +1023,7 @@
       "pred_name": "Benign",
       "confidence": 0.3127823770046234,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.341
+      "latency_ms": 1.064
     },
     {
       "true_id": 0,
@@ -1032,7 +1032,7 @@
       "pred_name": "Benign",
       "confidence": 0.27922335267066956,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.189
+      "latency_ms": 1.057
     },
     {
       "true_id": 0,
@@ -1041,7 +1041,7 @@
       "pred_name": "Benign",
       "confidence": 0.9712337255477905,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.257
+      "latency_ms": 1.094
     },
     {
       "true_id": 0,
@@ -1050,7 +1050,7 @@
       "pred_name": "Benign",
       "confidence": 0.7614859342575073,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.217
+      "latency_ms": 1.095
     },
     {
       "true_id": 0,
@@ -1059,7 +1059,7 @@
       "pred_name": "Benign",
       "confidence": 0.4549379050731659,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.588
+      "latency_ms": 1.116
     },
     {
       "true_id": 0,
@@ -1068,7 +1068,7 @@
       "pred_name": "Benign",
       "confidence": 0.6347786784172058,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.431
+      "latency_ms": 1.076
     },
     {
       "true_id": 0,
@@ -1077,7 +1077,7 @@
       "pred_name": "Benign",
       "confidence": 0.6472833156585693,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.218
+      "latency_ms": 1.065
     },
     {
       "true_id": 0,
@@ -1086,7 +1086,7 @@
       "pred_name": "Benign",
       "confidence": 0.863646924495697,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.161
+      "latency_ms": 1.07
     },
     {
       "true_id": 0,
@@ -1095,7 +1095,7 @@
       "pred_name": "Benign",
       "confidence": 0.974672794342041,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.141
+      "latency_ms": 1.071
     },
     {
       "true_id": 0,
@@ -1104,7 +1104,7 @@
       "pred_name": "Benign",
       "confidence": 0.5474526286125183,
       "specialist": "CICIoT2023",
-      "latency_ms": 1.164
+      "latency_ms": 1.075
     }
   ]
 }

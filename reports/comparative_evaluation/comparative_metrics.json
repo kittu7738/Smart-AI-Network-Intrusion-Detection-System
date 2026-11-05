@@ -12,9 +12,9 @@
       ]
     },
     "latency_comparison": {
-      "suricata_total_sec": 0.0876,
-      "ai_total_sec": 0.5955,
-      "ai_inference_only_sec": 0.1303
+      "suricata_total_sec": 0.0843,
+      "ai_total_sec": 0.519,
+      "ai_inference_only_sec": 0.1204
     }
   },
   "benchmark_delta": {

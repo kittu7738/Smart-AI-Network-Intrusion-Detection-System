@@ -45,8 +45,8 @@ The comparative evaluation revealed significant qualitative and quantitative div
 - **AI-NIDS Finding**: Detects statistical anomalies in packet inter-arrival times, flow byte asymmetry, and header entropy, successfully catching evasive instances.
 
 ### D. Processing Latency & Computational Overhead
-- **Suricata Advantage**: Average latency was **0.0004 ms** per evaluation. The compiled C/Rust engine is ultra-fast for packet filtering.
-- **AI-NIDS Overhead**: Average latency was **1.16 ms** per flow. Feature extraction and tree/boosting inference require greater computational resources.
+- **Suricata Advantage**: Average latency was **0.0002 ms** per evaluation. The compiled C/Rust engine is ultra-fast for packet filtering.
+- **AI-NIDS Overhead**: Average latency was **1.08 ms** per flow. Feature extraction and tree/boosting inference require greater computational resources.
 
 ---
 

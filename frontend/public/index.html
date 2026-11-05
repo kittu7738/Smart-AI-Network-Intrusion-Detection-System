@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=3.1.0">
+  <link rel="stylesheet" href="css/style.css?v=3.2.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -124,31 +124,36 @@
         </ul>
       </div>
 
-      <!-- Glowing wave background decoration matching reference -->
+      <!-- Glowing wave background decoration matching reference 1:1 -->
       <div class="sidebar-wave-bg" aria-hidden="true">
-        <svg viewBox="0 0 260 260" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg viewBox="0 0 288 320" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
           <defs>
-            <linearGradient id="waveG1" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#0066FF" stop-opacity="0.32" />
-              <stop offset="60%" stop-color="#0099FF" stop-opacity="0.45" />
-              <stop offset="100%" stop-color="#003399" stop-opacity="0.08" />
+            <linearGradient id="waveFill1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0066FF" stop-opacity="0.35" />
+              <stop offset="50%" stop-color="#00D2FF" stop-opacity="0.25" />
+              <stop offset="100%" stop-color="#022a65" stop-opacity="0.85" />
             </linearGradient>
-            <linearGradient id="waveG2" x1="0%" y1="100%" x2="100%" y2="0%">
-              <stop offset="0%" stop-color="#0052D4" stop-opacity="0.6" />
-              <stop offset="60%" stop-color="#00B4D8" stop-opacity="0.4" />
-              <stop offset="100%" stop-color="#021438" stop-opacity="0" />
+            <linearGradient id="waveFill2" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0052D4" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="#011f4d" stop-opacity="0.9" />
             </linearGradient>
-            <linearGradient id="waveLineG" x1="0%" y1="50%" x2="100%" y2="50%">
-              <stop offset="0%" stop-color="#0055EE" stop-opacity="0.4" />
-              <stop offset="40%" stop-color="#00D2FF" stop-opacity="0.95" />
-              <stop offset="80%" stop-color="#0080FF" stop-opacity="0.85" />
-              <stop offset="100%" stop-color="#0040B0" stop-opacity="0.2" />
+            <linearGradient id="waveGlow1" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0055EE" stop-opacity="0.3" />
+              <stop offset="45%" stop-color="#00C8FF" stop-opacity="0.95" />
+              <stop offset="85%" stop-color="#0080FF" stop-opacity="0.9" />
+              <stop offset="100%" stop-color="#0047AB" stop-opacity="0.2" />
+            </linearGradient>
+            <linearGradient id="waveGlow2" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0040C0" stop-opacity="0.2" />
+              <stop offset="50%" stop-color="#00E5FF" stop-opacity="0.8" />
+              <stop offset="100%" stop-color="#0066FF" stop-opacity="0.3" />
             </linearGradient>
           </defs>
-          <path d="M0,150 C50,130 130,200 260,90 L260,260 L0,260 Z" fill="url(#waveG1)" />
-          <path d="M0,180 C70,160 150,225 260,125 L260,260 L0,260 Z" fill="url(#waveG2)" />
-          <path d="M0,150 C50,130 130,200 260,90" stroke="url(#waveLineG)" stroke-width="2.2" />
-          <path d="M0,170 C70,152 145,215 260,115" stroke="url(#waveLineG)" stroke-width="1.6" opacity="0.75" />
+          <path d="M0,230 C80,210 160,180 288,120 L288,320 L0,320 Z" fill="url(#waveFill1)" />
+          <path d="M0,265 C90,250 180,225 288,175 L288,320 L0,320 Z" fill="url(#waveFill2)" />
+          <path d="M0,230 C80,210 160,180 288,120" stroke="url(#waveGlow1)" stroke-width="2.5" />
+          <path d="M0,210 C70,195 150,165 288,100" stroke="url(#waveGlow2)" stroke-width="1.8" opacity="0.65" />
+          <path d="M0,255 C85,240 175,215 288,160" stroke="url(#waveGlow1)" stroke-width="1.6" opacity="0.5" />
         </svg>
       </div>
 

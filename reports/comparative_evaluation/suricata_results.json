@@ -83,10 +83,10 @@
     "engine": "Suricata",
     "version": "This is Suricata version 8.0.8 RELEASE",
     "status": "ONLINE",
-    "total_alerts": 3,
+    "total_alerts": 2,
     "total_flows_tracked": 69,
-    "execution_duration_sec": 0.0876,
-    "throughput_packets_per_sec": 41769.4,
+    "execution_duration_sec": 0.0843,
+    "throughput_packets_per_sec": 43404.5,
     "class_distribution": {
       "Benign": 0,
       "DDoS": 0,
@@ -95,7 +95,7 @@
       "Infiltration": 0,
       "Brute Force": 0,
       "Web Attack": 0,
-      "DNS Spoofing": 3,
+      "DNS Spoofing": 2,
       "IP Spoofing": 0,
       "ARP Spoofing": 0,
       "Recon / Port Scan": 0,
@@ -104,33 +104,8 @@
     },
     "sample_alerts": [
       {
-        "timestamp": "2026-07-21T18:17:48.785537+0530",
-        "flow_id": 1240031906209421,
-        "pcap_cnt": 184,
-        "src_ip": "10.97.99.78",
-        "src_port": 53,
-        "dest_ip": "10.97.99.41",
-        "dest_port": 63185,
-        "proto": "UDP",
-        "app_proto": "dns",
-        "community_id": "1:Jt+Z/JuNmhVM+9Lig1lg7r4M7X8=",
-        "event_type": "alert",
-        "action": "allowed",
-        "gid": 1,
-        "sid": 9000070,
-        "rev": 1,
-        "signature": "SURICATA T-NIDS [Class 7: DNS Spoofing] Rogue DNS Poisoning Authoritative Reply Mismatch",
-        "category": "Potentially Bad Traffic",
-        "severity": 2,
-        "metadata": {},
-        "payload_printable": ".............push.apple.com..................count=50.............b.ns...............c.C.............d.C.............a.C",
-        "canonical_id": 7,
-        "canonical_class": "DNS Spoofing",
-        "mapping_method": "EXPLICIT_SID"
-      },
-      {
         "timestamp": "2026-07-21T18:17:52.411954+0530",
-        "flow_id": 68341615594219,
+        "flow_id": 68345612482484,
         "pcap_cnt": 321,
         "src_ip": "10.97.99.78",
         "src_port": 53,
@@ -154,16 +129,16 @@
         "mapping_method": "EXPLICIT_SID"
       },
       {
-        "timestamp": "2026-07-21T18:18:00.578479+0530",
-        "flow_id": 127285303610744,
-        "pcap_cnt": 3518,
+        "timestamp": "2026-07-21T18:17:59.404900+0530",
+        "flow_id": 2250121603660533,
+        "pcap_cnt": 3435,
         "src_ip": "10.97.99.78",
         "src_port": 53,
         "dest_ip": "10.97.99.41",
-        "dest_port": 62667,
+        "dest_port": 65053,
         "proto": "UDP",
         "app_proto": "dns",
-        "community_id": "1:Z9XHn26L3JCdhCpcFiilNpPwXYk=",
+        "community_id": "1:Ngbtprr02mRpANk2n0KoQ0LIlF4=",
         "event_type": "alert",
         "action": "allowed",
         "gid": 1,
@@ -173,7 +148,7 @@
         "category": "Potentially Bad Traffic",
         "severity": 2,
         "metadata": {},
-        "payload_printable": ".4...........ap-sin-00001.s3.dualstack.ap-southeast-1.amazonaws.com.................................................4.|k............4.(.............4...............................................4..~......../_...ns-241.awsdns-30.?......../_...ns-672.awsdns-20.net........./_...ns-1235.awsdns-26.org........./_...ns-1561.awsdns-03.co.uk.",
+        "payload_printable": ".,...........gateway.fe2.apple-dns.net..............V.....\n.............ns-693.awsdns-22.\".............ns-1396.awsdns-46.org..............ns-1919.awsdns-47.co.uk..............ns-383.awsdns-47.com.",
         "canonical_id": 7,
         "canonical_class": "DNS Spoofing",
         "mapping_method": "EXPLICIT_SID"
@@ -562,10 +537,10 @@
       ]
     ],
     "timing": {
-      "total_benchmark_time_sec": 0.0006,
-      "mean_latency_ms": 0.0004,
-      "median_latency_ms": 0.0003,
-      "p99_latency_ms": 0.0011
+      "total_benchmark_time_sec": 0.0005,
+      "mean_latency_ms": 0.0002,
+      "median_latency_ms": 0.0002,
+      "p99_latency_ms": 0.0005
     }
   },
   "sample_predictions": [
@@ -576,7 +551,7 @@
       "pred_name": "Benign",
       "detected": false,
       "reason": "No alert fired (Pass-through)",
-      "latency_ms": 0.007
+      "latency_ms": 0.001
     },
     {
       "true_id": 0,

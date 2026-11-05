@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Smart AI-NIDS — Security Operations Center</title>
-  <link rel="stylesheet" href="css/style.css?v=3.0.0">
+  <link rel="stylesheet" href="css/style.css?v=3.1.0">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -24,78 +24,141 @@
         </div>
         <div class="brand-text-col">
           <span class="brand-name-primary">Smart AI-NIDS</span>
-          <span class="brand-name-sub">Enterprise SOC</span>
+          <span class="brand-name-sub">ENTERPRISE SOC</span>
         </div>
       </div>
 
       <div class="sidebar-nav-container">
-        <div class="nav-section-label">Operations</div>
+        <div class="nav-section-label">OPERATIONS</div>
         <ul class="nav-links-list">
           <!-- 1. Security Overview -->
           <li>
-            <button class="nav-item-btn" data-view="view-overview">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            <button class="nav-item-btn active" data-view="view-overview">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+              </svg>
               <span>Security Overview</span>
             </button>
           </li>
           <!-- 2. Traffic Analysis -->
           <li>
             <button class="nav-item-btn" data-view="view-traffic">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
               <span>Traffic Analysis</span>
             </button>
           </li>
           <!-- 3. Threat Detection -->
           <li>
             <button class="nav-item-btn" data-view="view-predict">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="22" y1="12" x2="18" y2="12"/><line x1="6" y1="12" x2="2" y2="12"/><line x1="12" y1="6" x2="12" y2="2"/><line x1="12" y1="22" x2="12" y2="18"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="22" y1="12" x2="18" y2="12"/>
+                <line x1="6" y1="12" x2="2" y2="12"/>
+                <line x1="12" y1="6" x2="12" y2="2"/>
+                <line x1="12" y1="22" x2="12" y2="18"/>
+              </svg>
               <span>Threat Detection</span>
             </button>
           </li>
           <!-- 4. Alerts & Events -->
           <li>
             <button class="nav-item-btn" data-view="view-alerts">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
               <span>Alerts &amp; Events</span>
             </button>
           </li>
         </ul>
 
-        <div class="nav-section-label">Intelligence &amp; Benchmarks</div>
+        <div class="sidebar-nav-divider"></div>
+
+        <div class="nav-section-label">INTELLIGENCE &amp; BENCHMARKS</div>
         <ul class="nav-links-list">
           <!-- 5. Suricata vs AI-NIDS -->
           <li>
             <button class="nav-item-btn" data-view="view-comparison">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <line x1="18" y1="20" x2="18" y2="10"/>
+                <line x1="12" y1="20" x2="12" y2="4"/>
+                <line x1="6" y1="20" x2="6" y2="14"/>
+              </svg>
               <span>Suricata vs AI-NIDS</span>
             </button>
           </li>
           <!-- 6. Reports & Evaluation -->
           <li>
-            <button class="nav-item-btn active" data-view="view-reports">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+            <button class="nav-item-btn" data-view="view-reports">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+                <line x1="16" y1="13" x2="8" y2="13"/>
+                <line x1="16" y1="17" x2="8" y2="17"/>
+              </svg>
               <span>Reports &amp; Evaluation</span>
             </button>
           </li>
         </ul>
 
-        <div class="nav-section-label">Administration</div>
+        <div class="sidebar-nav-divider"></div>
+
+        <div class="nav-section-label">ADMINISTRATION</div>
         <ul class="nav-links-list">
           <!-- 7. System Configuration -->
           <li>
             <button class="nav-item-btn" data-view="view-settings">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
               <span>System Configuration</span>
             </button>
           </li>
         </ul>
       </div>
 
+      <!-- Glowing wave background decoration matching reference -->
+      <div class="sidebar-wave-bg" aria-hidden="true">
+        <svg viewBox="0 0 260 260" preserveAspectRatio="none" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="waveG1" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stop-color="#0066FF" stop-opacity="0.32" />
+              <stop offset="60%" stop-color="#0099FF" stop-opacity="0.45" />
+              <stop offset="100%" stop-color="#003399" stop-opacity="0.08" />
+            </linearGradient>
+            <linearGradient id="waveG2" x1="0%" y1="100%" x2="100%" y2="0%">
+              <stop offset="0%" stop-color="#0052D4" stop-opacity="0.6" />
+              <stop offset="60%" stop-color="#00B4D8" stop-opacity="0.4" />
+              <stop offset="100%" stop-color="#021438" stop-opacity="0" />
+            </linearGradient>
+            <linearGradient id="waveLineG" x1="0%" y1="50%" x2="100%" y2="50%">
+              <stop offset="0%" stop-color="#0055EE" stop-opacity="0.4" />
+              <stop offset="40%" stop-color="#00D2FF" stop-opacity="0.95" />
+              <stop offset="80%" stop-color="#0080FF" stop-opacity="0.85" />
+              <stop offset="100%" stop-color="#0040B0" stop-opacity="0.2" />
+            </linearGradient>
+          </defs>
+          <path d="M0,150 C50,130 130,200 260,90 L260,260 L0,260 Z" fill="url(#waveG1)" />
+          <path d="M0,180 C70,160 150,225 260,125 L260,260 L0,260 Z" fill="url(#waveG2)" />
+          <path d="M0,150 C50,130 130,200 260,90" stroke="url(#waveLineG)" stroke-width="2.2" />
+          <path d="M0,170 C70,152 145,215 260,115" stroke="url(#waveLineG)" stroke-width="1.6" opacity="0.75" />
+        </svg>
+      </div>
+
       <div class="sidebar-footer-card">
         <div class="footer-icon-box">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          </svg>
         </div>
-        <div>
+        <div class="footer-text-col">
           <div class="footer-text-title">Smart AI-NIDS</div>
           <div class="footer-text-sub">Unified Multi-Specialist</div>
         </div>
@@ -110,20 +173,9 @@
       <!-- TOP HEADER BAR (MINIMAL, SIMPLE, NO CLUTTER) -->
       <header class="soc-top-header">
         <div class="header-left-group">
-          <svg class="header-grid-icon" width="16" height="16" viewBox="0 0 24 24" fill="#64748B">
-            <rect x="3" y="3" width="4" height="4" rx="1"/>
-            <rect x="10" y="3" width="4" height="4" rx="1"/>
-            <rect x="17" y="3" width="4" height="4" rx="1"/>
-            <rect x="3" y="10" width="4" height="4" rx="1"/>
-            <rect x="10" y="10" width="4" height="4" rx="1"/>
-            <rect x="17" y="10" width="4" height="4" rx="1"/>
-            <rect x="3" y="17" width="4" height="4" rx="1"/>
-            <rect x="10" y="17" width="4" height="4" rx="1"/>
-            <rect x="17" y="17" width="4" height="4" rx="1"/>
-          </svg>
           <span class="header-brand-tag">Smart AI-NIDS</span>
           <span class="header-slash-divider">/</span>
-          <span class="header-page-title" id="header-view-title">Reports &amp; Evaluation</span>
+          <span class="header-page-title" id="header-view-title">System Configuration</span>
         </div>
 
         <div class="header-meta-group">
@@ -147,7 +199,7 @@
         <!-- ==============================================================
              SECTION 1: SECURITY OVERVIEW (MAIN DASHBOARD)
              ============================================================== -->
-        <section id="view-overview" class="view-panel">
+        <section id="view-overview" class="view-panel active">
           <div class="page-title-row">
             <div>
               <h1 class="page-heading">Security Overview</h1>
@@ -1018,15 +1070,276 @@
           <div class="page-title-row" style="margin-bottom: 20px;">
             <h1 class="page-heading" style="margin: 0;">Traditional NIDS vs Smart AI-NIDS Comparative Evaluation</h1>
             <div style="display: flex; gap: 10px; align-items: center;">
-              <button class="btn btn-primary" id="btn-comp-run-sample">
+              <button class="btn btn-secondary" id="btn-comp-run-sample" title="Run benchmark evaluation on verified 650-flow canonical capture">
                 <svg viewBox="0 0 24 24" width="13" height="13" fill="currentColor"><polygon points="6 4 20 12 6 20 6 4"/></svg>
                 <span>Run PCAP Benchmark</span>
               </button>
-              <label for="comp-file-upload-input" class="btn btn-secondary" style="cursor: pointer;">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                <span>Upload Capture</span>
-              </label>
-              <input type="file" id="comp-file-upload-input" accept=".pcap,.pcapng,.cap" style="display: none;">
+            </div>
+          </div>
+
+          <!-- 1. UPLOAD NETWORK CAPTURE CARD -->
+          <div class="comp-card" id="comp-upload-card" style="margin-bottom: 20px;">
+            <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
+              <span style="font-weight: 600;">Upload Network Capture</span>
+              <span style="font-size: 11.5px; opacity: 0.85; font-weight: normal;">Dual-Engine Simultaneous Evaluation</span>
+            </div>
+            <div class="card-body" style="padding: 18px 20px;">
+              
+              <!-- Drag & Drop Dropzone (Visible when no file selected) -->
+              <div id="comp-dropzone" class="comp-dropzone">
+                <input type="file" id="comp-file-upload-input" accept=".pcap,.pcapng,.cap" style="display: none;">
+                <div class="comp-dropzone-icon">
+                  <svg viewBox="0 0 24 24" width="34" height="34" fill="none" stroke="#2563EB" stroke-width="1.8">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                    <polyline points="17 8 12 3 7 8"/>
+                    <line x1="12" y1="3" x2="12" y2="15"/>
+                  </svg>
+                </div>
+                <div class="comp-dropzone-text">
+                  <strong>Drag &amp; drop packet capture here</strong>, or <button type="button" class="comp-browse-link" id="btn-comp-browse">choose file</button>
+                </div>
+                <div class="comp-dropzone-sub">
+                  Supported formats: <code>.pcap</code> and <code>.pcapng</code> (Wireshark / tcpdump captures)
+                </div>
+              </div>
+
+              <!-- Selected File Display (Hidden until valid file chosen) -->
+              <div id="comp-file-details" class="comp-file-details" style="display: none;">
+                <div class="comp-file-info-col">
+                  <div class="comp-file-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="#1D4ED8" stroke-width="2">
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                      <polyline points="14 2 14 8 20 8"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div class="comp-file-name" id="comp-file-name-display">capture.pcapng</div>
+                    <div class="comp-file-meta">
+                      <span id="comp-file-size-display">1.4 MB</span> &bull; 
+                      <span class="tag tag-benign" style="font-size: 10px; padding: 1px 6px;">Ready for Evaluation</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="comp-file-actions">
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-replace-file">Replace File</button>
+                  <button type="button" class="btn btn-link btn-sm" id="btn-comp-remove-file" style="color: #EF4444;">Remove</button>
+                </div>
+              </div>
+
+              <!-- Processing Progress State Box (Hidden by default) -->
+              <div id="comp-processing-box" class="comp-processing-box" style="display: none;">
+                <div class="comp-progress-header">
+                  <span class="comp-progress-status" id="comp-progress-text">Analysing with Suricata...</span>
+                  <span class="comp-progress-pct" id="comp-progress-pct">45%</span>
+                </div>
+                <div class="comp-progress-bar-bg">
+                  <div class="comp-progress-bar-fill" id="comp-progress-fill" style="width: 45%;"></div>
+                </div>
+                <!-- Progress Steps -->
+                <div class="comp-steps-grid">
+                  <div class="comp-step-item" id="comp-step-upload">
+                    <span class="comp-step-num">1</span>
+                    <span class="comp-step-lbl">Upload Capture</span>
+                  </div>
+                  <div class="comp-step-item" id="comp-step-suri">
+                    <span class="comp-step-num">2</span>
+                    <span class="comp-step-lbl">Suricata Analysis</span>
+                  </div>
+                  <div class="comp-step-item" id="comp-step-ai">
+                    <span class="comp-step-num">3</span>
+                    <span class="comp-step-lbl">AI-NIDS Inference</span>
+                  </div>
+                  <div class="comp-step-item" id="comp-step-compare">
+                    <span class="comp-step-num">4</span>
+                    <span class="comp-step-lbl">Comparative Alignment</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Error State Box (Hidden by default) -->
+              <div id="comp-error-box" class="comp-error-box" style="display: none;">
+                <div style="display: flex; align-items: flex-start; gap: 10px;">
+                  <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#DC2626" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                  <div style="flex: 1;">
+                    <strong style="color: #DC2626;">Evaluation Error:</strong>
+                    <span id="comp-error-message" style="color: #991B1B; font-size: 12.5px; display: block; margin-top: 2px;">File analysis failed.</span>
+                  </div>
+                  <button type="button" class="btn btn-secondary btn-sm" id="btn-comp-retry">Retry Analysis</button>
+                </div>
+              </div>
+
+              <!-- Action Footer -->
+              <div class="comp-upload-footer" style="margin-top: 14px; display: flex; align-items: center; justify-content: space-between; border-top: 1px solid #E2E8F0; padding-top: 12px;">
+                <div class="comp-upload-note" id="comp-upload-note">
+                  <span style="color: #64748B; font-size: 12px;">Select or drop a valid packet capture to enable dual-engine comparative evaluation.</span>
+                </div>
+                <button type="button" class="btn btn-primary" id="btn-comp-analyse" disabled style="min-width: 250px; font-weight: 600;">
+                  Analyse with Suricata &amp; AI-NIDS
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. DUAL-ENGINE RESULTS SUMMARY ROW (Shown upon analysis or benchmark) -->
+          <div id="comp-dual-results-section" style="margin-bottom: 20px;">
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+              <div>
+                <h2 style="font-size: 14.5px; font-weight: 700; color: #0F172A; margin: 0;">Dual-Engine Comparative Execution Results</h2>
+                <div style="font-size: 12px; color: #64748B; margin-top: 2px;" id="comp-active-capture-meta">Evaluated capture: <strong>benchmark.pcapng</strong> (650 network flows, 3,659 packets)</div>
+              </div>
+              <span class="tag tag-benign" id="comp-status-badge">Analysis Completed</span>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
+              <!-- Suricata Result Card -->
+              <div class="comp-card">
+                <div class="comp-card-header" style="background-color: #0F2744; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #60A5FA;"></span>
+                    <span>Suricata (Traditional NIDS)</span>
+                  </div>
+                  <span class="tag tag-info" id="comp-suri-status-tag" style="background: rgba(96, 165, 250, 0.2); color: #93C5FD; border-color: #60A5FA; font-size: 10px;">ONLINE</span>
+                </div>
+                <div class="card-body" style="padding: 14px 16px;">
+                  <div class="engine-stat-grid">
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Flows Tracked</span>
+                      <span class="engine-stat-val" id="comp-suri-flows">69</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Alerts Intercepted</span>
+                      <span class="engine-stat-val" id="comp-suri-alerts" style="color: #2563EB;">24</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Execution Time</span>
+                      <span class="engine-stat-val" id="comp-suri-time">0.099 s</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Throughput</span>
+                      <span class="engine-stat-val" id="comp-suri-tput">36,885 pkts/s</span>
+                    </div>
+                  </div>
+                  <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #E2E8F0;">
+                    <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 6px;">Supported Threat Classifications (Rule Coverage):</div>
+                    <div class="engine-badges-wrap" id="comp-suri-classes-wrap">
+                      <span class="engine-badge">DDoS</span>
+                      <span class="engine-badge">DoS</span>
+                      <span class="engine-badge">Botnet</span>
+                      <span class="engine-badge">Infiltration</span>
+                      <span class="engine-badge">Brute Force</span>
+                      <span class="engine-badge">Web Attack</span>
+                      <span class="engine-badge">DNS Spoofing</span>
+                      <span class="engine-badge">IP Spoofing</span>
+                      <span class="engine-badge">Recon / Port Scan</span>
+                      <span class="engine-badge">MITM</span>
+                      <span class="engine-badge">DNS Tunneling</span>
+                      <span class="tag tag-critical" style="font-size: 10px; padding: 2px 6px;">ARP Spoofing: Unsupported (L2)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Smart AI-NIDS Result Card -->
+              <div class="comp-card">
+                <div class="comp-card-header" style="background-color: #0F2744; display: flex; align-items: center; justify-content: space-between;">
+                  <div style="display: flex; align-items: center; gap: 8px;">
+                    <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #10B981;"></span>
+                    <span>Smart AI-NIDS (Proposed)</span>
+                  </div>
+                  <span class="tag tag-benign" id="comp-ai-status-tag" style="background: rgba(16, 185, 129, 0.2); color: #A7F3D0; border-color: #10B981; font-size: 10px;">5 Specialists</span>
+                </div>
+                <div class="card-body" style="padding: 14px 16px;">
+                  <div class="engine-stat-grid">
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Flows Analysed</span>
+                      <span class="engine-stat-val" id="comp-ai-flows">70</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Threats Detected</span>
+                      <span class="engine-stat-val" id="comp-ai-threats" style="color: #DC2626;">70</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Execution Time</span>
+                      <span class="engine-stat-val" id="comp-ai-time">0.596 s</span>
+                    </div>
+                    <div class="engine-stat-item">
+                      <span class="engine-stat-lbl">Throughput</span>
+                      <span class="engine-stat-val" id="comp-ai-tput">117.6 flows/s</span>
+                    </div>
+                  </div>
+                  <div style="margin-top: 12px; padding-top: 10px; border-top: 1px solid #E2E8F0;">
+                    <div style="font-size: 11px; font-weight: 600; color: #475569; margin-bottom: 6px;">Predicted Attack Class Distribution:</div>
+                    <div class="engine-badges-wrap" id="comp-ai-classes-wrap">
+                      <span class="engine-badge" style="background-color: #ECFDF5; border-color: #A7F3D0; color: #065F46;">All 13 Canonical Classes Supported (100% L2 Recall)</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Performance Comparison Table -->
+          <div class="comp-card" style="margin-bottom: 20px;">
+            <div class="comp-card-header" style="display: flex; align-items: center; justify-content: space-between;">
+              <span>Performance Comparison (Suricata vs Smart AI-NIDS)</span>
+              <span style="font-size: 11px; font-weight: normal; opacity: 0.85;" id="comp-perf-table-note">Ground-Truth Benchmark Metrics</span>
+            </div>
+            <div class="card-body" style="padding: 0; overflow-x: auto;">
+              <table class="perf-comp-table">
+                <thead>
+                  <tr>
+                    <th style="width: 22%;">Evaluation Metric</th>
+                    <th style="width: 22%;">Traditional NIDS (Suricata)</th>
+                    <th style="width: 26%;">Smart AI-NIDS (Unified 5 Specialists)</th>
+                    <th style="width: 30%;">Evaluation Scope &amp; Unit Rigor</th>
+                  </tr>
+                </thead>
+                <tbody id="comp-perf-table-tbody">
+                  <tr>
+                    <td><strong>Accuracy</strong></td>
+                    <td id="comp-tbl-acc-suri">80.77%</td>
+                    <td id="comp-tbl-acc-ai"><strong style="color: #1D4ED8;">89.08%</strong> <span class="tag tag-ai" style="font-size: 10px; padding: 1px 5px;">+8.31%</span></td>
+                    <td style="color: #64748B;">Evaluated on identical canonical test set</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Precision (Macro)</strong></td>
+                    <td id="comp-tbl-prec-suri">79.17%</td>
+                    <td id="comp-tbl-prec-ai"><strong style="color: #1D4ED8;">89.71%</strong> <span class="tag tag-ai" style="font-size: 10px; padding: 1px 5px;">+10.54%</span></td>
+                    <td style="color: #64748B;">Macro precision across all evaluated classes</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Recall (Macro)</strong></td>
+                    <td id="comp-tbl-rec-suri">79.17%</td>
+                    <td id="comp-tbl-rec-ai"><strong style="color: #1D4ED8;">89.08%</strong> <span class="tag tag-ai" style="font-size: 10px; padding: 1px 5px;">+9.91%</span></td>
+                    <td style="color: #64748B;">Includes Layer-2 ARP defense (AI: 100%, Suri: 0%)</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Macro F1-Score</strong></td>
+                    <td id="comp-tbl-mf1-suri">80.34%</td>
+                    <td id="comp-tbl-mf1-ai"><strong style="color: #1D4ED8;">88.98%</strong> (Calibrated: 91.38%)</td>
+                    <td style="color: #64748B;">Arithmetic mean of per-class F1 harmonic balances</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Weighted F1-Score</strong></td>
+                    <td id="comp-tbl-wf1-suri">80.34%</td>
+                    <td id="comp-tbl-wf1-ai"><strong style="color: #1D4ED8;">88.98%</strong></td>
+                    <td style="color: #64748B;">Class-weighted support harmonic mean</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Detection Latency</strong></td>
+                    <td id="comp-tbl-lat-suri">0.026 ms / packet <span style="color: #64748B; font-size: 11px;">(0.088s total)</span></td>
+                    <td id="comp-tbl-lat-ai">0.235 ms / flow <span style="color: #64748B; font-size: 11px;">(7.1ms extraction + infer)</span></td>
+                    <td style="color: #64748B;">Stateless packet pattern matching vs stateful flow inference</td>
+                  </tr>
+                  <tr>
+                    <td><strong>Throughput Unit</strong></td>
+                    <td id="comp-tbl-tput-suri"><strong style="color: #0F172A;">37,838 packets / sec</strong></td>
+                    <td id="comp-tbl-tput-ai"><strong style="color: #1D4ED8;">98.5 flows / sec</strong> <span style="color: #64748B; font-size: 11px;">(~5,146 pkts/s eq.)</span></td>
+                    <td style="color: #64748B;">Stateless C multi-threading vs stateful 46-feature aggregation</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
@@ -1175,7 +1488,7 @@
         <!-- ==============================================================
              SECTION 6: REPORTS & EVALUATION (RESEARCH & ARCHITECTURE)
              ============================================================== -->
-        <section id="view-reports" class="view-panel active">
+        <section id="view-reports" class="view-panel">
           <!-- Page Header Row -->
           <div class="reports-header-row">
             <div class="reports-header-icon-box">
@@ -1429,87 +1742,276 @@
         <!-- ==============================================================
              SECTION 7: SYSTEM CONFIGURATION (SETTINGS & PLATFORM)
              ============================================================== -->
-        <section id="view-settings" class="view-panel">
-          <div class="page-title-row">
-            <div>
+        <section id="view-settings" class="view-panel settings-view-container">
+          
+          <!-- Decorative Top Wave Background matching reference -->
+          <svg class="settings-wave-bg" viewBox="0 0 450 140" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M0 90 C 130 10, 260 130, 450 40" stroke="rgba(37, 99, 235, 0.12)" stroke-width="26" stroke-linecap="round" fill="none"/>
+            <path d="M50 105 C 170 30, 300 145, 470 55" stroke="rgba(59, 130, 246, 0.08)" stroke-width="14" stroke-linecap="round" fill="none"/>
+          </svg>
+
+          <!-- Page Header Row -->
+          <div class="settings-title-row">
+            <div class="settings-icon-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="3"/>
+                <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+              </svg>
+            </div>
+            <div class="settings-title-col">
               <h1 class="page-heading">System Configuration &amp; Backend Integration</h1>
-              <div class="page-description">Manage API endpoints, inspect server health, and view runtime platform metadata</div>
+              <div class="page-description">Manage API endpoints, inspect server health, and view runtime platform metadata.</div>
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 16px;">
-            <!-- Connection Manager -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <span class="card-title">FastAPI Backend Connection</span>
+          <!-- Top 2-Column Grid: Backend Connection & Host Environment -->
+          <div class="settings-grid-2col">
+            
+            <!-- Card 1: FastAPI Backend Connection -->
+            <div class="cfg-panel-card">
+              <div class="cfg-card-header-blue">
+                <div class="cfg-header-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="16 18 22 12 16 6"/>
+                    <polyline points="8 6 2 12 8 18"/>
+                  </svg>
+                </div>
+                <span class="cfg-header-title">FastAPI Backend Connection</span>
               </div>
-              <div class="card-body">
-                <div class="form-group">
-                  <label class="form-label" for="settings-api-input">API Base URL (VITE_API_BASE_URL):</label>
-                  <input type="text" class="form-input" id="settings-api-input" value="http://localhost:8000">
-                  <div style="font-size: 11.5px; color: var(--text-muted); margin-top: 4px;">
-                    When deployed on Render, leave empty or provide the public HTTPS domain (auto-detected).
-                  </div>
+              <div class="cfg-card-body">
+                <label class="cfg-input-label" for="settings-api-input">API BASE URL (VITE_API_BASE_URL):</label>
+                
+                <div class="cfg-input-wrapper">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                    <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                  </svg>
+                  <input type="text" class="cfg-url-input" id="settings-api-input" value="https://smart-ai-network-intrusion-detection.onrender.com" spellcheck="false" autocomplete="off">
                 </div>
 
-                <div style="display: flex; gap: 10px; margin-top: 12px;">
-                  <button class="btn btn-secondary" id="btn-settings-test">Test Connection</button>
-                  <button class="btn btn-primary" id="btn-settings-save">Save &amp; Reconnect</button>
+                <div class="cfg-info-box">
+                  <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="16" x2="12" y2="12"/>
+                    <line x1="12" y1="8" x2="12.01" y2="8"/>
+                  </svg>
+                  <span>When deployed on Render, leave empty or provide the public HTTPS domain (auto-detected).</span>
                 </div>
 
-                <div id="settings-status-banner" style="display: none; margin-top: 12px; padding: 10px 14px; border-radius: 6px; font-size: 12px; font-family: var(--font-mono);"></div>
+                <div class="cfg-btn-row">
+                  <button type="button" class="cfg-btn-outline" id="btn-settings-test">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M5 12.55a11 11 0 0 1 14.08 0"/>
+                      <path d="M1.42 9a16 16 0 0 1 21.16 0"/>
+                      <path d="M8.53 16.11a6 6 0 0 1 6.95 0"/>
+                      <line x1="12" y1="20" x2="12.01" y2="20"/>
+                    </svg>
+                    <span>Test Connection</span>
+                  </button>
+
+                  <button type="button" class="cfg-btn-primary" id="btn-settings-save">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/>
+                      <polyline points="17 21 17 13 7 13 7 21"/>
+                      <polyline points="7 3 7 8 15 8"/>
+                    </svg>
+                    <span>Save &amp; Reconnect</span>
+                  </button>
+                </div>
+
+                <div id="settings-status-banner" style="display: none; margin-top: 14px; padding: 10px 14px; border-radius: 8px; font-size: 12px; font-family: var(--font-mono);"></div>
               </div>
             </div>
 
-            <!-- Runtime Environment Details -->
-            <div class="card" style="margin-bottom: 0;">
-              <div class="card-header">
-                <span class="card-title">Host &amp; Engine Environment</span>
+            <!-- Card 2: Host & Engine Environment -->
+            <div class="cfg-panel-card">
+              <div class="cfg-card-header-blue">
+                <div class="cfg-header-badge">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2"/>
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2"/>
+                    <line x1="6" y1="6" x2="6.01" y2="6"/>
+                    <line x1="6" y1="18" x2="6.01" y2="18"/>
+                  </svg>
+                </div>
+                <span class="cfg-header-title">Host &amp; Engine Environment</span>
               </div>
-              <div class="card-body">
-                <div style="display: flex; flex-direction: column; gap: 8px; font-size: 12px;">
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Python Runtime:</span>
-                    <code id="runtime-python-ver">Python 3.13 / 3.11</code>
+              <div class="cfg-card-body">
+                <div class="cfg-env-list">
+                  
+                  <!-- Python Runtime -->
+                  <div class="cfg-env-row">
+                    <div class="cfg-env-label-group">
+                      <div class="cfg-env-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18">
+                          <path fill="#387eb8" d="M11.9 2c-3.1 0-5.1.7-5.1 2.4v1.8h5.2v.7H4.3C2.5 6.9 2 8.7 2 11.2c0 2.2.7 4.1 2.3 4.2h1.4v-2c0-2.3 1.9-4.2 4.2-4.2h5.1c.7 0 1.2-.5 1.2-1.2V4.4c0-1.7-1.9-2.4-4.3-2.4zm-2.8 1.4a.8.8 0 1 1 0 1.6.8.8 0 0 1 0-1.6z"/>
+                          <path fill="#ffe052" d="M12.1 22c3.1 0 5.1-.7 5.1-2.4v-1.8H12v-.7h7.7c1.8 0 2.3-1.8 2.3-4.3 0-2.2-.7-4.1-2.3-4.2h-1.4v2c0 2.3-1.9 4.2-4.2 4.2H9c-.7 0-1.2.5-1.2 1.2v3.6c0 1.7 1.9 2.4 4.3 2.4zm2.8-1.4a.8.8 0 1 1 0-1.6.8.8 0 0 1 0 1.6z"/>
+                        </svg>
+                      </div>
+                      <span class="cfg-env-label">Python Runtime:</span>
+                    </div>
+                    <span class="cfg-env-val" id="runtime-python-ver">Python 3.13 / 3.11</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Suricata Engine:</span>
-                    <code id="runtime-suricata-ver">Checking...</code>
+
+                  <!-- Suricata Engine -->
+                  <div class="cfg-env-row">
+                    <div class="cfg-env-label-group">
+                      <div class="cfg-env-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <circle cx="12" cy="12" r="10"/>
+                          <circle cx="12" cy="12" r="6"/>
+                          <circle cx="12" cy="12" r="2"/>
+                        </svg>
+                      </div>
+                      <span class="cfg-env-label">Suricata Engine:</span>
+                    </div>
+                    <span class="cfg-env-val" id="runtime-suricata-ver">This is Suricata version 7.0.10 RELEASE Active</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Loaded Specialist Models:</span>
-                    <strong style="color: var(--color-benign);" id="runtime-models-loaded">5 / 5 Active</strong>
+
+                  <!-- Loaded Specialist Models -->
+                  <div class="cfg-env-row">
+                    <div class="cfg-env-label-group">
+                      <div class="cfg-env-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                          <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                          <line x1="12" y1="22.08" x2="12" y2="12"/>
+                        </svg>
+                      </div>
+                      <span class="cfg-env-label">Loaded Specialist Models:</span>
+                    </div>
+                    <span class="cfg-pill-green" id="runtime-models-loaded">
+                      <span class="cfg-pill-dot"></span> 5 / 5 Operational
+                    </span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Canonical Taxonomy:</span>
-                    <code>13 Classes (IDs 0–12)</code>
+
+                  <!-- Canonical Taxonomy -->
+                  <div class="cfg-env-row">
+                    <div class="cfg-env-label-group">
+                      <div class="cfg-env-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                          <polyline points="2 17 12 22 22 17"/>
+                          <polyline points="2 12 12 17 22 12"/>
+                        </svg>
+                      </div>
+                      <span class="cfg-env-label">Canonical Taxonomy:</span>
+                    </div>
+                    <span class="cfg-env-val">13 Classes (IDs 0–12)</span>
                   </div>
-                  <div style="display: flex; justify-content: space-between;">
-                    <span style="color: var(--text-muted);">Platform Architecture:</span>
-                    <code>Single-Service Docker on Render</code>
+
+                  <!-- Platform Architecture -->
+                  <div class="cfg-env-row">
+                    <div class="cfg-env-label-group">
+                      <div class="cfg-env-icon">
+                        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                          <path d="M2 18h20c-.5 2-2 3-5 3H7c-3 0-4.5-1-5-3z"/>
+                          <path d="M4 14h16l2 4H2l2-4z"/>
+                          <path d="M7 10h3v4H7z"/>
+                          <path d="M11 10h3v4h-3z"/>
+                          <path d="M15 10h3v4h-3z"/>
+                          <path d="M11 6h3v4h-3z"/>
+                        </svg>
+                      </div>
+                      <span class="cfg-env-label">Platform Architecture:</span>
+                    </div>
+                    <span class="cfg-env-val">Single-Service Docker on Render</span>
                   </div>
+
                 </div>
               </div>
             </div>
+
           </div>
 
-          <!-- Session Telemetry Management Card -->
-          <div class="card">
-            <div class="card-header">
-              <span class="card-title">Session Telemetry Management</span>
-            </div>
-            <div class="card-body" style="display: flex; justify-content: space-between; align-items: center;">
+          <!-- Bottom Card: Session Telemetry Management -->
+          <div class="cfg-telemetry-card">
+            
+            <div class="cfg-telem-header">
+              <div class="cfg-telem-icon-box">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                </svg>
+              </div>
               <div>
-                <div style="font-weight: 600; font-size: 13px;">Reset Current Session State</div>
-                <div style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">
-                  Clears local session telemetry, recent security alerts, and KPI counters back to the initial state.
-                </div>
+                <div class="cfg-telem-title">Session Telemetry Management</div>
+                <div class="cfg-telem-subtitle">Reset and manage the current session's runtime telemetry and state.</div>
               </div>
-              <button class="btn btn-secondary btn-sm" id="btn-settings-reset-session">
-                Reset Session Telemetry
-              </button>
             </div>
+
+            <div class="cfg-telem-body">
+              
+              <!-- Left: 4 Metric Cards -->
+              <div class="cfg-metrics-grid">
+                
+                <div class="cfg-metric-item">
+                  <div class="cfg-metric-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                      <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+                    </svg>
+                  </div>
+                  <span class="cfg-metric-name">Session Alerts</span>
+                  <span class="cfg-metric-val" id="telemetry-session-alerts">0</span>
+                </div>
+
+                <div class="cfg-metric-item">
+                  <div class="cfg-metric-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <polygon points="12 2 2 7 12 12 22 7 12 2"/>
+                      <polyline points="2 17 12 22 22 17"/>
+                      <polyline points="2 12 12 17 22 12"/>
+                    </svg>
+                  </div>
+                  <span class="cfg-metric-name">Flow Records</span>
+                  <span class="cfg-metric-val" id="telemetry-flow-records">0</span>
+                </div>
+
+                <div class="cfg-metric-item">
+                  <div class="cfg-metric-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <line x1="18" y1="20" x2="18" y2="10"/>
+                      <line x1="12" y1="20" x2="12" y2="4"/>
+                      <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                  </div>
+                  <span class="cfg-metric-name">KPI Counters</span>
+                  <span class="cfg-metric-val" id="telemetry-kpi-counters">0</span>
+                </div>
+
+                <div class="cfg-metric-item">
+                  <div class="cfg-metric-icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <circle cx="12" cy="12" r="10"/>
+                      <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                  </div>
+                  <span class="cfg-metric-name">Uptime</span>
+                  <span class="cfg-metric-val" id="telemetry-uptime">—</span>
+                </div>
+
+              </div>
+
+              <!-- Divider -->
+              <div class="cfg-telem-divider"></div>
+
+              <!-- Right: Reset Action -->
+              <div class="cfg-reset-col">
+                <div>
+                  <div class="cfg-reset-text-title">Reset Current Session State</div>
+                  <div class="cfg-reset-text-desc">Clears local session telemetry, recent security alerts, and KPI counters back to the initial state.</div>
+                </div>
+                <button type="button" class="cfg-btn-reset" id="btn-settings-reset-session">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21.5 2v6h-6M2.5 22v-6h6M2 11.5a10 10 0 0 1 18.8-4.3M22 12.5a10 10 0 0 1-18.8 4.2"/>
+                  </svg>
+                  <span>Reset Session Telemetry</span>
+                </button>
+              </div>
+
+            </div>
+
           </div>
+
         </section>
 
       </main>

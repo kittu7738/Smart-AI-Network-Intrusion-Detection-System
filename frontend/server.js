@@ -39,7 +39,7 @@ const server = http.createServer((req, res) => {
 
   // Dynamic environment configuration endpoint
   if (safePath === "/env.js") {
-    const apiUrl = process.env.VITE_API_BASE_URL || "http://localhost:8000";
+    const apiUrl = process.env.VITE_API_BASE_URL || "https://smart-ai-network-intrusion-detection.onrender.com";
     res.writeHead(200, {
       "Content-Type": "application/javascript; charset=utf-8",
       "Cache-Control": "no-store, no-cache, must-revalidate",

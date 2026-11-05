@@ -240,6 +240,14 @@ class EnterpriseSocApp {
   }
 
   async init() {
+    // Load verified genuine preset attack vectors from JSON if available
+    try {
+      const pRes = await fetch("js/preset_scenarios.json");
+      if (pRes.ok) {
+        this.presetScenarios = await pRes.json();
+      }
+    } catch (_) {}
+
     this.initNavigation();
     this.initOverviewCharts();
     this.renderModelsMatrix();

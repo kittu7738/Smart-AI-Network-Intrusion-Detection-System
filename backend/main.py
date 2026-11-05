@@ -123,9 +123,17 @@ app.add_middleware(
 
 
 @app.middleware("http")
-async def add_cache_control_headers(request: Request, call_next):
-    """Ensure HTML, JavaScript, and CSS assets are never cached stale by web browsers."""
+async def add_security_and_cache_headers(request: Request, call_next):
+    """Ensure HTML, JavaScript, and CSS assets are never cached stale and enforce standard security headers."""
     response = await call_next(request)
+
+    # Standard security headers (OWASP guidelines)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "SAMEORIGIN"
+    response.headers["X-XSS-Protection"] = "1; mode=block"
+    response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+
+    # Cache control for dynamic and static assets
     path = request.url.path
     if path == "/" or path.endswith((".html", ".js", ".css", ".json")):
         response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
@@ -258,6 +266,9 @@ def predict_batch(request_data: Union[BatchPredictionRequest, List[Dict[str, Any
 
     if not records or len(records) == 0:
         raise HTTPException(status_code=400, detail="Batch cannot be empty. At least one inference record is required.")
+
+    if len(records) > 10000:
+        raise HTTPException(status_code=400, detail="Batch exceeds maximum limit of 10,000 records.")
 
     # Guard MAC Spoofing in all records
     for rec in records:
@@ -612,6 +623,42 @@ def save_csv_analysis_session(df: pd.DataFrame, filename: str, file_size: int = 
     return session_id
 
 
+MAX_UPLOAD_SIZE_BYTES = 50 * 1024 * 1024  # 50 MB DoS prevention threshold
+
+
+def save_uploaded_file_safely(upload_file: UploadFile, dest_dir: str) -> tuple[str, str, int]:
+    """Safely stream and store an untrusted uploaded file to prevent path traversal and DoS exhaustion.
+
+    Returns:
+        (sanitized_filename, local_path, file_size_bytes)
+    """
+    raw_name = upload_file.filename or "uploaded_traffic"
+    # Canonicalize and strip any directory components (prevent path traversal like ../../ or /etc/)
+    base_name = os.path.basename(raw_name.replace("\\", "/")).strip()
+    if not base_name or base_name in (".", ".."):
+        import secrets
+        base_name = f"traffic_{secrets.token_hex(4)}"
+
+    local_path = os.path.join(dest_dir, base_name)
+    total_bytes = 0
+    chunk_size = 64 * 1024
+
+    with open(local_path, "wb") as buffer:
+        while True:
+            chunk = upload_file.file.read(chunk_size)
+            if not chunk:
+                break
+            total_bytes += len(chunk)
+            if total_bytes > MAX_UPLOAD_SIZE_BYTES:
+                raise HTTPException(
+                    status_code=413,
+                    detail=f"Uploaded file exceeds maximum allowed limit of {MAX_UPLOAD_SIZE_BYTES // (1024 * 1024)} MB."
+                )
+            buffer.write(chunk)
+
+    return base_name, local_path, total_bytes
+
+
 @app.post("/compare/pcap")
 async def compare_pcap(file: UploadFile = File(...)):
     """Run dual-engine comparative evaluation (Suricata vs UnifiedNIDS) on uploaded PCAP and persist session."""
@@ -619,18 +666,15 @@ async def compare_pcap(file: UploadFile = File(...)):
         raise HTTPException(status_code=400, detail="Uploaded file must be a .pcap or .pcapng packet capture.")
 
     temp_dir = tempfile.mkdtemp(prefix="compare_upload_")
-    pcap_path = os.path.join(temp_dir, file.filename)
     try:
-        with open(pcap_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
+        sanitized_name, pcap_path, file_size = save_uploaded_file_safely(file, temp_dir)
 
-        file_size = os.path.getsize(pcap_path)
         engine = get_engine()
         evaluator = ComparativeEvaluator(nids_engine=engine)
         comparison = evaluator.evaluate_pcap(pcap_path)
 
         # Store in shared session manager
-        session_id = save_pcap_comparison_session(comparison, filename=file.filename, file_size=file_size)
+        session_id = save_pcap_comparison_session(comparison, filename=sanitized_name, file_size=file_size)
         sm = get_session_manager()
         comparison["session_id"] = session_id
         comparison["session"] = sm.get_session(session_id)
@@ -692,27 +736,23 @@ async def upload_analysis_file(file: UploadFile = File(...)):
         )
 
     temp_dir = tempfile.mkdtemp(prefix="analysis_upload_")
-    local_path = os.path.join(temp_dir, file.filename)
     try:
-        with open(local_path, "wb") as buffer:
-            shutil.copyfileobj(file.file, buffer)
-
-        file_size = os.path.getsize(local_path)
+        sanitized_name, local_path, file_size = save_uploaded_file_safely(file, temp_dir)
         sm = get_session_manager()
 
         if fname.endswith((".pcap", ".pcapng", ".cap")):
             engine = get_engine()
             evaluator = ComparativeEvaluator(nids_engine=engine)
             comparison = evaluator.evaluate_pcap(local_path)
-            session_id = save_pcap_comparison_session(comparison, filename=file.filename, file_size=file_size)
+            session_id = save_pcap_comparison_session(comparison, filename=sanitized_name, file_size=file_size)
         elif fname.endswith(".csv"):
             import pandas as pd
             df = pd.read_csv(local_path)
-            session_id = save_csv_analysis_session(df, filename=file.filename, file_size=file_size)
+            session_id = save_csv_analysis_session(df, filename=sanitized_name, file_size=file_size)
         elif fname.endswith(".json"):
             import pandas as pd
             df = pd.read_json(local_path)
-            session_id = save_csv_analysis_session(df, filename=file.filename, file_size=file_size)
+            session_id = save_csv_analysis_session(df, filename=sanitized_name, file_size=file_size)
 
         session_data = sm.get_session(session_id)
         return {
@@ -720,6 +760,8 @@ async def upload_analysis_file(file: UploadFile = File(...)):
             "session_id": session_id,
             "session": session_data
         }
+    except HTTPException:
+        raise
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Analysis processing error: {str(e)}")
     finally:
@@ -814,13 +856,13 @@ _live_sensor_events: List[Dict[str, Any]] = []
 
 
 def verify_sensor_auth(request: Request, body_key: Optional[str] = None):
-    """Enforce API key authentication for sensor telemetry endpoints."""
+    """Enforce API key authentication for sensor telemetry endpoints with timing-attack resistance."""
     header_key = request.headers.get("X-Sensor-Key") or request.headers.get("Authorization")
     if header_key and header_key.startswith("Bearer "):
         header_key = header_key[7:].strip()
 
     provided_key = header_key or body_key
-    if not provided_key or provided_key != SENSOR_API_KEY:
+    if not provided_key or not secrets.compare_digest(str(provided_key), str(SENSOR_API_KEY)):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Sensor authentication required. Provide valid X-Sensor-Key header."
